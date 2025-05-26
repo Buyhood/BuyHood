@@ -4,7 +4,7 @@ import api.buyhood.global.common.exception.enums.ErrorCode;
 
 public class NotFoundException extends BaseException {
 
-	protected NotFoundException(ErrorCode errorCode) {
+	public NotFoundException(ErrorCode errorCode) {
 		super(errorCode);
 	}
 }
