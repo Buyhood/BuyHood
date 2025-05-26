@@ -9,8 +9,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Min;
+import java.util.HashSet;
+import java.util.Set;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,9 +20,9 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@Table(name = "products")
+@Table(name = "categories")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Product extends BaseTimeEntity {
+public class Category extends BaseTimeEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,26 +32,17 @@ public class Product extends BaseTimeEntity {
 	@Column(nullable = false)
 	private String name;
 
-	@Column(nullable = false)
-	@Min(0)
-	private Long price;
-
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "category_id")
-	private Category category;
+	@JoinColumn(name = "parent_id")
+	private Category parent;
 
-	@Column
-	private String description;
-
-	@Column(nullable = false)
-	private Long stock;
+	@OneToMany(mappedBy = "parent")
+	private Set<Category> children = new HashSet<>();
 
 	@Builder
-	public Product(String name, Long price, Category category, String description, Long stock) {
+	public Category(String name, Category parent, Set<Category> children) {
 		this.name = name;
-		this.price = price;
-		this.category = category;
-		this.description = description;
-		this.stock = stock;
+		this.parent = parent;
+		this.children = children;
 	}
 }
