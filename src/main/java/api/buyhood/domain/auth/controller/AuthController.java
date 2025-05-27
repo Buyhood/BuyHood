@@ -32,5 +32,6 @@ public class AuthController {
 		headers.add("Authorization", "Bearer " + accessToken);
 
 		return new ResponseEntity<>(signupUserRes, headers, HttpStatus.CREATED);
+
 	}
 }
