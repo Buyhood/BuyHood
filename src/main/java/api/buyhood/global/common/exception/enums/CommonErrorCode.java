@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum CommonErrorCode implements ErrorCode {
 
-	;
+	REDIS_SERIALIZE_FAILED(1400, "Redis 정보 직렬화 실패", HttpStatus.BAD_REQUEST);
 
 	private final int code;
 	private final String message;
