@@ -2,6 +2,7 @@ package api.buyhood.domain.cart.service;
 
 import api.buyhood.domain.cart.dto.request.CreateCartReq;
 import api.buyhood.domain.cart.dto.response.CartRes;
+import api.buyhood.domain.cart.entity.Cart;
 import api.buyhood.domain.cart.entity.CartItem;
 import api.buyhood.domain.cart.repository.CartRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,7 @@ public class CartService {
         Long userId = 1L;
 
         //todo: product 존재 여부 확인 추가하기
-        List<CartItem> cartList = createCartReq.getCartItems().stream()
+        List<CartItem> cartItemList = createCartReq.getCartItems().stream()
                 .map(item ->
                         CartItem.builder()
                                 .productId(item.getProductId())
@@ -32,10 +33,14 @@ public class CartService {
                 )
                 .toList();
 
-        cartRepository.add(userId, cartList);
+        Cart cart = Cart.builder()
+                .cart(cartItemList)
+                .build();
+
+        cartRepository.add(userId, cart);
 
         return CartRes.builder()
-                .cartList(createCartReq)
+                .cart(cart)
                 .build();
     }
 }

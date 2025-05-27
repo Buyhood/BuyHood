@@ -1,15 +1,15 @@
 package api.buyhood.domain.cart.dto.response;
 
-import api.buyhood.domain.cart.dto.request.CreateCartReq;
+import api.buyhood.domain.cart.entity.Cart;
 import lombok.Builder;
 import lombok.Getter;
 
 @Getter
 public class CartRes {
-    private final CreateCartReq cartList;
+    private final Cart cart;
 
     @Builder
-    private CartRes(CreateCartReq cartList) {
-        this.cartList = cartList;
+    private CartRes(Cart cart) {
+        this.cart = cart;
     }
 }

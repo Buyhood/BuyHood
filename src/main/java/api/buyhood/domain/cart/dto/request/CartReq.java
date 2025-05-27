@@ -1,11 +1,15 @@
 package api.buyhood.domain.cart.dto.request;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 @Getter
-@NoArgsConstructor
+@RequiredArgsConstructor
 public class CartReq {
-    private Long productId;
-    private int quantity;
+    @NotNull
+    private final Long productId;
+
+    @NotNull
+    private final int quantity;
 }
