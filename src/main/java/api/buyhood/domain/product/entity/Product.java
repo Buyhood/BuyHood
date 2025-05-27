@@ -3,10 +3,14 @@ package api.buyhood.domain.product.entity;
 import api.buyhood.global.common.entity.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Min;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -24,13 +28,15 @@ public class Product extends BaseTimeEntity {
 	private Long id;
 
 	@Column(nullable = false)
-	private String productName;
+	private String name;
 
 	@Column(nullable = false)
+	@Min(0)
 	private Long price;
 
-	@Column
-	private String category;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "category_id")
+	private Category category;
 
 	@Column
 	private String description;
@@ -39,8 +45,8 @@ public class Product extends BaseTimeEntity {
 	private Long stock;
 
 	@Builder
-	public Product(String productName, Long price, String category, String description, Long stock) {
-		this.productName = productName;
+	public Product(String name, Long price, Category category, String description, Long stock) {
+		this.name = name;
 		this.price = price;
 		this.category = category;
 		this.description = description;
