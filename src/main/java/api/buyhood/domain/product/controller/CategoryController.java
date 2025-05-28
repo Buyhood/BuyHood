@@ -1,6 +1,7 @@
 package api.buyhood.domain.product.controller;
 
 import api.buyhood.domain.product.dto.request.CreateCategoryReq;
+import api.buyhood.domain.product.dto.request.PatchCategoryReq;
 import api.buyhood.domain.product.dto.response.CreateCategoryRes;
 import api.buyhood.domain.product.dto.response.GetCategoryRes;
 import api.buyhood.domain.product.dto.response.PageCategoryRes;
@@ -12,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -50,5 +52,13 @@ public class CategoryController {
 	) {
 		Page<PageCategoryRes> response = categoryService.getDepthCategories(depth, pageable);
 		return Response.ok(response);
+	}
+
+	@PatchMapping("/v1/categories/{categoryId}")
+	public void patchCategory(
+		@PathVariable Long categoryId,
+		@Valid @RequestBody PatchCategoryReq request
+	) {
+		categoryService.patchCategory(categoryId, request.getNewCategoryName());
 	}
 }
