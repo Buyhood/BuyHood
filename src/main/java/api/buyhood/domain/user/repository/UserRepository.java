@@ -1,6 +1,7 @@
 package api.buyhood.domain.user.repository;
 
 import api.buyhood.domain.user.entity.User;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,6 +11,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 	boolean existsByEmail(String email);
 
+
 	@Query("SELECT u FROM User u WHERE u.deletedAt IS NULL ")
 	Page<User> findAllActiveUsers(Pageable pageable);
+
+	@Query("SELECT u FROM User u WHERE u.deletedAt IS NULL")
+	Optional<User> findByEmail(String email);
+
 }

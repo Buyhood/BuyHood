@@ -70,4 +70,11 @@ public class CategoryService {
 		return PageCategoryRes.of(categoryRepository.getCategoriesByDepth(depth, pageRequest));
 	}
 
+	@Transactional
+	public void patchCategory(Long categoryId, String newCategoryName) {
+		Category getCategory = categoryRepository.findById(categoryId)
+			.orElseThrow(() -> new NotFoundException(CategoryErrorCode.CATEGORY_NOT_FOUND));
+		getCategory.patchCategory(newCategoryName);
+	}
+
 }
