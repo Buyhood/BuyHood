@@ -6,9 +6,10 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 @RequiredArgsConstructor
-public enum UserErrorCode implements ErrorCode {
-	//에러코드 1400번대 사용예정
-	INVALID_USER_ROLE(1401, "유효하지 않은 UserRole 입니다.", HttpStatus.UNAUTHORIZED);
+public enum AuthErrorCode implements ErrorCode {
+	//에러코드 1300번대 사용 예정
+	INVALID_TOKEN(1301, "만료된 토큰입니다.", HttpStatus.UNAUTHORIZED),
+	EMAIL_DUPLICATED(1302, "이미 가입된 이메일입니다.", HttpStatus.CONFLICT);
 
 	private final int code;
 	private final String message;

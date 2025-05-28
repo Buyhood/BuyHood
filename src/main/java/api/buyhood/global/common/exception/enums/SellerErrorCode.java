@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 @Getter
 @RequiredArgsConstructor
 public enum SellerErrorCode implements ErrorCode {
-
+	//에러코드 1500번대 사용예정
 	;
 
 	private final int code;
