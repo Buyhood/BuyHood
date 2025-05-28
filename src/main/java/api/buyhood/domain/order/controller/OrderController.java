@@ -50,4 +50,16 @@ public class OrderController {
     ) {
         return Response.ok(orderService.getOrders(pageNum, pageSize));
     }
+
+    /**
+     * 주문 취소
+     * todo: AuthUser 추후 추가
+     */
+    @DeleteMapping("/v1/orders/{orderId}")
+    public Response<String> deleteOrder(
+            @PathVariable Long orderId
+    ) {
+        orderService.deleteOrder(orderId);
+        return Response.ok("주문 취소 성공");
+    }
 }

@@ -51,4 +51,9 @@ public class Order extends BaseTimeEntity {
 				.pickupAt(pickupAt)
 				.build();
 	}
+
+	public void delete() {
+		markDeleted();
+		this.status = OrderStatus.CANCELED;
+	}
 }

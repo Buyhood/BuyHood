@@ -79,6 +79,16 @@ public class OrderService {
         return orderList.map(OrderRes::of);
     }
 
+    @Transactional
+    public void deleteOrder(Long orderId) {
+        Order order = orderRepository.findNotDeletedById(orderId)
+                .orElseThrow(() -> new NotFoundException(NOT_FOUND_ORDER));
+
+        //todo: 주문 취소 가능시간 지정 (배송 및 결제 기능 구현 후 추가)
+
+        order.delete();
+    }
+
     private long getTotalPrice(Map<Long, Product> productMap,List<CartItem> cartItemList) {
         long totalPrice = 0L;
 
