@@ -50,11 +50,6 @@ public class OrderService {
         orderRepository.save(order);
         cartRepository.clearCart(userId);
 
-        for (CartItem item : cart.getCart()) {
-            Product product = productMap.get(item.getProductId());
-            product.decreaseStock(item.getQuantity());
-        }
-
         return CreateOrderRes.of(CartRes.of(cart),order.getTotalPrice(), order.getPaymentMethod(), order.getStatus(), order.getPickupAt());
     }
 
