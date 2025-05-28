@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.Duration;
 
-import static api.buyhood.global.common.exception.enums.CommonErrorCode.REDIS_PARSING_FAILED;
+import static api.buyhood.global.common.exception.enums.CommonErrorCode.JSON_PARSING_FAILED;
 import static api.buyhood.global.common.exception.enums.CommonErrorCode.REDIS_SERIALIZE_FAILED;
 
 @Repository
@@ -44,7 +44,7 @@ public class CartRepository {
             return objectMapper.readValue(value, Cart.class);
         } catch (JsonProcessingException e) {
             log.error("Failed to serialize {}: {}", userId, value, e);
-            throw new InvalidRequestException(REDIS_PARSING_FAILED);
+            throw new InvalidRequestException(JSON_PARSING_FAILED);
         }
 
     }
