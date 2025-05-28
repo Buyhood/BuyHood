@@ -1,5 +1,7 @@
 package api.buyhood.domain.user.enums;
 
+import api.buyhood.global.common.exception.AuthenticationException;
+import api.buyhood.global.common.exception.enums.UserErrorCode;
 import java.util.Arrays;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -16,13 +18,7 @@ public enum UserRole {
 		return Arrays.stream(UserRole.values())
 			.filter(r -> r.name().equalsIgnoreCase(role) || r.getRole().equalsIgnoreCase(role))
 			.findFirst()
-			.orElseThrow(() -> new IllegalArgumentException("유효하지 않은 UserRole: " + role));
+			.orElseThrow(() -> new AuthenticationException(UserErrorCode.INVALID_USER_ROLE));
 	}
 
-	public static class Authority {
-
-		public static final String USER = "ROLE_USER";
-		public static final String SELLER = "ROLE_SELLER";
-
-	}
 }

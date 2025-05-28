@@ -4,12 +4,10 @@ import api.buyhood.domain.auth.dto.req.SignupUserReq;
 import api.buyhood.domain.auth.dto.res.SignupUserRes;
 import api.buyhood.domain.seller.repository.SellerRepository;
 import api.buyhood.domain.user.entity.User;
-import api.buyhood.domain.user.enums.UserRole;
 import api.buyhood.domain.user.repository.UserRepository;
 import api.buyhood.global.common.exception.ConflictException;
 import api.buyhood.global.common.exception.enums.AuthErrorCode;
 import api.buyhood.global.common.util.JwtUtil;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -26,19 +24,17 @@ public class AuthService {
 
 	@Transactional
 	public SignupUserRes signUpUser(
-		@Valid SignupUserReq signupUserReq
+		SignupUserReq signupUserReq
 	) {
 		if (userRepository.existsByEmail(signupUserReq.getEmail())) {
 			throw new ConflictException(AuthErrorCode.EMAIL_DUPLICATED);
 		}
 
-		String password = passwordEncoder.encode(signupUserReq.getPassword());
-		UserRole userRole = UserRole.USER;
+		String encodedPassword = passwordEncoder.encode(signupUserReq.getPassword());
 
 		User newUser = User.builder()
 			.email(signupUserReq.getEmail())
-			.password(password)
-			.role(userRole)
+			.password(encodedPassword)
 			.address(signupUserReq.getAddress())
 			.username(signupUserReq.getUsername())
 			.build();
@@ -46,7 +42,6 @@ public class AuthService {
 		User savedUser = userRepository.save(newUser);
 
 		String accessToken = jwtUtil.createToken(
-			savedUser.getId(),
 			savedUser.getUsername(),
 			savedUser.getEmail(),
 			savedUser.getRole());

@@ -19,7 +19,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class JwtUtil {
 
-	private static final String BEARER_PREFIX = "Bearer ";
 	private static final long TOKEN_EXPIRATION_TIME = 60 * 1000L * 30 * 24; //30분 * 24
 
 	@Value("${jwt.secret.key}")
@@ -34,13 +33,15 @@ public class JwtUtil {
 		key = Keys.hmacShaKeyFor(bytes); // HS256 자동 인식
 	}
 
-	public String createToken(Long userId, String username, String email, UserRole role) {
+	public String createToken(String username, String email, UserRole role) {
+		Date now = new Date();
+
 		return Jwts.builder()
-			.subject(userId.toString())
+			.subject(email)
 			.claim("username", username)
-			.claim("email", email)
 			.claim("role", role.toString())
 			.expiration(new Date(System.currentTimeMillis() + TOKEN_EXPIRATION_TIME))
+			.issuedAt(now)
 			.signWith(key)
 			.compact();
 	}

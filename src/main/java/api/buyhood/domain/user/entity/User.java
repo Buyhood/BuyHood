@@ -35,7 +35,7 @@ public class User extends BaseTimeEntity {
 	@Column(nullable = false)
 	private String password;
 
-	@Column
+	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
 	private UserRole role;
 
@@ -43,11 +43,11 @@ public class User extends BaseTimeEntity {
 	private String address;
 
 	@Builder
-	public User(String username, String email, String password, UserRole role, String address) {
+	public User(String username, String email, String password, String address) {
 		this.username = username;
 		this.email = email;
 		this.password = password;
-		this.role = role;
+		this.role = UserRole.USER;
 		this.address = address;
 	}
 }

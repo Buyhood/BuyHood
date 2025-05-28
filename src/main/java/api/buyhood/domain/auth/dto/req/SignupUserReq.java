@@ -1,6 +1,5 @@
 package api.buyhood.domain.auth.dto.req;
 
-import api.buyhood.domain.user.enums.UserRole;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -17,8 +16,9 @@ public class SignupUserReq {
 	private String email;
 	@NotBlank
 	private String password;
+	@NotBlank
 	private String username;
+	@NotBlank
 	private String address;
-	private UserRole role;
 
 }
