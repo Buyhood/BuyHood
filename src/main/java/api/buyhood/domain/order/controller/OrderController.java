@@ -48,6 +48,6 @@ public class OrderController {
             @RequestParam(defaultValue = "0") int pageNum,
             @RequestParam(defaultValue = "10") int pageSize
     ) {
-        return Response.ok(orderService.findOrders(pageNum, pageSize));
+        return Response.ok(orderService.getOrders(pageNum, pageSize));
     }
 }

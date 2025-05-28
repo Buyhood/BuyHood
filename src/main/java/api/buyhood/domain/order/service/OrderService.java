@@ -73,7 +73,7 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public Page<OrderRes> findOrders(int pageNum, int pageSize) {
+    public Page<OrderRes> getOrders(int pageNum, int pageSize) {
         Page<Order> orderList = orderRepository.findNotDeletedAll(PageRequest.of(pageNum, pageSize));
 
         return orderList.map(OrderRes::of);
