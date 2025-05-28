@@ -6,10 +6,7 @@ import api.buyhood.domain.cart.service.CartService;
 import api.buyhood.global.common.dto.Response;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,5 +24,14 @@ public class CartController {
             @Valid @RequestBody CreateCartReq createCartReq
     ) {
         return Response.ok(cartService.addItemsToCart(createCartReq));
+    }
+
+    /**
+     * 장바구니 조회 기능
+     * todo: 권한 AuthUser 정보 추가
+     */
+    @GetMapping("/v1/carts")
+    public Response<CartRes> findCart() {
+        return Response.ok(cartService.findCart());
     }
 }
