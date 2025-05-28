@@ -77,4 +77,11 @@ public class CategoryService {
 		getCategory.patchCategory(newCategoryName);
 	}
 
+	@Transactional
+	public void deleteCategory(Long categoryId) {
+		Category getCategory = categoryRepository.findById(categoryId)
+			.orElseThrow(() -> new NotFoundException(CategoryErrorCode.CATEGORY_NOT_FOUND));
+		categoryRepository.delete(getCategory);
+	}
+	
 }
