@@ -74,4 +74,8 @@ public class Category extends BaseTimeEntity {
 			.flatMap(List::stream)
 			.collect(Collectors.toList());
 	}
+
+	public void patchCategory(String newCategoryName) {
+		this.name = newCategoryName;
+	}
 }
