@@ -49,6 +49,11 @@ public class CartRepository {
 
     }
 
+    //장바구니 비우기
+    public void clearCart(Long userId) {
+        redisTemplate.delete(CART_KEY_PREFIX + userId);
+    }
+
     //장바구니 존재 여부 확인
     public boolean existsCart(Long userId) {
         return redisTemplate.hasKey(CART_KEY_PREFIX + userId);
