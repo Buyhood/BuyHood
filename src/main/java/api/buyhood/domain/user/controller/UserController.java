@@ -3,7 +3,6 @@ package api.buyhood.domain.user.controller;
 import api.buyhood.domain.user.dto.res.GetUserRes;
 import api.buyhood.domain.user.service.UserService;
 import api.buyhood.global.common.dto.Response;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,19 +18,21 @@ public class UserController {
 
 	private final UserService userService;
 
+	//단건 조회
 	@GetMapping("/v1/users/{userId}")
-	public Response<GetUserRes> getUser(@PathVariable @Valid Long userId) {
-		GetUserRes getUserRes = userService.getUser(userId);
+	public Response<GetUserRes> getUser(@PathVariable Long userId) {
+		GetUserRes response = userService.getUser(userId);
 
-		return Response.ok(getUserRes);
+		return Response.ok(response);
 	}
 
+	//다건 조회
 	@GetMapping("v1/users")
 	public Response<Page<GetUserRes>> getUsers(
 		@RequestParam(defaultValue = "0") int page,
 		@RequestParam(defaultValue = "10") int size) {
-		Page<GetUserRes> getUserRes = userService.getAllUsers(page, size);
-		
-		return Response.ok(getUserRes);
+		Page<GetUserRes> response = userService.getAllUsers(page, size);
+
+		return Response.ok(response);
 	}
 }
