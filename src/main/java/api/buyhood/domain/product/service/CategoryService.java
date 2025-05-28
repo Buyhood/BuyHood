@@ -23,22 +23,28 @@ public class CategoryService {
 	private final CategoryRepository categoryRepository;
 
 	@Transactional
-	public CreateCategoryRes createCategory(String categoryName, long parentId) {
+	public CreateCategoryRes createCategory(String categoryName, Long parentId) {
+		Category parent = null;
+		if (parentId != null && parentId != 0) {
+			parent = categoryRepository.findById(parentId)
+				.orElseThrow(() -> new NotFoundException(CategoryErrorCode.CATEGORY_NOT_FOUND));
+		}
+
 		if (categoryRepository.existsByParentIdAndName(categoryName, parentId)) {
 			throw new InvalidRequestException(CategoryErrorCode.DUPLICATE_CATEGORIES);
 		}
 
-		Category parent = categoryRepository.findById(parentId)
-			.orElse(null);
+		int depth = parent == null ? 0 : parent.getDepth() + 1;
+
+		if (depth >= 3) {
+			throw new InvalidRequestException(CategoryErrorCode.MAX_DEPTH_OVER);
+		}
 
 		Category category = Category.builder()
+			.depth(depth)
 			.name(categoryName)
 			.parent(parent)
 			.build();
-
-		if (parent != null) {
-			parent.addChildCategory(category);
-		}
 
 		return CreateCategoryRes.of(categoryRepository.save(category));
 	}
