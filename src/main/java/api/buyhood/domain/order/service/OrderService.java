@@ -5,7 +5,7 @@ import api.buyhood.domain.cart.entity.Cart;
 import api.buyhood.domain.cart.entity.CartItem;
 import api.buyhood.domain.cart.repository.CartRepository;
 import api.buyhood.domain.order.dto.request.OrderReq;
-import api.buyhood.domain.order.dto.response.OrderRes;
+import api.buyhood.domain.order.dto.response.CreateOrderRes;
 import api.buyhood.domain.order.entity.Order;
 import api.buyhood.domain.order.repository.OrderRepository;
 import api.buyhood.domain.product.entity.Product;
@@ -29,7 +29,7 @@ public class OrderService {
     private final ProductRepository productRepository;
 
     @Transactional
-    public OrderRes createOrder(OrderReq orderReq) {
+    public CreateOrderRes createOrder(OrderReq orderReq) {
 
         Long userId = 1L;
 
@@ -55,7 +55,7 @@ public class OrderService {
             product.decreaseStock(item.getQuantity());
         }
 
-        return OrderRes.of(CartRes.of(cart),order.getTotalPrice(), order.getPaymentMethod(), order.getStatus(), order.getPickupAt());
+        return CreateOrderRes.of(CartRes.of(cart),order.getTotalPrice(), order.getPaymentMethod(), order.getStatus(), order.getPickupAt());
     }
 
     private long getTotalPrice(Map<Long, Product> productMap,List<CartItem> cartItemList) {

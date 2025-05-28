@@ -9,7 +9,7 @@ import lombok.Getter;
 import java.time.LocalDateTime;
 
 @Getter
-public class OrderRes {
+public class CreateOrderRes {
     private CartRes orderInfo;
     private long totalPrice;
     private PaymentMethod paymentMethod;
@@ -17,7 +17,7 @@ public class OrderRes {
     private LocalDateTime pickupAt;
 
     @Builder
-    private OrderRes (CartRes orderInfo,long totalPrice, PaymentMethod paymentMethod, OrderStatus status, LocalDateTime pickupAt) {
+    private CreateOrderRes(CartRes orderInfo, long totalPrice, PaymentMethod paymentMethod, OrderStatus status, LocalDateTime pickupAt) {
         this.orderInfo = orderInfo;
         this.totalPrice = totalPrice;
         this.paymentMethod = paymentMethod;
@@ -25,8 +25,8 @@ public class OrderRes {
         this.pickupAt = pickupAt;
     }
 
-    public static OrderRes of (CartRes orderInfo, long totalPrice, PaymentMethod paymentMethod, OrderStatus status, LocalDateTime pickupAt) {
-        return OrderRes.builder()
+    public static CreateOrderRes of (CartRes orderInfo, long totalPrice, PaymentMethod paymentMethod, OrderStatus status, LocalDateTime pickupAt) {
+        return CreateOrderRes.builder()
                 .orderInfo(orderInfo)
                 .totalPrice(totalPrice)
                 .paymentMethod(paymentMethod)
