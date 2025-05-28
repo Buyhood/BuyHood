@@ -52,4 +52,9 @@ public class Product extends BaseTimeEntity {
 		this.description = description;
 		this.stock = stock;
 	}
+
+	//재고 감소
+	public void decreaseStock (int quantity) {
+		this.stock -= quantity;
+	}
 }
