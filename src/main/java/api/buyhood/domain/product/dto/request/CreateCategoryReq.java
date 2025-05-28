@@ -13,5 +13,5 @@ public class CreateCategoryReq {
 	@Size(min = 1, max = 30, message = "카테고리는 최소 1글자, 최대 30글자여야 합니다.")
 	private final String categoryName;
 
-	private final int parentId;
+	private final Long parentId;
 }
