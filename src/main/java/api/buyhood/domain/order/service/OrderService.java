@@ -25,6 +25,7 @@ import static api.buyhood.global.common.exception.enums.CartErrorCode.NOT_FOUND_
 @RequiredArgsConstructor
 public class OrderService {
     private final OrderRepository orderRepository;
+    private final OrderHistoryService orderHistoryService;
     private final CartRepository cartRepository;
     private final ProductRepository productRepository;
 
@@ -48,6 +49,7 @@ public class OrderService {
 
         Order order = Order.of(orderReq.getPaymentMethod(), getTotalPrice(productMap, cart.getCart()), orderReq.getPickupAt());
         orderRepository.save(order);
+        orderHistoryService.saveOrderHistory(order, cart, productMap);
         cartRepository.clearCart(userId);
 
         return CreateOrderRes.of(CartRes.of(cart),order.getTotalPrice(), order.getPaymentMethod(), order.getStatus(), order.getPickupAt());
