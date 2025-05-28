@@ -42,7 +42,7 @@ public class UserService {
 	//비밀번호 변경
 	@Transactional
 	public void changePassword(AuthUser authUser, ChangePasswordReq changePasswordReq) {
-		User user = userRepository.findById(authUser.getId())
+		User user = userRepository.findByEmail(authUser.getEmail())
 			.orElseThrow(() -> new NotFoundException(UserErrorCode.USER_NOT_FOUND));
 
 		validateOldPassword(changePasswordReq.getOldPassword(), user.getPassword());
@@ -65,7 +65,7 @@ public class UserService {
 		}
 
 		if (passwordEncoder.matches(newPassword, oldPassword)) {
-			throw new BadRequestException(UserErrorCode.INVALID_PASSWORD);
+			throw new BadRequestException(UserErrorCode.PASSWORD_SAME_AS_OLD);
 		}
 	}
 }

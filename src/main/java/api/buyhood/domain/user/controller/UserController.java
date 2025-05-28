@@ -42,7 +42,8 @@ public class UserController {
 		return Response.ok(response);
 	}
 
-	@PatchMapping
+	//비밀번호 변경
+	@PatchMapping("/v1/users")
 	public Response<String> changePassword(
 		@AuthenticationPrincipal AuthUser authUser,
 		@RequestBody @Valid ChangePasswordReq req) {
