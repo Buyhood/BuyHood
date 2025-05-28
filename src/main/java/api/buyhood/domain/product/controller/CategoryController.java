@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -61,4 +62,10 @@ public class CategoryController {
 	) {
 		categoryService.patchCategory(categoryId, request.getNewCategoryName());
 	}
+
+	@DeleteMapping("/v1/categories/{categoryId}")
+	public void deleteCategory(@PathVariable Long categoryId) {
+		categoryService.deleteCategory(categoryId);
+	}
+	
 }
