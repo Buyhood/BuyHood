@@ -53,6 +53,17 @@ public class CartService {
         return getCartRes(cart);
     }
 
+    @Transactional
+    public void clearCart() {
+        Long userId = 1L;
+
+        if (!cartRepository.existsCart(userId)) {
+            throw new NotFoundException(NOT_FOUND_CART);
+        }
+
+        cartRepository.clearCart(userId);
+    }
+
     //dto 변환
     private CartRes getCartRes(Cart cart) {
         List<CartItemRes> cartList = cart.getCart().stream()

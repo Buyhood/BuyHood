@@ -34,4 +34,13 @@ public class CartController {
     public Response<CartRes> findCart() {
         return Response.ok(cartService.findCart());
     }
+
+    /**
+     * 장바구니 비우기
+     */
+    @DeleteMapping("/v1/carts")
+    public Response<String> clearCart() {
+        cartService.clearCart();
+        return Response.ok("장바구니 비우기 성공");
+    }
 }
