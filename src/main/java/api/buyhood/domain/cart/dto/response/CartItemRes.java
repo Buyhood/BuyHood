@@ -1,21 +1,23 @@
-package api.buyhood.domain.cart.entity;
+package api.buyhood.domain.cart.dto.response;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 @Getter
-public class CartItem {
+@RequiredArgsConstructor
+public class CartItemRes {
     private Long productId;
     private int quantity;
 
     @Builder
-    private CartItem(Long productId, int quantity) {
+    public CartItemRes(Long productId, int quantity) {
         this.productId = productId;
         this.quantity = quantity;
     }
 
-    public static CartItem of(Long productId, int quantity) {
-        return CartItem.builder()
+    public static CartItemRes of (Long productId, int quantity) {
+        return CartItemRes.builder()
                 .productId(productId)
                 .quantity(quantity)
                 .build();

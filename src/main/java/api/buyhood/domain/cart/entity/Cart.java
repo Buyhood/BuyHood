@@ -16,4 +16,10 @@ public class Cart {
     public Cart(List<CartItem> cart) {
         this.cart = cart;
     }
+
+    public static Cart of (List<CartItem> cartItemList) {
+        return Cart.builder()
+                .cart(cartItemList)
+                .build();
+    }
 }
