@@ -10,6 +10,7 @@ import api.buyhood.domain.order.entity.Order;
 import api.buyhood.domain.order.repository.OrderRepository;
 import api.buyhood.domain.product.entity.Product;
 import api.buyhood.domain.product.repository.ProductRepository;
+import api.buyhood.domain.product.service.ProductService;
 import api.buyhood.global.common.exception.InvalidRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ public class OrderService {
     private final OrderHistoryService orderHistoryService;
     private final CartRepository cartRepository;
     private final ProductRepository productRepository;
+    private final ProductService productService;
 
     @Transactional
     public CreateOrderRes createOrder(OrderReq orderReq) {
@@ -50,6 +52,8 @@ public class OrderService {
         Order order = Order.of(orderReq.getPaymentMethod(), getTotalPrice(productMap, cart.getCart()), orderReq.getPickupAt());
         orderRepository.save(order);
         orderHistoryService.saveOrderHistory(order, cart, productMap);
+
+        productService.decreaseStock(cart, productMap);
         cartRepository.clearCart(userId);
 
         return CreateOrderRes.of(CartRes.of(cart),order.getTotalPrice(), order.getPaymentMethod(), order.getStatus(), order.getPickupAt());

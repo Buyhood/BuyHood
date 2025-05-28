@@ -1,5 +1,7 @@
 package api.buyhood.domain.product.service;
 
+import api.buyhood.domain.cart.entity.Cart;
+import api.buyhood.domain.cart.entity.CartItem;
 import api.buyhood.domain.product.dto.response.RegisteringProductRes;
 import api.buyhood.domain.product.entity.Category;
 import api.buyhood.domain.product.entity.Product;
@@ -10,6 +12,8 @@ import api.buyhood.global.common.exception.enums.CategoryErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -45,4 +49,11 @@ public class ProductService {
 		return RegisteringProductRes.of(product, category != null ? category.getName() : null);
 	}
 
+	@Transactional
+	public void decreaseStock(Cart cart, Map<Long, Product> productMap) {
+		for (CartItem cartItem : cart.getCart()) {
+			Product product = productMap.get(cartItem.getProductId());
+			product.decreaseStock(cartItem.getQuantity());
+		}
+	}
 }
