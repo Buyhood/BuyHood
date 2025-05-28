@@ -1,5 +1,6 @@
 package api.buyhood.domain.cart.dto.response;
 
+import api.buyhood.domain.cart.entity.Cart;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -14,9 +15,15 @@ public class CartRes {
         this.cartItemRes = cartItemRes;
     }
 
-    public static CartRes of(List<CartItemRes> cartItemRes) {
+    public static CartRes of(Cart cart) {
+
+        List<CartItemRes> cartList = cart.getCart().stream()
+                .map(cartItem ->
+                        CartItemRes.of(cartItem.getProductId(), cartItem.getQuantity())
+                ).toList();
+
         return CartRes.builder()
-                .cartItemRes(cartItemRes)
+                .cartItemRes(cartList)
                 .build();
     }
 }

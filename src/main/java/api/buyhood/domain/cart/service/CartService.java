@@ -1,7 +1,6 @@
 package api.buyhood.domain.cart.service;
 
 import api.buyhood.domain.cart.dto.request.CreateCartReq;
-import api.buyhood.domain.cart.dto.response.CartItemRes;
 import api.buyhood.domain.cart.dto.response.CartRes;
 import api.buyhood.domain.cart.entity.Cart;
 import api.buyhood.domain.cart.entity.CartItem;
@@ -37,7 +36,7 @@ public class CartService {
         Cart cart = Cart.of(cartItemList);
         cartRepository.add(userId, cart);
 
-        return getCartRes(cart);
+        return CartRes.of(cart);
     }
 
     @Transactional(readOnly = true)
@@ -50,7 +49,7 @@ public class CartService {
 
         Cart cart = cartRepository.findCart(userId);
 
-        return getCartRes(cart);
+        return CartRes.of(cart);
     }
 
     @Transactional
@@ -62,15 +61,5 @@ public class CartService {
         }
 
         cartRepository.clearCart(userId);
-    }
-
-    //dto 변환
-    private CartRes getCartRes(Cart cart) {
-        List<CartItemRes> cartList = cart.getCart().stream()
-                .map(cartItem ->
-                        CartItemRes.of(cartItem.getProductId(), cartItem.getQuantity())
-                ).toList();
-
-        return CartRes.of(cartList);
     }
 }
