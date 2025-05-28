@@ -7,11 +7,10 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public class CreateCategoryReq {
+public class PatchCategoryReq {
 
 	@NotBlank(message = "카테고리 이름은 공백일 수 없습니다.")
 	@Size(min = 1, max = 30, message = "카테고리는 최소 1글자, 최대 30글자여야 합니다.")
-	private final String categoryName;
+	private final String newCategoryName;
 
-	private final Long parentId;
 }
