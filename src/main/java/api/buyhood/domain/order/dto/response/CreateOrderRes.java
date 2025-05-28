@@ -10,28 +10,34 @@ import java.time.LocalDateTime;
 
 @Getter
 public class CreateOrderRes {
+    private Long storeId;
     private CartRes orderInfo;
     private long totalPrice;
     private PaymentMethod paymentMethod;
     private OrderStatus status;
     private LocalDateTime pickupAt;
+    private LocalDateTime createAt;
 
     @Builder
-    private CreateOrderRes(CartRes orderInfo, long totalPrice, PaymentMethod paymentMethod, OrderStatus status, LocalDateTime pickupAt) {
+    private CreateOrderRes(Long storeId, CartRes orderInfo, long totalPrice, PaymentMethod paymentMethod, OrderStatus status, LocalDateTime pickupAt, LocalDateTime createAt) {
+        this.storeId = storeId;
         this.orderInfo = orderInfo;
         this.totalPrice = totalPrice;
         this.paymentMethod = paymentMethod;
         this.status = status;
         this.pickupAt = pickupAt;
+        this.createAt = createAt;
     }
 
-    public static CreateOrderRes of (CartRes orderInfo, long totalPrice, PaymentMethod paymentMethod, OrderStatus status, LocalDateTime pickupAt) {
+    public static CreateOrderRes of (Long storeId, CartRes orderInfo, long totalPrice, PaymentMethod paymentMethod, OrderStatus status, LocalDateTime pickupAt, LocalDateTime createAt) {
         return CreateOrderRes.builder()
+                .storeId(storeId)
                 .orderInfo(orderInfo)
                 .totalPrice(totalPrice)
                 .paymentMethod(paymentMethod)
                 .status(status)
                 .pickupAt(pickupAt)
+                .createAt(createAt)
                 .build();
     }
 }

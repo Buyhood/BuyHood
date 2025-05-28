@@ -1,6 +1,6 @@
 package api.buyhood.domain.order.controller;
 
-import api.buyhood.domain.order.dto.request.OrderReq;
+import api.buyhood.domain.order.dto.request.CreateOrderReq;
 import api.buyhood.domain.order.dto.response.CreateOrderRes;
 import api.buyhood.domain.order.service.OrderService;
 import api.buyhood.global.common.dto.Response;
@@ -26,9 +26,9 @@ public class OrderController {
 
     @PostMapping("/v1/orders")
     public Response<CreateOrderRes> createOrder(
-            @Valid @RequestBody OrderReq orderReq
+            @Valid @RequestBody CreateOrderReq createOrderReq
     ) {
-        return Response.ok(orderService.createOrder(orderReq));
+        return Response.ok(orderService.createOrder(createOrderReq));
     }
 
 }

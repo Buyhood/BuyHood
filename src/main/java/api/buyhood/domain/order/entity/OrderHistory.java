@@ -8,7 +8,7 @@ import lombok.Builder;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "order_history")
+@Table(name = "order_histories")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class OrderHistory extends BaseTimeEntity {
     @Id

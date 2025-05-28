@@ -4,14 +4,17 @@ import api.buyhood.domain.cart.dto.response.CartRes;
 import api.buyhood.domain.cart.entity.Cart;
 import api.buyhood.domain.cart.entity.CartItem;
 import api.buyhood.domain.cart.repository.CartRepository;
-import api.buyhood.domain.order.dto.request.OrderReq;
+import api.buyhood.domain.order.dto.request.CreateOrderReq;
 import api.buyhood.domain.order.dto.response.CreateOrderRes;
 import api.buyhood.domain.order.entity.Order;
 import api.buyhood.domain.order.repository.OrderRepository;
 import api.buyhood.domain.product.entity.Product;
 import api.buyhood.domain.product.repository.ProductRepository;
 import api.buyhood.domain.product.service.ProductService;
+import api.buyhood.domain.store.entity.Store;
+import api.buyhood.domain.store.repository.StoreRepository;
 import api.buyhood.global.common.exception.InvalidRequestException;
+import api.buyhood.global.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +24,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static api.buyhood.global.common.exception.enums.CartErrorCode.NOT_FOUND_CART;
+import static api.buyhood.global.common.exception.enums.StoreErrorCode.NOT_FOUND_STORE;
 
 @Service
 @RequiredArgsConstructor
@@ -30,11 +34,15 @@ public class OrderService {
     private final CartRepository cartRepository;
     private final ProductRepository productRepository;
     private final ProductService productService;
+    private final StoreRepository storeRepository;
 
     @Transactional
-    public CreateOrderRes createOrder(OrderReq orderReq) {
+    public CreateOrderRes createOrder(CreateOrderReq createOrderReq) {
 
         Long userId = 1L;
+
+        Store store = storeRepository.findById(createOrderReq.getStoreId())
+                .orElseThrow(() -> new NotFoundException(NOT_FOUND_STORE));
 
         if (!cartRepository.existsCart(userId)) {
             throw  new InvalidRequestException(NOT_FOUND_CART);
@@ -49,14 +57,14 @@ public class OrderService {
         Map<Long, Product> productMap = productRepository.findAllById(productIdList).stream()
                 .collect(Collectors.toMap(Product::getId, p -> p));
 
-        Order order = Order.of(orderReq.getPaymentMethod(), getTotalPrice(productMap, cart.getCart()), orderReq.getPickupAt());
+        Order order = Order.of(store, createOrderReq.getPaymentMethod(), getTotalPrice(productMap, cart.getCart()), createOrderReq.getPickupAt());
         orderRepository.save(order);
         orderHistoryService.saveOrderHistory(order, cart, productMap);
 
         productService.decreaseStock(cart, productMap);
         cartRepository.clearCart(userId);
 
-        return CreateOrderRes.of(CartRes.of(cart),order.getTotalPrice(), order.getPaymentMethod(), order.getStatus(), order.getPickupAt());
+        return CreateOrderRes.of(order.getStore().getId(), CartRes.of(cart),order.getTotalPrice(), order.getPaymentMethod(), order.getStatus(), order.getPickupAt(), order.getCreatedAt());
     }
 
     private long getTotalPrice(Map<Long, Product> productMap,List<CartItem> cartItemList) {
