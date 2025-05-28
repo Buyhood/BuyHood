@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum OrderErrorCode implements ErrorCode {
 
-	;
+	NOT_FOUND_ORDER(3000, "주문이 존재하지 않습니다.", HttpStatus.NOT_FOUND);
 
 	private final int code;
 	private final String message;

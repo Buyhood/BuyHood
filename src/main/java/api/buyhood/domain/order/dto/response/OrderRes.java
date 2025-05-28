@@ -1,6 +1,6 @@
 package api.buyhood.domain.order.dto.response;
 
-import api.buyhood.domain.cart.dto.response.CartRes;
+import api.buyhood.domain.order.entity.Order;
 import api.buyhood.domain.order.enums.OrderStatus;
 import api.buyhood.domain.order.enums.PaymentMethod;
 import lombok.Builder;
@@ -10,28 +10,29 @@ import java.time.LocalDateTime;
 
 @Getter
 public class OrderRes {
-    private CartRes orderInfo;
-    private long totalPrice;
+
+    private Long orderId;
     private PaymentMethod paymentMethod;
+    private long totalPrice;
     private OrderStatus status;
     private LocalDateTime pickupAt;
 
     @Builder
-    private OrderRes (CartRes orderInfo,long totalPrice, PaymentMethod paymentMethod, OrderStatus status, LocalDateTime pickupAt) {
-        this.orderInfo = orderInfo;
-        this.totalPrice = totalPrice;
+    public OrderRes(Long orderId, PaymentMethod paymentMethod, long totalPrice, OrderStatus status, LocalDateTime pickupAt ) {
+        this.orderId = orderId;
         this.paymentMethod = paymentMethod;
+        this.totalPrice = totalPrice;
         this.status = status;
         this.pickupAt = pickupAt;
     }
 
-    public static OrderRes of (CartRes orderInfo, long totalPrice, PaymentMethod paymentMethod, OrderStatus status, LocalDateTime pickupAt) {
+    public static OrderRes of(Order order) {
         return OrderRes.builder()
-                .orderInfo(orderInfo)
-                .totalPrice(totalPrice)
-                .paymentMethod(paymentMethod)
-                .status(status)
-                .pickupAt(pickupAt)
+                .orderId(order.getId())
+                .paymentMethod(order.getPaymentMethod())
+                .totalPrice(order.getTotalPrice())
+                .status(order.getStatus())
+                .pickupAt(order.getPickupAt())
                 .build();
     }
 }

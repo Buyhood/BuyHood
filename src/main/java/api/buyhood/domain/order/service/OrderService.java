@@ -6,12 +6,16 @@ import api.buyhood.domain.cart.entity.CartItem;
 import api.buyhood.domain.cart.repository.CartRepository;
 import api.buyhood.domain.order.dto.request.OrderReq;
 import api.buyhood.domain.order.dto.response.OrderRes;
+import api.buyhood.domain.order.dto.response.CreateOrderRes;
 import api.buyhood.domain.order.entity.Order;
 import api.buyhood.domain.order.repository.OrderRepository;
 import api.buyhood.domain.product.entity.Product;
 import api.buyhood.domain.product.repository.ProductRepository;
 import api.buyhood.global.common.exception.InvalidRequestException;
+import api.buyhood.global.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +24,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static api.buyhood.global.common.exception.enums.CartErrorCode.NOT_FOUND_CART;
+import static api.buyhood.global.common.exception.enums.OrderErrorCode.NOT_FOUND_ORDER;
 
 @Service
 @RequiredArgsConstructor
@@ -29,7 +34,7 @@ public class OrderService {
     private final ProductRepository productRepository;
 
     @Transactional
-    public OrderRes createOrder(OrderReq orderReq) {
+    public CreateOrderRes createOrder(OrderReq orderReq) {
 
         Long userId = 1L;
 
@@ -55,7 +60,23 @@ public class OrderService {
             product.decreaseStock(item.getQuantity());
         }
 
-        return OrderRes.of(CartRes.of(cart),order.getTotalPrice(), order.getPaymentMethod(), order.getStatus(), order.getPickupAt());
+        return CreateOrderRes.of(CartRes.of(cart),order.getTotalPrice(), order.getPaymentMethod(), order.getStatus(), order.getPickupAt());
+    }
+
+    @Transactional(readOnly = true)
+    public OrderRes findOrder(Long orderId) {
+
+        Order order = orderRepository.findNotDeletedById(orderId)
+                .orElseThrow(() -> new NotFoundException(NOT_FOUND_ORDER));
+
+        return OrderRes.of(order);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<OrderRes> findOrders(int pageNum, int pageSize) {
+        Page<Order> orderList = orderRepository.findNotDeletedAll(PageRequest.of(pageNum, pageSize));
+
+        return orderList.map(OrderRes::of);
     }
 
     private long getTotalPrice(Map<Long, Product> productMap,List<CartItem> cartItemList) {
