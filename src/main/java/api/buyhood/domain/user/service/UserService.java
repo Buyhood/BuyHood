@@ -2,6 +2,7 @@ package api.buyhood.domain.user.service;
 
 import api.buyhood.domain.auth.entity.AuthUser;
 import api.buyhood.domain.user.dto.req.ChangePasswordReq;
+import api.buyhood.domain.user.dto.req.DeleteUserReq;
 import api.buyhood.domain.user.dto.res.GetUserRes;
 import api.buyhood.domain.user.entity.User;
 import api.buyhood.domain.user.repository.UserRepository;
@@ -50,6 +51,16 @@ public class UserService {
 			throw new InvalidRequestException(UserErrorCode.PASSWORD_SAME_AS_OLD);
 		}
 		user.changePassword(passwordEncoder.encode(changePasswordReq.getNewPassword()));
+	}
+
+	//회원탈퇴
+	@Transactional
+	public void deleteUser(AuthUser authUser, DeleteUserReq deleteUserReq) {
+		User findUser = userRepository.findByEmail(authUser.getEmail())
+			.orElseThrow(() -> new NotFoundException(UserErrorCode.USER_NOT_FOUND));
+
+		validateOldPassword(deleteUserReq.getPassword(), findUser.getPassword());
+		findUser.markDeleted();
 	}
 
 	private void validateOldPassword(String rawPassword, String encodedPassword) {
