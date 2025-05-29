@@ -5,11 +5,9 @@ import api.buyhood.domain.order.dto.response.CreateOrderRes;
 import api.buyhood.domain.order.service.OrderService;
 import api.buyhood.global.common.dto.Response;
 import jakarta.validation.Valid;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 //todo: AuthUser 정보 추가
 @RestController
