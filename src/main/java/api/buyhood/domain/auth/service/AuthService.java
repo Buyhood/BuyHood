@@ -47,7 +47,7 @@ public class AuthService {
 		User savedUser = userRepository.save(newUser);
 
 		String accessToken = jwtUtil.createToken(
-			savedUser.getUsername(),
+			savedUser.getId(),
 			savedUser.getEmail(),
 			savedUser.getRole());
 
@@ -62,7 +62,7 @@ public class AuthService {
 			.orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
 
 		String accessToken = jwtUtil.createToken(
-			user.getUsername(),
+			user.getId(),
 			user.getEmail(),
 			user.getRole());
 
