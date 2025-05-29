@@ -1,13 +1,17 @@
 package api.buyhood.domain.store.entity;
 
+import api.buyhood.domain.seller.entity.Seller;
 import api.buyhood.global.common.entity.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -25,37 +29,38 @@ public class Store extends BaseTimeEntity {
 	private Long id;
 
 	@Column(nullable = false)
-	private String storeName;
-
-	@Column
-	private String description;
+	private String name;
 
 	@Column(nullable = false)
 	private String address;
 
-	@Column
-	private LocalDateTime openedAt;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "seller_id")
+	private Seller seller;
 
 	@Column
-	private LocalDateTime closedAt;
+	private String description;
 
 	@Column
-	private boolean isOpened;
+	private LocalTime openedAt;
+
+	@Column
+	private LocalTime closedAt;
 
 	@Builder
 	public Store(
-		String storeName,
-		String description,
+		String name,
 		String address,
-		LocalDateTime openedAt,
-		LocalDateTime closedAt,
-		boolean isOpened
+		Seller seller,
+		String description,
+		LocalTime openedAt,
+		LocalTime closedAt
 	) {
-		this.storeName = storeName;
-		this.description = description;
+		this.name = name;
 		this.address = address;
+		this.seller = seller;
+		this.description = description;
 		this.openedAt = openedAt;
 		this.closedAt = closedAt;
-		this.isOpened = isOpened;
 	}
 }
