@@ -4,7 +4,7 @@ import api.buyhood.domain.cart.entity.Cart;
 import api.buyhood.domain.cart.entity.CartItem;
 import api.buyhood.domain.order.entity.Order;
 import api.buyhood.domain.order.entity.OrderHistory;
-import api.buyhood.domain.order.repository.OrderHistoryRepoditory;
+import api.buyhood.domain.order.repository.OrderHistoryRepository;
 import api.buyhood.domain.product.entity.Product;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,7 +16,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class OrderHistoryService {
 
-    private final OrderHistoryRepoditory orderHistoryRepoditory;
+    private final OrderHistoryRepository orderHistoryRepository;
 
     @Transactional
     public void saveOrderHistory(Order order, Cart cart, Map<Long, Product> productMap) {
@@ -24,7 +24,7 @@ public class OrderHistoryService {
         for (CartItem item : cart.getCart()) {
             Product product = productMap.get(item.getProductId());
             OrderHistory orderHistory = OrderHistory.of(order, product, item.getQuantity());
-            orderHistoryRepoditory.save(orderHistory);
+            orderHistoryRepository.save(orderHistory);
         }
     }
 }

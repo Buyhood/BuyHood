@@ -13,7 +13,6 @@ import api.buyhood.domain.product.repository.ProductRepository;
 import api.buyhood.domain.product.service.ProductService;
 import api.buyhood.domain.store.entity.Store;
 import api.buyhood.domain.store.repository.StoreRepository;
-import api.buyhood.global.common.exception.InvalidRequestException;
 import api.buyhood.global.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -37,7 +36,7 @@ public class OrderService {
     private final StoreRepository storeRepository;
 
     @Transactional
-    public CreateOrderRes createOrder(CreateOrderReq createOrderReq) {
+    public CreateOrderRes createOrder(CreateOrderReq createOrderReq)  {
 
         Long userId = 1L;
 
@@ -45,7 +44,7 @@ public class OrderService {
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_STORE));
 
         if (!cartRepository.existsCart(userId)) {
-            throw  new InvalidRequestException(NOT_FOUND_CART);
+            throw new NotFoundException(NOT_FOUND_CART);
         }
 
         Cart cart = cartRepository.findCart(userId);
