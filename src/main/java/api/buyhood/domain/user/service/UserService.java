@@ -7,13 +7,16 @@ import api.buyhood.domain.user.entity.User;
 import api.buyhood.domain.user.repository.UserRepository;
 import api.buyhood.global.common.exception.InvalidRequestException;
 import api.buyhood.global.common.exception.NotFoundException;
-import api.buyhood.global.common.exception.enums.UserErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static api.buyhood.global.common.exception.enums.UserErrorCode.PASSWORD_SAME_AS_OLD;
+import static api.buyhood.global.common.exception.enums.UserErrorCode.USER_INVALID_PASSWORD;
+import static api.buyhood.global.common.exception.enums.UserErrorCode.USER_NOT_FOUND;
 
 
 @Service
@@ -27,7 +30,7 @@ public class UserService {
 	@Transactional(readOnly = true)
 	public GetUserRes getUser(Long id) {
 		User user = userRepository.findById(id)
-			.orElseThrow(() -> new NotFoundException(UserErrorCode.USER_NOT_FOUND));
+			.orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
 
 		return GetUserRes.of(user);
 	}
@@ -43,18 +46,18 @@ public class UserService {
 	@Transactional
 	public void changePassword(AuthUser authUser, ChangePasswordReq changePasswordReq) {
 		User user = userRepository.findByEmail(authUser.getEmail())
-			.orElseThrow(() -> new NotFoundException(UserErrorCode.USER_NOT_FOUND));
+			.orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
 
 		validateOldPassword(changePasswordReq.getOldPassword(), user.getPassword());
 		if (passwordEncoder.matches(changePasswordReq.getNewPassword(), user.getPassword())) {
-			throw new InvalidRequestException(UserErrorCode.PASSWORD_SAME_AS_OLD);
+			throw new InvalidRequestException(PASSWORD_SAME_AS_OLD);
 		}
 		user.changePassword(passwordEncoder.encode(changePasswordReq.getNewPassword()));
 	}
 
 	private void validateOldPassword(String rawPassword, String encodedPassword) {
 		if (!passwordEncoder.matches(rawPassword, encodedPassword)) {
-			throw new InvalidRequestException(UserErrorCode.INVALID_PASSWORD);
+			throw new InvalidRequestException(USER_INVALID_PASSWORD);
 		}
 	}
 
