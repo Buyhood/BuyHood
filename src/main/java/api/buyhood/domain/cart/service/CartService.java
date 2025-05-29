@@ -1,16 +1,18 @@
 package api.buyhood.domain.cart.service;
 
 import api.buyhood.domain.cart.dto.request.CreateCartReq;
-import api.buyhood.domain.cart.dto.response.CartItemRes;
 import api.buyhood.domain.cart.dto.response.CartRes;
 import api.buyhood.domain.cart.entity.Cart;
 import api.buyhood.domain.cart.entity.CartItem;
 import api.buyhood.domain.cart.repository.CartRepository;
+import api.buyhood.global.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
+import static api.buyhood.global.common.exception.enums.CartErrorCode.NOT_FOUND_CART;
 
 @Service
 @RequiredArgsConstructor
@@ -34,16 +36,30 @@ public class CartService {
         Cart cart = Cart.of(cartItemList);
         cartRepository.add(userId, cart);
 
-        return getCartRes(cart);
+        return CartRes.of(cart);
     }
 
-    //dto 변환
-    private CartRes getCartRes(Cart cart) {
-        List<CartItemRes> cartList = cart.getCart().stream()
-                .map(cartItem ->
-                        CartItemRes.of(cartItem.getProductId(), cartItem.getQuantity())
-                ).toList();
+    @Transactional(readOnly = true)
+    public CartRes findCart() {
+        Long userId = 1L;
 
-        return CartRes.of(cartList);
+        if (!cartRepository.existsCart(userId)) {
+            throw new NotFoundException(NOT_FOUND_CART);
+        }
+
+        Cart cart = cartRepository.findCart(userId);
+
+        return CartRes.of(cart);
+    }
+
+    @Transactional
+    public void clearCart() {
+        Long userId = 1L;
+
+        if (!cartRepository.existsCart(userId)) {
+            throw new NotFoundException(NOT_FOUND_CART);
+        }
+
+        cartRepository.clearCart(userId);
     }
 }

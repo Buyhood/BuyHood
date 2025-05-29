@@ -1,20 +1,16 @@
 package api.buyhood.domain.order.entity;
 
 import api.buyhood.domain.order.enums.OrderStatus;
+import api.buyhood.domain.order.enums.PaymentMethod;
+import api.buyhood.domain.store.entity.Store;
 import api.buyhood.global.common.entity.BaseTimeEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import java.time.LocalDateTime;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -27,11 +23,16 @@ public class Order extends BaseTimeEntity {
 	@Column(nullable = false)
 	private Long id;
 
-	@Column
-	private String paymentMethod;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "store_id")
+	private Store store;
 
 	@Column(nullable = false)
-	private Long totalPrice;
+	@Enumerated(EnumType.STRING)
+	private PaymentMethod paymentMethod;
+
+	@Column(nullable = false)
+	private long totalPrice;
 
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
@@ -40,11 +41,22 @@ public class Order extends BaseTimeEntity {
 	@Column
 	private LocalDateTime pickupAt;
 
+
 	@Builder
-	public Order(String paymentMethod, Long totalPrice, OrderStatus status, LocalDateTime pickupAt) {
+	public Order(Store store, PaymentMethod paymentMethod, long totalPrice, LocalDateTime pickupAt) {
+		this.store = store;
 		this.paymentMethod = paymentMethod;
 		this.totalPrice = totalPrice;
-		this.status = status;
+		this.status = OrderStatus.PENDING;
 		this.pickupAt = pickupAt;
+	}
+
+	public static Order of(Store store, PaymentMethod paymentMethod, long totalPrice, LocalDateTime pickupAt) {
+		return Order.builder()
+				.store(store)
+				.paymentMethod(paymentMethod)
+				.totalPrice(totalPrice)
+				.pickupAt(pickupAt)
+				.build();
 	}
 }
