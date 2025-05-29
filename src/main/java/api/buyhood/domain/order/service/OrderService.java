@@ -13,6 +13,8 @@ import api.buyhood.domain.product.repository.ProductRepository;
 import api.buyhood.domain.product.service.ProductService;
 import api.buyhood.domain.store.entity.Store;
 import api.buyhood.domain.store.repository.StoreRepository;
+import api.buyhood.domain.user.entity.User;
+import api.buyhood.domain.user.repository.UserRepository;
 import api.buyhood.global.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,7 @@ import java.util.stream.Collectors;
 
 import static api.buyhood.global.common.exception.enums.CartErrorCode.NOT_FOUND_CART;
 import static api.buyhood.global.common.exception.enums.StoreErrorCode.NOT_FOUND_STORE;
+import static api.buyhood.global.common.exception.enums.UserErrorCode.USER_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -34,11 +37,15 @@ public class OrderService {
     private final ProductRepository productRepository;
     private final ProductService productService;
     private final StoreRepository storeRepository;
+    private final UserRepository userRepository;
 
     @Transactional
     public CreateOrderRes createOrder(CreateOrderReq createOrderReq)  {
 
         Long userId = 1L;
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
 
         Store store = storeRepository.findById(createOrderReq.getStoreId())
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_STORE));
@@ -56,7 +63,7 @@ public class OrderService {
         Map<Long, Product> productMap = productRepository.findAllById(productIdList).stream()
                 .collect(Collectors.toMap(Product::getId, p -> p));
 
-        Order order = Order.of(store, createOrderReq.getPaymentMethod(), getTotalPrice(productMap, cart.getCart()), createOrderReq.getPickupAt());
+        Order order = Order.of(store, user, createOrderReq.getPaymentMethod(), getTotalPrice(productMap, cart.getCart()), createOrderReq.getPickupAt());
         orderRepository.save(order);
         orderHistoryService.saveOrderHistory(order, cart, productMap);
 
