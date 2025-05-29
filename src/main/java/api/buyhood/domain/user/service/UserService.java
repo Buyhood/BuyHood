@@ -63,7 +63,7 @@ public class UserService {
 		findUser.markDeleted();
 	}
 
-	public void validateOldPassword(String rawPassword, String encodedPassword) {
+	private void validateOldPassword(String rawPassword, String encodedPassword) {
 		if (!passwordEncoder.matches(rawPassword, encodedPassword)) {
 			throw new InvalidRequestException(UserErrorCode.INVALID_PASSWORD);
 		}
