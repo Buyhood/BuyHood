@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -71,5 +72,10 @@ public class ProductController {
 			request.getDescription(),
 			request.getStock()
 		);
+	}
+
+	@DeleteMapping("/v1/products/{productId}")
+	public void deleteProduct(@PathVariable Long productId) {
+		productService.deleteProduct(productId);
 	}
 }
