@@ -1,21 +1,27 @@
 package api.buyhood.domain.user.service;
 
+import api.buyhood.domain.auth.entity.AuthUser;
+import api.buyhood.domain.user.dto.req.ChangePasswordReq;
 import api.buyhood.domain.user.dto.res.GetUserRes;
 import api.buyhood.domain.user.entity.User;
 import api.buyhood.domain.user.repository.UserRepository;
+import api.buyhood.global.common.exception.InvalidRequestException;
 import api.buyhood.global.common.exception.NotFoundException;
 import api.buyhood.global.common.exception.enums.UserErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
 	private final UserRepository userRepository;
+	private final PasswordEncoder passwordEncoder;
 
 	//단건 조회
 	@Transactional(readOnly = true)
@@ -32,4 +38,24 @@ public class UserService {
 		Page<User> users = userRepository.findAllActiveUsers(PageRequest.of(page, size));
 		return users.map(GetUserRes::of);
 	}
+
+	//비밀번호 변경
+	@Transactional
+	public void changePassword(AuthUser authUser, ChangePasswordReq changePasswordReq) {
+		User user = userRepository.findByEmail(authUser.getEmail())
+			.orElseThrow(() -> new NotFoundException(UserErrorCode.USER_NOT_FOUND));
+
+		validateOldPassword(changePasswordReq.getOldPassword(), user.getPassword());
+		if (passwordEncoder.matches(changePasswordReq.getNewPassword(), user.getPassword())) {
+			throw new InvalidRequestException(UserErrorCode.PASSWORD_SAME_AS_OLD);
+		}
+		user.changePassword(passwordEncoder.encode(changePasswordReq.getNewPassword()));
+	}
+
+	private void validateOldPassword(String rawPassword, String encodedPassword) {
+		if (!passwordEncoder.matches(rawPassword, encodedPassword)) {
+			throw new InvalidRequestException(UserErrorCode.INVALID_PASSWORD);
+		}
+	}
+
 }
