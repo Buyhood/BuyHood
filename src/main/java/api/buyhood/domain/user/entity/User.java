@@ -58,4 +58,13 @@ public class User extends BaseTimeEntity {
 	public void deleteUser() {
 		this.markDeleted();
 	}
+
+	public void patchUser(String username, String address) {
+		if (username != null) {
+			this.username = username;
+		}
+		if (address != null) {
+			this.address = address;
+		}
+	}
 }
