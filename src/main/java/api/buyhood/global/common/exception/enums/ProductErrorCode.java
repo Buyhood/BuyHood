@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum ProductErrorCode implements ErrorCode {
 
+	PRODUCT_NOT_FOUND(2100, "상품을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 	;
 
 	private final int code;
