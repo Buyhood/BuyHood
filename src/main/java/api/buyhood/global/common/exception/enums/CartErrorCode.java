@@ -8,7 +8,8 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum CartErrorCode implements ErrorCode {
 
-	DUPLICATE_CART(1400, "중복된 카트 입니다.", HttpStatus.CONFLICT);
+	NOT_FOUND_CART(3000, "카트가 존재하지 않습니다.", HttpStatus.NOT_FOUND),
+	DUPLICATE_CART(3100, "중복된 카트 입니다.", HttpStatus.CONFLICT);
 
 	private final int code;
 	private final String message;

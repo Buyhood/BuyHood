@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.Duration;
 
+import static api.buyhood.global.common.exception.enums.CommonErrorCode.JSON_PARSING_FAILED;
 import static api.buyhood.global.common.exception.enums.CommonErrorCode.REDIS_SERIALIZE_FAILED;
 
 @Repository
@@ -34,4 +35,28 @@ public class CartRepository {
             throw new InvalidRequestException(REDIS_SERIALIZE_FAILED);
         }
     }
+
+    //장바구니 조회
+    public Cart findCart(Long userId) {
+        String value = (String) redisTemplate.opsForValue().get(CART_KEY_PREFIX + userId);
+
+        try {
+            return objectMapper.readValue(value, Cart.class);
+        } catch (JsonProcessingException e) {
+            log.error("Failed to serialize {}: {}", userId, value, e);
+            throw new InvalidRequestException(JSON_PARSING_FAILED);
+        }
+
+    }
+
+    //장바구니 비우기
+    public void clearCart(Long userId) {
+        redisTemplate.delete(CART_KEY_PREFIX + userId);
+    }
+
+    //장바구니 존재 여부 확인
+    public boolean existsCart(Long userId) {
+        return redisTemplate.hasKey(CART_KEY_PREFIX + userId);
+    }
+
 }
