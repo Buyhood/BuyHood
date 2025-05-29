@@ -3,7 +3,9 @@ package api.buyhood.domain.user.controller;
 import api.buyhood.domain.auth.entity.AuthUser;
 import api.buyhood.domain.user.dto.req.ChangePasswordReq;
 import api.buyhood.domain.user.dto.req.DeleteUserReq;
+import api.buyhood.domain.user.dto.req.PatchUserReq;
 import api.buyhood.domain.user.dto.res.GetUserRes;
+import api.buyhood.domain.user.dto.res.PatchUserRes;
 import api.buyhood.domain.user.service.UserService;
 import api.buyhood.global.common.dto.Response;
 import jakarta.validation.Valid;
@@ -45,7 +47,7 @@ public class UserController {
 	}
 
 	//비밀번호 변경
-	@PatchMapping("/v1/users")
+	@PatchMapping("/v1/users/password")
 	public Response<String> changePassword(
 		@AuthenticationPrincipal AuthUser authUser,
 		@RequestBody @Valid ChangePasswordReq req) {
@@ -55,6 +57,14 @@ public class UserController {
 	}
 
 	//유저 정보 변경
+	@PatchMapping("/v1/users")
+	public Response<PatchUserRes> patchUser(
+		@AuthenticationPrincipal AuthUser authUser,
+		@RequestBody @Valid PatchUserReq req
+	) {
+		PatchUserRes patchUserRes = userService.patchUser(authUser, req);
+		return Response.ok(patchUserRes);
+	}
 
 	//유저 삭제
 	@DeleteMapping("/v1/users")

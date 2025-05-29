@@ -3,7 +3,9 @@ package api.buyhood.domain.user.service;
 import api.buyhood.domain.auth.entity.AuthUser;
 import api.buyhood.domain.user.dto.req.ChangePasswordReq;
 import api.buyhood.domain.user.dto.req.DeleteUserReq;
+import api.buyhood.domain.user.dto.req.PatchUserReq;
 import api.buyhood.domain.user.dto.res.GetUserRes;
+import api.buyhood.domain.user.dto.res.PatchUserRes;
 import api.buyhood.domain.user.entity.User;
 import api.buyhood.domain.user.repository.UserRepository;
 import api.buyhood.global.common.exception.InvalidRequestException;
@@ -53,6 +55,17 @@ public class UserService {
 		user.changePassword(passwordEncoder.encode(changePasswordReq.getNewPassword()));
 	}
 
+	//회원 정보 변경
+	@Transactional
+	public PatchUserRes patchUser(AuthUser authUser, PatchUserReq patchUserReq) {
+		User user = userRepository.findByEmail(authUser.getEmail())
+			.orElseThrow(() -> new NotFoundException(UserErrorCode.USER_NOT_FOUND));
+
+		user.patchUser(patchUserReq.getUsername(), patchUserReq.getAddress());
+
+		return PatchUserRes.of(user);
+	}
+
 	//회원탈퇴
 	@Transactional
 	public void deleteUser(AuthUser authUser, DeleteUserReq deleteUserReq) {
@@ -60,7 +73,7 @@ public class UserService {
 			.orElseThrow(() -> new NotFoundException(UserErrorCode.USER_NOT_FOUND));
 
 		validateOldPassword(deleteUserReq.getPassword(), findUser.getPassword());
-		findUser.markDeleted();
+		findUser.deleteUser();
 	}
 
 	private void validateOldPassword(String rawPassword, String encodedPassword) {
