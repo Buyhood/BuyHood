@@ -48,6 +48,7 @@ public class AuthService {
 
 		String accessToken = jwtUtil.createToken(
 			savedUser.getUsername(),
+			savedUser.getId(),
 			savedUser.getEmail(),
 			savedUser.getRole());
 
@@ -63,6 +64,7 @@ public class AuthService {
 
 		String accessToken = jwtUtil.createToken(
 			user.getUsername(),
+			user.getId(),
 			user.getEmail(),
 			user.getRole());
 

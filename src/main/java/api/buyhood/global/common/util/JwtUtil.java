@@ -33,11 +33,12 @@ public class JwtUtil {
 		key = Keys.hmacShaKeyFor(bytes); // HS256 자동 인식
 	}
 
-	public String createToken(String username, String email, UserRole role) {
+	public String createToken(String username, Long userId, String email, UserRole role) {
 		Date now = new Date();
 
 		return Jwts.builder()
 			.subject(email)
+			.claim("userId", userId)
 			.claim("username", username)
 			.claim("role", role.toString())
 			.expiration(new Date(System.currentTimeMillis() + TOKEN_EXPIRATION_TIME))
