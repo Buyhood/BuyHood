@@ -129,6 +129,13 @@ public class ProductService {
 	}
 
 	@Transactional
+	public void deleteProduct(Long productId) {
+		Product getProduct = productRepository.findById(productId)
+			.orElseThrow(() -> new NotFoundException(ProductErrorCode.PRODUCT_NOT_FOUND));
+		productRepository.delete(getProduct);
+	}
+
+	@Transactional
 	public void decreaseStock(Cart cart, Map<Long, Product> productMap) {
 		for (CartItem cartItem : cart.getCart()) {
 			Product product = productMap.get(cartItem.getProductId());
