@@ -62,7 +62,7 @@ public class UserService {
 	@Transactional
 	public PatchUserRes patchUser(AuthUser authUser, PatchUserReq patchUserReq) {
 		User user = userRepository.findByEmail(authUser.getEmail())
-			.orElseThrow(() -> new NotFoundException(UserErrorCode.USER_NOT_FOUND));
+			.orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
 
 		user.patchUser(patchUserReq.getUsername(), patchUserReq.getAddress());
 
@@ -73,7 +73,7 @@ public class UserService {
 	@Transactional
 	public void deleteUser(AuthUser authUser, DeleteUserReq deleteUserReq) {
 		User findUser = userRepository.findByEmail(authUser.getEmail())
-			.orElseThrow(() -> new NotFoundException(UserErrorCode.USER_NOT_FOUND));
+			.orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
 
 		validateOldPassword(deleteUserReq.getPassword(), findUser.getPassword());
 		findUser.deleteUser();
