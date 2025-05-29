@@ -1,9 +1,12 @@
 package api.buyhood.domain.auth.service;
 
 import api.buyhood.domain.auth.dto.req.SignInUserReq;
+import api.buyhood.domain.auth.dto.req.SignupSellerReq;
 import api.buyhood.domain.auth.dto.req.SignupUserReq;
 import api.buyhood.domain.auth.dto.res.SignInUserRes;
+import api.buyhood.domain.auth.dto.res.SignupSellerRes;
 import api.buyhood.domain.auth.dto.res.SignupUserRes;
+import api.buyhood.domain.seller.entity.Seller;
 import api.buyhood.domain.seller.repository.SellerRepository;
 import api.buyhood.domain.user.entity.User;
 import api.buyhood.domain.user.repository.UserRepository;
@@ -47,7 +50,7 @@ public class AuthService {
 		User savedUser = userRepository.save(newUser);
 
 		String accessToken = jwtUtil.createToken(
-			savedUser.getUsername(),
+			savedUser.getId(),
 			savedUser.getEmail(),
 			savedUser.getRole());
 
@@ -62,10 +65,39 @@ public class AuthService {
 			.orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
 
 		String accessToken = jwtUtil.createToken(
-			user.getUsername(),
+			user.getId(),
 			user.getEmail(),
 			user.getRole());
 
 		return new SignInUserRes(accessToken);
+	}
+
+	@Transactional
+	public SignupSellerRes signUpSeller(
+		SignupSellerReq signupSellerReq
+	) {
+		if (sellerRepository.existsByEmail(signupSellerReq.getEmail())) {
+			throw new ConflictException(EMAIL_DUPLICATED);
+		}
+
+		String encodedPassword = passwordEncoder.encode(signupSellerReq.getPassword());
+
+		Seller newSeller = Seller.builder()
+			.email(signupSellerReq.getEmail())
+			.password(encodedPassword)
+			.businessName(signupSellerReq.getBusinessName())
+			.businessNumber(String.valueOf(signupSellerReq.getBusinessNumber()))
+			.businessAddress(signupSellerReq.getBusinessAddress())
+			.username(signupSellerReq.getUsername())
+			.build();
+
+		Seller savedSeller = sellerRepository.save(newSeller);
+
+		String accessToken = jwtUtil.createToken(
+			savedSeller.getId(),
+			savedSeller.getEmail(),
+			savedSeller.getRole());
+
+		return new SignupSellerRes(accessToken);
 	}
 }
