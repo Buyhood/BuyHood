@@ -1,7 +1,7 @@
 package api.buyhood.domain.product.service;
 
-import api.buyhood.domain.product.dto.response.GetProductRes;
-import api.buyhood.domain.product.dto.response.PageProductRes;
+import api.buyhood.domain.cart.entity.Cart;
+import api.buyhood.domain.cart.entity.CartItem;
 import api.buyhood.domain.product.dto.response.RegisteringProductRes;
 import api.buyhood.domain.product.entity.Category;
 import api.buyhood.domain.product.entity.Product;
@@ -9,14 +9,11 @@ import api.buyhood.domain.product.repository.CategoryRepository;
 import api.buyhood.domain.product.repository.ProductRepository;
 import api.buyhood.global.common.exception.NotFoundException;
 import api.buyhood.global.common.exception.enums.CategoryErrorCode;
-import api.buyhood.global.common.exception.enums.ProductErrorCode;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -74,4 +71,12 @@ public class ProductService {
 		Page<Product> productPage = productRepository.findByKeyword(keyword, pageRequest);
 		return PageProductRes.of(productPage);
 	}
+
+    @Transactional
+    public void decreaseStock(Cart cart, Map<Long, Product> productMap) {
+        for (CartItem cartItem : cart.getCart()) {
+            Product product = productMap.get(cartItem.getProductId());
+            product.decreaseStock(cartItem.getQuantity());
+        }
+    }
 }
