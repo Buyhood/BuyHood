@@ -51,7 +51,7 @@ public class UserService {
 		User user = userRepository.findByEmail(authUser.getEmail())
 			.orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
 
-		validateOldPassword(changePasswordReq.getOldPassword(), user.getPassword());
+		validatePassword(changePasswordReq.getOldPassword(), user.getPassword());
 		if (passwordEncoder.matches(changePasswordReq.getNewPassword(), user.getPassword())) {
 			throw new InvalidRequestException(PASSWORD_SAME_AS_OLD);
 		}
@@ -75,11 +75,11 @@ public class UserService {
 		User findUser = userRepository.findByEmail(authUser.getEmail())
 			.orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
 
-		validateOldPassword(deleteUserReq.getPassword(), findUser.getPassword());
+		validatePassword(deleteUserReq.getPassword(), findUser.getPassword());
 		findUser.deleteUser();
 	}
 
-	private void validateOldPassword(String rawPassword, String encodedPassword) {
+	private void validatePassword(String rawPassword, String encodedPassword) {
 		if (!passwordEncoder.matches(rawPassword, encodedPassword)) {
 			throw new InvalidRequestException(USER_INVALID_PASSWORD);
 		}
