@@ -37,6 +37,7 @@ public class AuthService {
 	private final PasswordEncoder passwordEncoder;
 	private final JwtUtil jwtUtil;
 
+	//유저회원가입
 	@Transactional
 	public SignupUserRes signUpUser(
 		SignupUserReq signupUserReq
@@ -50,8 +51,9 @@ public class AuthService {
 		User newUser = User.builder()
 			.email(signupUserReq.getEmail())
 			.password(encodedPassword)
-			.address(signupUserReq.getAddress())
 			.username(signupUserReq.getUsername())
+			.phoneNumber(signupUserReq.getPhoneNumber())
+			.address(signupUserReq.getAddress())
 			.build();
 
 		User savedUser = userRepository.save(newUser);
@@ -85,21 +87,20 @@ public class AuthService {
 
 	@Transactional
 	public SignupSellerRes signUpSeller(
-		SignupSellerReq signupSellerReq
+		SignupSellerReq req
 	) {
-		if (sellerRepository.existsByEmail(signupSellerReq.getEmail())) {
+		if (sellerRepository.existsByEmail(req.getEmail())) {
 			throw new ConflictException(SELLER_EMAIL_DUPLICATED);
 		}
 
-		String encodedPassword = passwordEncoder.encode(signupSellerReq.getPassword());
+		String encodedPassword = passwordEncoder.encode(req.getPassword());
 
 		Seller newSeller = Seller.builder()
-			.email(signupSellerReq.getEmail())
+			.email(req.getEmail())
 			.password(encodedPassword)
-			.businessName(signupSellerReq.getBusinessName())
-			.businessNumber(String.valueOf(signupSellerReq.getBusinessNumber()))
-			.businessAddress(signupSellerReq.getBusinessAddress())
-			.username(signupSellerReq.getUsername())
+			.username(req.getUsername())
+			.businessNumber(req.getBusinessNumber())
+			.phoneNumber(req.getPhoneNumber())
 			.build();
 
 		Seller savedSeller = sellerRepository.save(newSeller);

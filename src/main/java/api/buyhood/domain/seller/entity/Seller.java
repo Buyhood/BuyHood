@@ -39,34 +39,29 @@ public class Seller extends BaseTimeEntity {
 	private String businessNumber;
 
 	@Column(nullable = false)
-	private String businessName;
-
-	@Column(nullable = false)
-	private String businessAddress;
+	private String phoneNumber;
 
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
 	private UserRole role;
 
 	@Builder
-	public Seller(
-		String username,
-		String email,
-		String password,
-		String businessNumber,
-		String businessName,
-		String businessAddress
+	public Seller(String username, String email, String password, String businessNumber, String phoneNumber
 	) {
 		this.username = username;
 		this.email = email;
 		this.password = password;
 		this.businessNumber = businessNumber;
-		this.businessName = businessName;
-		this.businessAddress = businessAddress;
+		this.phoneNumber = phoneNumber;
 		this.role = UserRole.SELLER;
+	}
+
+	public void changePassword(String encodedPassword) {
+		this.password = encodedPassword;
 	}
 
 	public void deleteSeller() {
 		this.markDeleted();
 	}
+
 }

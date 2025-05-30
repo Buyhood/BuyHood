@@ -1,7 +1,7 @@
 package api.buyhood.domain.user.controller;
 
 import api.buyhood.domain.auth.entity.AuthUser;
-import api.buyhood.domain.user.dto.req.ChangePasswordReq;
+import api.buyhood.domain.user.dto.req.ChangeUserPasswordReq;
 import api.buyhood.domain.user.dto.req.DeleteUserReq;
 import api.buyhood.domain.user.dto.req.PatchUserReq;
 import api.buyhood.domain.user.dto.res.GetUserRes;
@@ -50,7 +50,7 @@ public class UserController {
 	@PatchMapping("/v1/users/password")
 	public Response<String> changePassword(
 		@AuthenticationPrincipal AuthUser authUser,
-		@RequestBody @Valid ChangePasswordReq req) {
+		@RequestBody @Valid ChangeUserPasswordReq req) {
 		userService.changePassword(authUser, req);
 
 		return Response.ok("비밀번호 변경에 성공했습니다.");

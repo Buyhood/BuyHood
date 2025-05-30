@@ -1,6 +1,7 @@
 package api.buyhood.domain.seller.service;
 
 import api.buyhood.domain.auth.entity.AuthUser;
+import api.buyhood.domain.seller.dto.req.ChangeSellerPasswordReq;
 import api.buyhood.domain.seller.dto.req.DeleteSellerReq;
 import api.buyhood.domain.seller.dto.res.GetSellerRes;
 import api.buyhood.domain.seller.entity.Seller;
@@ -15,7 +16,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static api.buyhood.global.common.exception.enums.SellerErrorCode.SELLER_NOT_FOUND;
+import static api.buyhood.global.common.exception.enums.UserErrorCode.PASSWORD_SAME_AS_OLD;
 import static api.buyhood.global.common.exception.enums.UserErrorCode.USER_INVALID_PASSWORD;
+import static api.buyhood.global.common.exception.enums.UserErrorCode.USER_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -49,6 +52,19 @@ public class SellerService {
 		validatePassword(req.getPassword(), findSeller.getPassword());
 		findSeller.deleteSeller();
 
+	}
+
+	//비밀번호 변경
+	@Transactional
+	public void changePassword(AuthUser authUser, ChangeSellerPasswordReq req) {
+		Seller seller = sellerRepository.findByEmail(authUser.getEmail())
+			.orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
+
+		validatePassword(req.getOldPassword(), seller.getPassword());
+		if (passwordEncoder.matches(req.getNewPassword(), seller.getPassword())) {
+			throw new InvalidRequestException(PASSWORD_SAME_AS_OLD);
+		}
+		seller.changePassword(passwordEncoder.encode(req.getNewPassword()));
 	}
 
 	private void validatePassword(String rawPassword, String encodedPassword) {
