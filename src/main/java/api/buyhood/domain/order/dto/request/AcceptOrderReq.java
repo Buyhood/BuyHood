@@ -8,6 +8,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AcceptOrderReq {
 
-	private LocalTime readyAt;
+	private final LocalTime readyAt;
 
 }
