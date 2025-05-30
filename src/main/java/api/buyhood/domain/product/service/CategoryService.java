@@ -32,13 +32,18 @@ public class CategoryService {
 	@Transactional
 	public CreateCategoryRes createCategory(Long parentId, String categoryName) {
 		Category parent = null;
+
 		if (parentId != null && parentId != 0) {
 			parent = categoryRepository.findById(parentId)
 				.orElseThrow(() -> new NotFoundException(CategoryErrorCode.CATEGORY_NOT_FOUND));
-		}
 
-		if (categoryRepository.existsByParentIdAndName(parentId, categoryName)) {
-			throw new InvalidRequestException(CategoryErrorCode.DUPLICATE_CATEGORIES);
+			if (categoryRepository.existsByParentIdAndName(parentId, categoryName)) {
+				throw new ConflictException(CategoryErrorCode.DUPLICATE_CATEGORIES);
+			}
+		} else {
+			if (categoryRepository.existsByParentIsNullAndName(categoryName)) {
+				throw new ConflictException(CategoryErrorCode.DUPLICATE_CATEGORIES);
+			}
 		}
 
 		int depth = parent == null ? 0 : parent.getDepth() + 1;
@@ -104,13 +109,20 @@ public class CategoryService {
 		Category getCategory = categoryRepository.findById(categoryId)
 			.orElseThrow(() -> new NotFoundException(CategoryErrorCode.CATEGORY_NOT_FOUND));
 
-		if (categoryRepository.existsByParentIdAndName(getCategory.getParent().getId(), newCategoryName)) {
-			throw new ConflictException(CategoryErrorCode.DUPLICATE_CATEGORIES);
-		}
-
 		if (getCategory.getName().equalsIgnoreCase(newCategoryName)) {
 			throw new InvalidRequestException(CategoryErrorCode.CATEGORY_NAME_SAME_AS_OLD);
 		}
+
+		if (getCategory.getParent() != null) {
+			if (categoryRepository.existsByParentIdAndName(getCategory.getParent().getId(), newCategoryName)) {
+				throw new ConflictException(CategoryErrorCode.DUPLICATE_CATEGORIES);
+			}
+		} else {
+			if (categoryRepository.existsByParentIsNullAndName(newCategoryName)) {
+				throw new ConflictException(CategoryErrorCode.DUPLICATE_CATEGORIES);
+			}
+		}
+
 		getCategory.patchCategory(newCategoryName);
 	}
 

@@ -9,15 +9,12 @@ import org.springframework.data.repository.query.Param;
 
 public interface CategoryRepository extends JpaRepository<Category, Long> {
 
-	@Query(
-		"select count(*) > 0 "
-			+ "from Category c "
-			+ "where c.name = :categoryName "
-			+ "and ((:parentId = 0 and c.parent is null) "
-			+ "or (c.parent.id = :parentId))")
+	@Query("select count(c) > 0 from Category c where c.name = :categoryName and c.parent.id = :parentId")
 	boolean existsByParentIdAndName(@Param("parentId") Long parentId, @Param("categoryName") String categoryName);
 
 	@Query("select c from Category c where c.depth = :depth")
 	Page<Category> getCategoriesByDepth(@Param("depth") int depth, Pageable pageable);
 
+	@Query("select count(c) > 0 from Category c where c.parent.id is null and c.name = :newCategoryName")
+	boolean existsByParentIsNullAndName(String newCategoryName);
 }

@@ -37,6 +37,9 @@ public class SecurityConfig {
 				.requestMatchers("/api/v1/auth/**", "/error").permitAll()
 				.anyRequest().authenticated()
 			)
+//			.authorizeHttpRequests(auth -> auth
+//				.anyRequest().permitAll()
+//			)
 			.formLogin(AbstractHttpConfigurer::disable)
 			.anonymous(AbstractHttpConfigurer::disable)
 			.httpBasic(AbstractHttpConfigurer::disable)
