@@ -50,8 +50,21 @@ public class User extends BaseTimeEntity {
 		this.role = UserRole.USER;
 		this.address = address;
 	}
-	
+
 	public void changePassword(String encodedPassword) {
 		this.password = encodedPassword;
+	}
+
+	public void deleteUser() {
+		this.markDeleted();
+	}
+
+	public void patchUser(String username, String address) {
+		if (username != null) {
+			this.username = username;
+		}
+		if (address != null) {
+			this.address = address;
+		}
 	}
 }

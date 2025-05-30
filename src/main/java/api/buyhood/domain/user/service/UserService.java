@@ -2,7 +2,10 @@ package api.buyhood.domain.user.service;
 
 import api.buyhood.domain.auth.entity.AuthUser;
 import api.buyhood.domain.user.dto.req.ChangePasswordReq;
+import api.buyhood.domain.user.dto.req.DeleteUserReq;
+import api.buyhood.domain.user.dto.req.PatchUserReq;
 import api.buyhood.domain.user.dto.res.GetUserRes;
+import api.buyhood.domain.user.dto.res.PatchUserRes;
 import api.buyhood.domain.user.entity.User;
 import api.buyhood.domain.user.repository.UserRepository;
 import api.buyhood.global.common.exception.InvalidRequestException;
@@ -48,14 +51,35 @@ public class UserService {
 		User user = userRepository.findByEmail(authUser.getEmail())
 			.orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
 
-		validateOldPassword(changePasswordReq.getOldPassword(), user.getPassword());
+		validatePassword(changePasswordReq.getOldPassword(), user.getPassword());
 		if (passwordEncoder.matches(changePasswordReq.getNewPassword(), user.getPassword())) {
 			throw new InvalidRequestException(PASSWORD_SAME_AS_OLD);
 		}
 		user.changePassword(passwordEncoder.encode(changePasswordReq.getNewPassword()));
 	}
 
-	private void validateOldPassword(String rawPassword, String encodedPassword) {
+	//회원 정보 변경
+	@Transactional
+	public PatchUserRes patchUser(AuthUser authUser, PatchUserReq patchUserReq) {
+		User user = userRepository.findByEmail(authUser.getEmail())
+			.orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
+
+		user.patchUser(patchUserReq.getUsername(), patchUserReq.getAddress());
+
+		return PatchUserRes.of(user);
+	}
+
+	//회원탈퇴
+	@Transactional
+	public void deleteUser(AuthUser authUser, DeleteUserReq deleteUserReq) {
+		User findUser = userRepository.findByEmail(authUser.getEmail())
+			.orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
+
+		validatePassword(deleteUserReq.getPassword(), findUser.getPassword());
+		findUser.deleteUser();
+	}
+
+	private void validatePassword(String rawPassword, String encodedPassword) {
 		if (!passwordEncoder.matches(rawPassword, encodedPassword)) {
 			throw new InvalidRequestException(USER_INVALID_PASSWORD);
 		}
