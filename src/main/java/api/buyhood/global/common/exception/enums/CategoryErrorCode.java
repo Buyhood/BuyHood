@@ -9,8 +9,10 @@ import org.springframework.http.HttpStatus;
 public enum CategoryErrorCode implements ErrorCode {
 
 	MAX_DEPTH_OVER(1401, "더 이상 하위 카테고리를 만들 수 없습니다.", HttpStatus.BAD_REQUEST),
+	CATEGORY_NAME_SAME_AS_OLD(1402, "카테고리 이름이 이전과 동일합니다.", HttpStatus.BAD_REQUEST),
 	CATEGORY_NOT_FOUND(1440, "카테고리를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
-	DUPLICATE_CATEGORIES(1490, "중복된 카테고리 입니다.", HttpStatus.CONFLICT);
+	DUPLICATE_CATEGORIES(1490, "중복된 카테고리 입니다.", HttpStatus.CONFLICT),
+	;
 
 	private final int code;
 	private final String message;

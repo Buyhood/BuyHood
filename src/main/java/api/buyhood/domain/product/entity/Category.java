@@ -13,7 +13,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import jakarta.validation.constraints.Min;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -40,7 +39,6 @@ public class Category extends BaseTimeEntity {
 	private String name;
 
 	@Column(nullable = false)
-	@Min(0)
 	private int depth;
 
 	@ManyToOne(fetch = FetchType.LAZY)

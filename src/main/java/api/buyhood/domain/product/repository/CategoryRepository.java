@@ -15,7 +15,7 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 			+ "where c.name = :categoryName "
 			+ "and ((:parentId = 0 and c.parent is null) "
 			+ "or (c.parent.id = :parentId))")
-	boolean existsByParentIdAndName(@Param("categoryName") String categoryName, @Param("parentId") Long parentId);
+	boolean existsByParentIdAndName(@Param("parentId") Long parentId, @Param("categoryName") String categoryName);
 
 	@Query("select c from Category c where c.depth = :depth")
 	Page<Category> getCategoriesByDepth(@Param("depth") int depth, Pageable pageable);

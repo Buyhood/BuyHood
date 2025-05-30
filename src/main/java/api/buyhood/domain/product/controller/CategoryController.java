@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -28,24 +29,28 @@ public class CategoryController {
 
 	private final CategoryService categoryService;
 
+	@Secured("ROLE_SELLER")
 	@PostMapping("/v1/categories")
 	public Response<CreateCategoryRes> createCategories(@Valid @RequestBody CreateCategoryReq request) {
-		CreateCategoryRes response = categoryService.createCategory(request.getCategoryName(), request.getParentId());
+		CreateCategoryRes response = categoryService.createCategory(request.getParentId(), request.getCategoryName());
 		return Response.ok(response);
 	}
 
+	@Secured("ROLE_SELLER")
 	@GetMapping("/v1/categories/{categoryId}")
 	public Response<GetCategoryRes> getCategory(@PathVariable Long categoryId) {
 		GetCategoryRes response = categoryService.getCategory(categoryId);
 		return Response.ok(response);
 	}
 
+	@Secured("ROLE_SELLER")
 	@GetMapping("/v1/categories")
 	public Response<Page<PageCategoryRes>> getAllCategories(@PageableDefault Pageable pageable) {
 		Page<PageCategoryRes> response = categoryService.getAllCategories(pageable);
 		return Response.ok(response);
 	}
 
+	@Secured("ROLE_SELLER")
 	@GetMapping("/v1/categories/depth/{depth}")
 	public Response<Page<PageCategoryRes>> getDepthCategories(
 		@PathVariable int depth,
@@ -55,6 +60,7 @@ public class CategoryController {
 		return Response.ok(response);
 	}
 
+	@Secured("ROLE_SELLER")
 	@PatchMapping("/v1/categories/{categoryId}")
 	public void patchCategory(
 		@PathVariable Long categoryId,
@@ -63,9 +69,10 @@ public class CategoryController {
 		categoryService.patchCategory(categoryId, request.getNewCategoryName());
 	}
 
+	@Secured("ROLE_SELLER")
 	@DeleteMapping("/v1/categories/{categoryId}")
 	public void deleteCategory(@PathVariable Long categoryId) {
 		categoryService.deleteCategory(categoryId);
 	}
-	
+
 }
