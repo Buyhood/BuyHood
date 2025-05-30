@@ -1,8 +1,11 @@
 package api.buyhood.domain.seller.service;
 
+import api.buyhood.domain.auth.entity.AuthUser;
+import api.buyhood.domain.seller.dto.req.DeleteSellerReq;
 import api.buyhood.domain.seller.dto.res.GetSellerRes;
 import api.buyhood.domain.seller.entity.Seller;
 import api.buyhood.domain.seller.repository.SellerRepository;
+import api.buyhood.global.common.exception.InvalidRequestException;
 import api.buyhood.global.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -12,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static api.buyhood.global.common.exception.enums.SellerErrorCode.SELLER_NOT_FOUND;
+import static api.buyhood.global.common.exception.enums.UserErrorCode.USER_INVALID_PASSWORD;
 
 @Service
 @RequiredArgsConstructor
@@ -34,5 +38,22 @@ public class SellerService {
 	public Page<GetSellerRes> getAllSellers(int page, int size) {
 		Page<Seller> sellers = sellerRepository.findAllActiveSellers(PageRequest.of(page, size));
 		return sellers.map(GetSellerRes::of);
+	}
+
+	//회원 탈퇴
+	@Transactional
+	public void deleteSeller(AuthUser authUser, DeleteSellerReq req) {
+		Seller findSeller = sellerRepository.findByEmail(authUser.getEmail())
+			.orElseThrow(() -> new NotFoundException(SELLER_NOT_FOUND));
+
+		validatePassword(req.getPassword(), findSeller.getPassword());
+		findSeller.deleteSeller();
+
+	}
+
+	private void validatePassword(String rawPassword, String encodedPassword) {
+		if (!passwordEncoder.matches(rawPassword, encodedPassword)) {
+			throw new InvalidRequestException(USER_INVALID_PASSWORD);
+		}
 	}
 }

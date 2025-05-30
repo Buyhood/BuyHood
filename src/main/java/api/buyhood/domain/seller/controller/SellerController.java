@@ -1,12 +1,18 @@
 package api.buyhood.domain.seller.controller;
 
+import api.buyhood.domain.auth.entity.AuthUser;
+import api.buyhood.domain.seller.dto.req.DeleteSellerReq;
 import api.buyhood.domain.seller.dto.res.GetSellerRes;
 import api.buyhood.domain.seller.service.SellerService;
 import api.buyhood.global.common.dto.Response;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,5 +40,15 @@ public class SellerController {
 		Page<GetSellerRes> res = sellerService.getAllSellers(page, size);
 
 		return Response.ok(res);
+	}
+
+	//셀러 탈퇴
+	@DeleteMapping("/v1/sellers")
+	public Response<String> deleteSeller(
+		@AuthenticationPrincipal AuthUser authUser,
+		@RequestBody @Valid DeleteSellerReq req) {
+		sellerService.deleteSeller(authUser, req);
+
+		return Response.ok("회원탈퇴에 성공했습니다.");
 	}
 }
