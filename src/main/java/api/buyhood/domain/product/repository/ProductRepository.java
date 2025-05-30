@@ -13,4 +13,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 		value = "select p from Product p join fetch p.category c where p.name like %:keyword%",
 		countQuery = "select count(p) from Product p where p.name like %:keyword%")
 	Page<Product> findByKeyword(@Param("keyword") String keyword, Pageable pageable);
+
+	@Query("select count(p) > 0 from Product p where p.name = :productName")
+	boolean existsByName(String productName);
 }

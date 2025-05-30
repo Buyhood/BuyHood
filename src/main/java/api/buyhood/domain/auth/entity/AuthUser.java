@@ -17,6 +17,6 @@ public class AuthUser {
 	public AuthUser(Long id, String email, UserRole role) {
 		this.id = id;
 		this.email = email;
-		this.authorities = List.of(new SimpleGrantedAuthority(role.name()));
+		this.authorities = List.of(new SimpleGrantedAuthority(role.getRole()));
 	}
 }
