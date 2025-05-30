@@ -19,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -82,5 +83,52 @@ public class StoreService {
 		Page<Store> storePage = storeRepository.findByKeyword(keyword, pageRequest);
 		return PageStoreRes.of(storePage);
 	}
-	
+
+	@Transactional
+	public void patchStore(
+		Long storeId,
+		String storeName,
+		String address,
+		Long sellerId,
+		String description,
+		LocalTime openedAt,
+		LocalTime closedAt
+	) {
+		Store getStore = storeRepository.findStoreById(storeId)
+			.orElseThrow(() -> new NotFoundException(StoreErrorCode.STORE_NOT_FOUND));
+
+		if (StringUtils.hasText(storeName)) {
+			if (getStore.getName().equalsIgnoreCase(storeName)) {
+				throw new ConflictException(StoreErrorCode.STORE_NAME_SAME_AS_OLD);
+			}
+
+			if (storeRepository.existsByName(storeName)) {
+				throw new ConflictException(StoreErrorCode.DUPLICATE_STORE_NAME);
+			}
+
+			getStore.patchName(storeName);
+		}
+
+		if (StringUtils.hasText(address)) {
+			getStore.patchAddress(address);
+		}
+
+		if (sellerId != null) {
+			Seller getSeller = sellerRepository.findById(sellerId)
+				.orElseThrow(() -> new NotFoundException(SellerErrorCode.SELLER_NOT_FOUND));
+			getStore.patchSeller(getSeller);
+		}
+
+		if (StringUtils.hasText(description)) {
+			getStore.patchDescription(description);
+		}
+
+		if (StringUtils.hasText(String.valueOf(openedAt))) {
+			getStore.patchOpenedAt(openedAt);
+		}
+
+		if (StringUtils.hasText(String.valueOf(closedAt))) {
+			getStore.patchClosedAt(closedAt);
+		}
+	}
 }
