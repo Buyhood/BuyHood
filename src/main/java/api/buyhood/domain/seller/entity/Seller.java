@@ -65,4 +65,8 @@ public class Seller extends BaseTimeEntity {
 		this.businessAddress = businessAddress;
 		this.role = UserRole.SELLER;
 	}
+
+	public void deleteSeller() {
+		this.markDeleted();
+	}
 }
