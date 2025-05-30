@@ -7,15 +7,10 @@ import api.buyhood.domain.cart.entity.CartItem;
 import api.buyhood.domain.cart.repository.CartRepository;
 import api.buyhood.domain.order.dto.request.CreateOrderReq;
 import api.buyhood.domain.order.dto.response.CreateOrderRes;
-import api.buyhood.domain.order.dto.request.OrderReq;
-import api.buyhood.domain.order.dto.response.OrderRes;
-import api.buyhood.domain.order.dto.response.CreateOrderRes;
 import api.buyhood.domain.order.entity.Order;
 import api.buyhood.domain.order.repository.OrderRepository;
 import api.buyhood.domain.product.entity.Product;
 import api.buyhood.domain.product.repository.ProductRepository;
-import api.buyhood.global.common.exception.InvalidRequestException;
-import api.buyhood.global.common.exception.NotFoundException;
 import api.buyhood.domain.product.service.ProductService;
 import api.buyhood.domain.store.entity.Store;
 import api.buyhood.domain.store.repository.StoreRepository;
@@ -26,16 +21,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static api.buyhood.global.common.exception.enums.CartErrorCode.NOT_FOUND_CART;
+import static api.buyhood.global.common.exception.enums.OrderErrorCode.NOT_FOUND_ORDER;
 import static api.buyhood.global.common.exception.enums.ProductErrorCode.PRODUCT_NOT_FOUND;
 import static api.buyhood.global.common.exception.enums.StoreErrorCode.STORE_NOT_FOUND;
 import static api.buyhood.global.common.exception.enums.UserErrorCode.USER_NOT_FOUND;
-import static api.buyhood.global.common.exception.enums.OrderErrorCode.NOT_FOUND_ORDER;
 
 @Service
 @RequiredArgsConstructor
@@ -86,34 +79,20 @@ public class OrderService {
 		return CreateOrderRes.of(order.getStore().getId(), CartRes.of(cart), order.getTotalPrice(),
 			order.getPaymentMethod(), order.getStatus(), order.getPickupAt(), order.getCreatedAt());
 	}
-        return CreateOrderRes.of(CartRes.of(cart),order.getTotalPrice(), order.getPaymentMethod(), order.getStatus(), order.getPickupAt());
-    }
 
-    @Transactional(readOnly = true)
-    public OrderRes findOrder(Long orderId) {
 
-        Order order = orderRepository.findNotDeletedById(orderId)
-                .orElseThrow(() -> new NotFoundException(NOT_FOUND_ORDER));
+	@Transactional
+	public void deleteOrder(AuthUser authUser, Long orderId) {
+		User user = userRepository.findByEmail(authUser.getEmail())
+			.orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
 
-        return OrderRes.of(order);
-    }
+		Order order = orderRepository.findNotDeletedById(orderId)
+			.orElseThrow(() -> new NotFoundException(NOT_FOUND_ORDER));
 
-    @Transactional(readOnly = true)
-    public Page<OrderRes> getOrders(int pageNum, int pageSize) {
-        Page<Order> orderList = orderRepository.findNotDeletedAll(PageRequest.of(pageNum, pageSize));
+		//todo: 주문 취소 가능시간 지정 (배송 및 결제 기능 구현 후 추가)
 
-        return orderList.map(OrderRes::of);
-    }
-
-    @Transactional
-    public void deleteOrder(Long orderId) {
-        Order order = orderRepository.findNotDeletedById(orderId)
-                .orElseThrow(() -> new NotFoundException(NOT_FOUND_ORDER));
-
-        //todo: 주문 취소 가능시간 지정 (배송 및 결제 기능 구현 후 추가)
-
-        order.delete();
-    }
+		order.delete();
+	}
 
 	private long getTotalPrice(Map<Long, Product> productMap, List<CartItem> cartItemList) {
 		long totalPrice = 0L;

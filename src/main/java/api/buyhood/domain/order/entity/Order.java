@@ -55,7 +55,6 @@ public class Order extends BaseTimeEntity {
 	@Column
 	private LocalDateTime pickupAt;
 
-
 	@Builder
 	public Order(Store store, User user, PaymentMethod paymentMethod, long totalPrice, LocalDateTime pickupAt) {
 		this.store = store;
@@ -64,14 +63,6 @@ public class Order extends BaseTimeEntity {
 		this.totalPrice = totalPrice;
 		this.status = OrderStatus.PENDING;
 		this.pickupAt = pickupAt;
-	}
-
-	public static Order of(PaymentMethod paymentMethod, long totalPrice, LocalDateTime pickupAt) {
-		return Order.builder()
-				.paymentMethod(paymentMethod)
-				.totalPrice(totalPrice)
-				.pickupAt(pickupAt)
-				.build();
 	}
 
 	public void delete() {
