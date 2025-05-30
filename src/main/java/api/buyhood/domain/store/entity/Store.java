@@ -63,4 +63,28 @@ public class Store extends BaseTimeEntity {
 		this.openedAt = openedAt;
 		this.closedAt = closedAt;
 	}
+
+	public void patchName(String storeName) {
+		this.name = storeName;
+	}
+
+	public void patchAddress(String address) {
+		this.address = address;
+	}
+
+	public void patchSeller(Seller seller) {
+		this.seller = seller;
+	}
+
+	public void patchDescription(String description) {
+		this.description = description;
+	}
+
+	public void patchOpenedAt(LocalTime openedAt) {
+		this.openedAt = openedAt;
+	}
+
+	public void patchClosedAt(LocalTime closedAt) {
+		this.closedAt = closedAt;
+	}
 }
