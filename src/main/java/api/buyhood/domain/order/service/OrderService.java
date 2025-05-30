@@ -9,6 +9,7 @@ import api.buyhood.domain.order.dto.request.AcceptOrderReq;
 import api.buyhood.domain.order.dto.request.ApplyOrderReq;
 import api.buyhood.domain.order.dto.response.AcceptOrderRes;
 import api.buyhood.domain.order.dto.response.ApplyOrderRes;
+import api.buyhood.domain.order.dto.response.RejectOrderRes;
 import api.buyhood.domain.order.entity.Order;
 import api.buyhood.domain.order.enums.OrderStatus;
 import api.buyhood.domain.order.repository.OrderRepository;
@@ -115,7 +116,26 @@ public class OrderService {
 	}
 
 	//주문 거절
+	@Transactional
+	public RejectOrderRes rejectOrder(Long orderId, AuthUser authUser) {
 
+		Seller seller = sellerRepository.findById(authUser.getId())
+			.orElseThrow(() -> new NotFoundException(SELLER_NOT_FOUND));
+
+		Order order = orderRepository.findById(orderId)
+			.orElseThrow(() -> new NotFoundException(NOT_FOUND_ORDER));
+
+		Long sellerIdInStore = order.getStore().getSeller().getId();
+
+		//셀러 스토어가 같은 업장인지
+		if (!sellerIdInStore.equals(seller.getId())) {
+			throw new ForbiddenException(NOT_OWNER_OF_STORE);
+		}
+
+		order.reject();
+
+		return RejectOrderRes.of(order);
+	}
 
 	@Transactional
 	public void deleteOrder(AuthUser authUser, Long orderId) {

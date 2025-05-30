@@ -5,6 +5,7 @@ import api.buyhood.domain.order.dto.request.AcceptOrderReq;
 import api.buyhood.domain.order.dto.request.ApplyOrderReq;
 import api.buyhood.domain.order.dto.response.AcceptOrderRes;
 import api.buyhood.domain.order.dto.response.ApplyOrderRes;
+import api.buyhood.domain.order.dto.response.RejectOrderRes;
 import api.buyhood.domain.order.service.OrderService;
 import api.buyhood.global.common.dto.Response;
 import jakarta.validation.Valid;
@@ -58,7 +59,16 @@ public class OrderController {
 		AcceptOrderRes res = orderService.acceptOrder(req, orderId, authUser);
 		return Response.ok(res);
 	}
-	//주문 거절
 
+	//주문 거절
+	@Secured("ROLE_SELLER")
+	@PatchMapping("/v1/orders/{orderId}/reject")
+	public Response<RejectOrderRes> rejectOrder(
+		@AuthenticationPrincipal AuthUser authUser,
+		@PathVariable Long orderId
+	) {
+		RejectOrderRes res = orderService.rejectOrder(orderId, authUser);
+		return Response.ok(res);
+	}
 
 }

@@ -77,6 +77,10 @@ public class Order extends BaseTimeEntity {
 		this.readyAt = readyAt;
 	}
 
+	public void reject() {
+		this.status = OrderStatus.REJECTED;
+	}
+
 	public void delete() {
 		markDeleted();
 		this.status = OrderStatus.CANCELED;
