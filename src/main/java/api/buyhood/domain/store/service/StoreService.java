@@ -2,6 +2,8 @@ package api.buyhood.domain.store.service;
 
 import api.buyhood.domain.seller.entity.Seller;
 import api.buyhood.domain.seller.repository.SellerRepository;
+import api.buyhood.domain.store.dto.response.GetStoreRes;
+import api.buyhood.domain.store.dto.response.PageStoreRes;
 import api.buyhood.domain.store.dto.response.RegisteringStoreRes;
 import api.buyhood.domain.store.entity.Store;
 import api.buyhood.domain.store.repository.StoreRepository;
@@ -11,6 +13,10 @@ import api.buyhood.global.common.exception.enums.SellerErrorCode;
 import api.buyhood.global.common.exception.enums.StoreErrorCode;
 import java.time.LocalTime;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,4 +56,31 @@ public class StoreService {
 
 		return RegisteringStoreRes.of(store, getSeller.getId());
 	}
+
+	@Transactional(readOnly = true)
+	public GetStoreRes getStore(Long storeId) {
+		Store getStore = storeRepository.findStoreById(storeId)
+			.orElseThrow(() -> new NotFoundException(StoreErrorCode.STORE_NOT_FOUND));
+
+		return GetStoreRes.of(getStore, getStore.getId());
+	}
+
+	@Transactional(readOnly = true)
+	public Page<PageStoreRes> getAllStore(Pageable pageable) {
+		PageRequest pageRequest =
+			PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Direction.ASC, "name");
+
+		Page<Store> storePage = storeRepository.findFetchAll(pageRequest);
+		return PageStoreRes.of(storePage);
+	}
+
+	@Transactional(readOnly = true)
+	public Page<PageStoreRes> getStoreByKeyword(String keyword, Pageable pageable) {
+		PageRequest pageRequest =
+			PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Direction.ASC, "name");
+
+		Page<Store> storePage = storeRepository.findByKeyword(keyword, pageRequest);
+		return PageStoreRes.of(storePage);
+	}
+	
 }
