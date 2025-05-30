@@ -2,7 +2,15 @@ package api.buyhood.domain.order.entity;
 
 import api.buyhood.domain.product.entity.Product;
 import api.buyhood.global.common.entity.BaseTimeEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,34 +21,28 @@ import lombok.NoArgsConstructor;
 @Table(name = "order_histories")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class OrderHistory extends BaseTimeEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(nullable = false)
-    private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id")
-    private Order order;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(nullable = false)
+	private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id")
-    private Product product;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "order_id")
+	private Order order;
 
-    @Column(nullable = false)
-    private int quantity;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "product_id")
+	private Product product;
 
-    @Builder
-    public OrderHistory (Order order, Product product, int quantity) {
-        this.order = order;
-        this.product = product;
-        this.quantity = quantity;
-    }
+	@Column(nullable = false)
+	private int quantity;
 
-    public static OrderHistory of(Order order, Product product, int quantity) {
-        return OrderHistory.builder()
-                .order(order)
-                .product(product)
-                .quantity(quantity)
-                .build();
-    }
+	@Builder
+	public OrderHistory(Order order, Product product, int quantity) {
+		this.order = order;
+		this.product = product;
+		this.quantity = quantity;
+	}
+
 }
