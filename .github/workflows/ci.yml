@@ -43,8 +43,4 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Run tests
-        run: ./gradlew clean test
-        env:
-          SPRING_DATASOURCE_URL: ${{ secrets.MYSQL_URL }}
-          SPRING_DATASOURCE_USERNAME: ${{ secrets.MYSQL_USER }}
-          SPRING_DATASOURCE_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+        run: ./gradlew clean test -Dspring.profiles.active=ci
