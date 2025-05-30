@@ -131,4 +131,12 @@ public class StoreService {
 			getStore.patchClosedAt(closedAt);
 		}
 	}
+
+	@Transactional
+	public void deleteStore(Long storeId) {
+		Store getStore = storeRepository.findById(storeId)
+			.orElseThrow(() -> new NotFoundException(StoreErrorCode.STORE_NOT_FOUND));
+
+		getStore.markDeleted();
+	}
 }
