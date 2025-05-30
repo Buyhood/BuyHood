@@ -112,7 +112,12 @@ public class OrderHistoryService {
 
 		for (CartItem item : cart.getCart()) {
 			Product product = productMap.get(item.getProductId());
-			OrderHistory orderHistory = OrderHistory.of(order, product, item.getQuantity());
+			OrderHistory orderHistory = OrderHistory.builder()
+				.order(order)
+				.product(product)
+				.quantity(item.getQuantity())
+				.build();
+
 			orderHistoryRepository.save(orderHistory);
 		}
 	}

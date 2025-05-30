@@ -1,5 +1,6 @@
 package api.buyhood.domain.store.controller;
 
+import api.buyhood.domain.store.dto.request.PatchStoreReq;
 import api.buyhood.domain.store.dto.request.RegisteringStoreReq;
 import api.buyhood.domain.store.dto.response.GetStoreRes;
 import api.buyhood.domain.store.dto.response.PageStoreRes;
@@ -11,7 +12,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -58,6 +61,24 @@ public class StoreController {
 	) {
 		Page<PageStoreRes> response = storeService.getStoreByKeyword(keyword, pageable);
 		return Response.ok(response);
+	}
+
+	@PatchMapping("/v1/stores/{storeId}")
+	public void patchStore(@PathVariable Long storeId, @RequestBody PatchStoreReq request) {
+		storeService.patchStore(
+			storeId,
+			request.getStoreName(),
+			request.getAddress(),
+			request.getSellerId(),
+			request.getDescription(),
+			request.getOpenedAt(),
+			request.getClosedAt()
+		);
+	}
+
+	@DeleteMapping("/v1/stores/{storeId}")
+	public void deleteStore(@PathVariable Long storeId) {
+		storeService.deleteStore(storeId);
 	}
 
 }

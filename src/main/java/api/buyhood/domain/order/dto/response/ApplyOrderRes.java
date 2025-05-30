@@ -11,27 +11,27 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @Builder
 @RequiredArgsConstructor
-public class CreateOrderRes {
+public class ApplyOrderRes {
 
 	private final Long storeId;
 	private final CartRes orderInfo;
 	private final long totalPrice;
 	private final PaymentMethod paymentMethod;
 	private final OrderStatus status;
-	private final LocalDateTime pickupAt;
+	private final String requestMessage;
 	private final LocalDateTime createAt;
 
 
-	public static CreateOrderRes of(Long storeId, CartRes orderInfo, long totalPrice, PaymentMethod paymentMethod,
-		OrderStatus status, LocalDateTime pickupAt, LocalDateTime createAt) {
-		return CreateOrderRes.builder()
+	public static ApplyOrderRes of(Long storeId, CartRes orderInfo, long totalPrice, PaymentMethod paymentMethod,
+		OrderStatus status, LocalDateTime createAt, String requestMessage) {
+		return ApplyOrderRes.builder()
 			.storeId(storeId)
 			.orderInfo(orderInfo)
 			.totalPrice(totalPrice)
 			.paymentMethod(paymentMethod)
 			.status(status)
-			.pickupAt(pickupAt)
 			.createAt(createAt)
+			.requestMessage(requestMessage)
 			.build();
 	}
 }

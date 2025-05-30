@@ -10,10 +10,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class OrderHistoryRes {
 
-	private Long orderId;
-	private Long productId;
-	private int quantity;
-	private LocalDateTime createdAt;
+	private final Long orderId;
+	private final Long productId;
+	private final int quantity;
+	private final LocalDateTime createdAt;
 
 
 	public static OrderHistoryRes of(Long orderId, Long productId, int quantity, LocalDateTime createdAt) {
