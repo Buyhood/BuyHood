@@ -16,7 +16,7 @@ jobs:
       mysql:
         image: mysql:8.0
         env:
-          MYSQL_ROOT_PASSWORD: Plqafgh12!
+          MYSQL_ROOT_PASSWORD: plqafgh12
           MYSQL_DATABASE: buyhood
         ports:
           - 3306:3306
@@ -24,7 +24,7 @@ jobs:
           --health-cmd="mysqladmin ping --silent"
           --health-interval=10s
           --health-timeout=5s
-          --health-retries=3
+          --health-retries=5
 
     steps:
     - name: Checkout code
@@ -44,6 +44,14 @@ jobs:
 
     - name: Grant execute permission to Gradle wrapper
       run: chmod +x ./gradlew
+
+    - name: Install wait-for-it script
+      run: |
+        curl -o wait-for-it.sh https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh
+        chmod +x wait-for-it.sh
+
+    - name: Wait for MySQL to be ready
+      run: ./wait-for-it.sh 127.0.0.1:3306 --timeout=40 --strict -- echo "MySQL is up"
 
     - name: Build with Gradle
       run: ./gradlew clean build
