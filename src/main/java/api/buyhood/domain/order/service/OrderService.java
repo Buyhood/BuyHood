@@ -5,17 +5,23 @@ import api.buyhood.domain.cart.dto.response.CartRes;
 import api.buyhood.domain.cart.entity.Cart;
 import api.buyhood.domain.cart.entity.CartItem;
 import api.buyhood.domain.cart.repository.CartRepository;
-import api.buyhood.domain.order.dto.request.CreateOrderReq;
-import api.buyhood.domain.order.dto.response.CreateOrderRes;
+import api.buyhood.domain.order.dto.request.AcceptOrderReq;
+import api.buyhood.domain.order.dto.request.ApplyOrderReq;
+import api.buyhood.domain.order.dto.response.AcceptOrderRes;
+import api.buyhood.domain.order.dto.response.ApplyOrderRes;
 import api.buyhood.domain.order.entity.Order;
+import api.buyhood.domain.order.enums.OrderStatus;
 import api.buyhood.domain.order.repository.OrderRepository;
 import api.buyhood.domain.product.entity.Product;
 import api.buyhood.domain.product.repository.ProductRepository;
 import api.buyhood.domain.product.service.ProductService;
+import api.buyhood.domain.seller.entity.Seller;
+import api.buyhood.domain.seller.repository.SellerRepository;
 import api.buyhood.domain.store.entity.Store;
 import api.buyhood.domain.store.repository.StoreRepository;
 import api.buyhood.domain.user.entity.User;
 import api.buyhood.domain.user.repository.UserRepository;
+import api.buyhood.global.common.exception.ForbiddenException;
 import api.buyhood.global.common.exception.NotFoundException;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +32,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static api.buyhood.global.common.exception.enums.CartErrorCode.NOT_FOUND_CART;
 import static api.buyhood.global.common.exception.enums.OrderErrorCode.NOT_FOUND_ORDER;
+import static api.buyhood.global.common.exception.enums.OrderErrorCode.NOT_OWNER_OF_STORE;
 import static api.buyhood.global.common.exception.enums.ProductErrorCode.PRODUCT_NOT_FOUND;
+import static api.buyhood.global.common.exception.enums.SellerErrorCode.SELLER_NOT_FOUND;
 import static api.buyhood.global.common.exception.enums.StoreErrorCode.STORE_NOT_FOUND;
 import static api.buyhood.global.common.exception.enums.UserErrorCode.USER_NOT_FOUND;
 
@@ -41,12 +49,15 @@ public class OrderService {
 	private final ProductService productService;
 	private final StoreRepository storeRepository;
 	private final UserRepository userRepository;
+	private final SellerRepository sellerRepository;
 
+	//주문 요청
 	@Transactional
-	public CreateOrderRes createOrder(CreateOrderReq createOrderReq, AuthUser authUser) {
+	public ApplyOrderRes applyOrder(ApplyOrderReq req, AuthUser authUser) {
 
-		Store store = storeRepository.findById(createOrderReq.getStoreId())
+		Store store = storeRepository.findById(req.getStoreId())
 			.orElseThrow(() -> new NotFoundException(STORE_NOT_FOUND));
+
 		User user = userRepository.findById(authUser.getId())
 			.orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
 
@@ -66,19 +77,44 @@ public class OrderService {
 		Order order = Order.builder()
 			.store(store)
 			.user(user)
-			.paymentMethod(createOrderReq.getPaymentMethod())
+			.requestMessage(req.getRequestMessage())
+			.status(OrderStatus.PENDING)
+			.paymentMethod(req.getPaymentMethod())
 			.totalPrice(getTotalPrice(productMap, cart.getCart()))
-			.pickupAt(createOrderReq.getPickupAt())
 			.build();
 		orderRepository.save(order);
 		orderHistoryService.saveOrderHistory(order, cart, productMap);
-
-		productService.decreaseStock(cart, productMap);
 		cartRepository.clearCart(user.getId());
 
-		return CreateOrderRes.of(order.getStore().getId(), CartRes.of(cart), order.getTotalPrice(),
-			order.getPaymentMethod(), order.getStatus(), order.getPickupAt(), order.getCreatedAt());
+		productService.decreaseStock(cart, productMap);
+
+		return ApplyOrderRes.of(order.getStore().getId(), CartRes.of(cart), order.getTotalPrice(),
+			order.getPaymentMethod(), order.getStatus(), order.getCreatedAt(), order.getRequestMessage());
 	}
+
+	//주문 승인
+	@Transactional
+	public AcceptOrderRes acceptOrder(AcceptOrderReq req, Long orderId, AuthUser authUser) {
+
+		Seller seller = sellerRepository.findById(authUser.getId())
+			.orElseThrow(() -> new NotFoundException(SELLER_NOT_FOUND));
+
+		Order order = orderRepository.findById(orderId)
+			.orElseThrow(() -> new NotFoundException(NOT_FOUND_ORDER));
+
+		Long sellerIdInStore = order.getStore().getSeller().getId();
+
+		//셀러 스토어가 같은 업장인지
+		if (!sellerIdInStore.equals(seller.getId())) {
+			throw new ForbiddenException(NOT_OWNER_OF_STORE);
+		}
+
+		order.accept(req.getReadyAt());
+
+		return AcceptOrderRes.of(order);
+	}
+
+	//주문 거절
 
 
 	@Transactional
