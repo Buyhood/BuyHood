@@ -27,6 +27,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -159,7 +160,7 @@ public class ProductService {
 		Product getProduct = productRepository.findById(productId)
 			.orElseThrow(() -> new NotFoundException(ProductErrorCode.PRODUCT_NOT_FOUND));
 
-		if (productName != null) {
+		if (StringUtils.hasText(productName)) {
 			if (getProduct.getName().equalsIgnoreCase(productName)) {
 				throw new InvalidRequestException(ProductErrorCode.PRODUCT_NAME_SAME_AS_OLD);
 			}
@@ -175,7 +176,7 @@ public class ProductService {
 			getProduct.patchPrice(price);
 		}
 
-		if (description != null) {
+		if (StringUtils.hasText(description)) {
 			getProduct.patchDescription(description);
 		}
 

@@ -84,6 +84,7 @@ public class CategoryService {
 		Category getCategory = categoryRepository.findById(categoryId)
 			.orElseThrow(() -> new NotFoundException(CategoryErrorCode.CATEGORY_NOT_FOUND));
 
+		// 삭제하려는 카테고리와 연결된 상품이 있을 경우 연결 해제 (매핑 테이블에서 내용 삭제)
 		if (categoryProductRepository.existsByCategoryId(categoryId)) {
 			categoryProductRepository.deleteByCategoryId(categoryId);
 		}

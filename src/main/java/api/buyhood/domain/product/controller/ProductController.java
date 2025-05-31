@@ -63,7 +63,7 @@ public class ProductController {
 	}
 
 	@PatchMapping("/v1/products/{productId}")
-	public void patchProduct(@PathVariable Long productId, @RequestBody PatchProductReq request) {
+	public void patchProduct(@PathVariable Long productId, @Valid @RequestBody PatchProductReq request) {
 		productService.patchProduct(
 			productId,
 			request.getProductName(),
