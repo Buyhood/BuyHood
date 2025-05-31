@@ -1,6 +1,8 @@
 package api.buyhood.domain.product.repository;
 
 import api.buyhood.domain.product.entity.Category;
+import java.util.Collection;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,4 +22,6 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 	@Query("select c from Category c where c.depth = :depth")
 	Page<Category> getCategoriesByDepth(@Param("depth") int depth, Pageable pageable);
 
+	@Query("select c.name from Category c where c.id in :categoryIds")
+	List<String> findCategoryNamesByCategoryIds(@Param("categoryIds") Collection<Long> categoryIds);
 }

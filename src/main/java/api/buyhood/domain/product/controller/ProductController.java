@@ -35,7 +35,7 @@ public class ProductController {
 			request.getProductName(),
 			request.getPrice(),
 			request.getStock(),
-			request.getCategoryId(),
+			request.getCategoryIdList(),
 			request.getDescription()
 		);
 		return Response.ok(response);
@@ -68,7 +68,7 @@ public class ProductController {
 			productId,
 			request.getProductName(),
 			request.getPrice(),
-			request.getCategoryId(),
+			request.getCategoryIdList(),
 			request.getDescription(),
 			request.getStock()
 		);
