@@ -8,6 +8,6 @@ import lombok.Getter;
 @AllArgsConstructor
 public class DeleteSellerReq {
 
-	@NotBlank
+	@NotBlank(message = "비밀번호를 입력해주세요")
 	private String password;
 }

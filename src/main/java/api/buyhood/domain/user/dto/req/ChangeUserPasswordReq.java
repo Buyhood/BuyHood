@@ -7,7 +7,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class ChangePasswordReq {
+public class ChangeUserPasswordReq {
 
 	@NotBlank(message = "기존 비밀번호는 필수 입력값입니다.")
 	private String oldPassword;

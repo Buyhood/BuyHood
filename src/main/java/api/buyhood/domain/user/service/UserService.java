@@ -1,7 +1,7 @@
 package api.buyhood.domain.user.service;
 
 import api.buyhood.domain.auth.entity.AuthUser;
-import api.buyhood.domain.user.dto.req.ChangePasswordReq;
+import api.buyhood.domain.user.dto.req.ChangeUserPasswordReq;
 import api.buyhood.domain.user.dto.req.DeleteUserReq;
 import api.buyhood.domain.user.dto.req.PatchUserReq;
 import api.buyhood.domain.user.dto.res.GetUserRes;
@@ -47,15 +47,15 @@ public class UserService {
 
 	//비밀번호 변경
 	@Transactional
-	public void changePassword(AuthUser authUser, ChangePasswordReq changePasswordReq) {
+	public void changePassword(AuthUser authUser, ChangeUserPasswordReq changeUserPasswordReq) {
 		User user = userRepository.findByEmail(authUser.getEmail())
 			.orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
 
-		validatePassword(changePasswordReq.getOldPassword(), user.getPassword());
-		if (passwordEncoder.matches(changePasswordReq.getNewPassword(), user.getPassword())) {
+		validatePassword(changeUserPasswordReq.getOldPassword(), user.getPassword());
+		if (passwordEncoder.matches(changeUserPasswordReq.getNewPassword(), user.getPassword())) {
 			throw new InvalidRequestException(PASSWORD_SAME_AS_OLD);
 		}
-		user.changePassword(passwordEncoder.encode(changePasswordReq.getNewPassword()));
+		user.changePassword(passwordEncoder.encode(changeUserPasswordReq.getNewPassword()));
 	}
 
 	//회원 정보 변경

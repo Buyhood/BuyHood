@@ -12,18 +12,16 @@ public class GetSellerRes {
 	private final String username;
 	private final String email;
 	private final String businessNumber;
-	private final String businessName;
-	private final String businessAddress;
 	private final UserRole role;
+	private final String phoneNumber;
 
 	public static GetSellerRes of(Seller seller) {
 		return new GetSellerRes(
 			seller.getUsername(),
 			seller.getEmail(),
 			seller.getBusinessNumber(),
-			seller.getBusinessName(),
-			seller.getBusinessAddress(),
-			seller.getRole()
+			seller.getRole(),
+			seller.getPhoneNumber()
 		);
 	}
 }

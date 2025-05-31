@@ -10,9 +10,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CartReq {
 
-	@NotNull
+	@NotNull(message = "상품 ID를 입력해주세요")
 	private Long productId;
 
-	@NotNull
+	@NotNull(message = "수량을 기입해주세요")
 	private int quantity;
 }

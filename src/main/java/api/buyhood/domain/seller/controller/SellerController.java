@@ -1,6 +1,7 @@
 package api.buyhood.domain.seller.controller;
 
 import api.buyhood.domain.auth.entity.AuthUser;
+import api.buyhood.domain.seller.dto.req.ChangeSellerPasswordReq;
 import api.buyhood.domain.seller.dto.req.DeleteSellerReq;
 import api.buyhood.domain.seller.dto.res.GetSellerRes;
 import api.buyhood.domain.seller.service.SellerService;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -50,5 +52,15 @@ public class SellerController {
 		sellerService.deleteSeller(authUser, req);
 
 		return Response.ok("회원탈퇴에 성공했습니다.");
+	}
+
+	//비밀번호 변경
+	@PatchMapping("/v1/sellers/password")
+	public Response<String> changePassword(
+		@AuthenticationPrincipal AuthUser authUser,
+		@RequestBody @Valid ChangeSellerPasswordReq req) {
+		sellerService.changePassword(authUser, req);
+
+		return Response.ok("비밀번호 변경에 성공했습니다.");
 	}
 }
