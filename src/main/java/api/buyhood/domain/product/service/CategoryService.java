@@ -4,6 +4,7 @@ import api.buyhood.domain.product.dto.response.CreateCategoryRes;
 import api.buyhood.domain.product.dto.response.GetCategoryRes;
 import api.buyhood.domain.product.dto.response.PageCategoryRes;
 import api.buyhood.domain.product.entity.Category;
+import api.buyhood.domain.product.repository.CategoryProductRepository;
 import api.buyhood.domain.product.repository.CategoryRepository;
 import api.buyhood.global.common.exception.InvalidRequestException;
 import api.buyhood.global.common.exception.NotFoundException;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CategoryService {
 
 	private final CategoryRepository categoryRepository;
+	private final CategoryProductRepository categoryProductRepository;
 
 	@Transactional
 	public CreateCategoryRes createCategory(String categoryName, Long parentId) {
@@ -81,7 +83,13 @@ public class CategoryService {
 	public void deleteCategory(Long categoryId) {
 		Category getCategory = categoryRepository.findById(categoryId)
 			.orElseThrow(() -> new NotFoundException(CategoryErrorCode.CATEGORY_NOT_FOUND));
+
+		// 삭제하려는 카테고리와 연결된 상품이 있을 경우 연결 해제 (매핑 테이블에서 내용 삭제)
+		if (categoryProductRepository.existsByCategoryId(categoryId)) {
+			categoryProductRepository.deleteByCategoryId(categoryId);
+		}
+
 		categoryRepository.delete(getCategory);
 	}
-	
+
 }

@@ -1,10 +1,10 @@
 package api.buyhood.domain.product.controller;
 
 import api.buyhood.domain.product.dto.request.PatchProductReq;
-import api.buyhood.domain.product.dto.request.RegisteringProductReq;
+import api.buyhood.domain.product.dto.request.RegisterProductReq;
 import api.buyhood.domain.product.dto.response.GetProductRes;
 import api.buyhood.domain.product.dto.response.PageProductRes;
-import api.buyhood.domain.product.dto.response.RegisteringProductRes;
+import api.buyhood.domain.product.dto.response.RegisterProductRes;
 import api.buyhood.domain.product.service.ProductService;
 import api.buyhood.global.common.dto.Response;
 import jakarta.validation.Valid;
@@ -30,12 +30,12 @@ public class ProductController {
 	private final ProductService productService;
 
 	@PostMapping("/v1/products")
-	public Response<RegisteringProductRes> registeringProduct(@Valid @RequestBody RegisteringProductReq request) {
-		RegisteringProductRes response = productService.registerProduct(
+	public Response<RegisterProductRes> registeringProduct(@Valid @RequestBody RegisterProductReq request) {
+		RegisterProductRes response = productService.registerProduct(
 			request.getProductName(),
 			request.getPrice(),
 			request.getStock(),
-			request.getCategoryId(),
+			request.getCategoryIdList(),
 			request.getDescription()
 		);
 		return Response.ok(response);
@@ -63,12 +63,12 @@ public class ProductController {
 	}
 
 	@PatchMapping("/v1/products/{productId}")
-	public void patchProduct(@PathVariable Long productId, @RequestBody PatchProductReq request) {
+	public void patchProduct(@PathVariable Long productId, @Valid @RequestBody PatchProductReq request) {
 		productService.patchProduct(
 			productId,
 			request.getProductName(),
 			request.getPrice(),
-			request.getCategoryId(),
+			request.getCategoryIdList(),
 			request.getDescription(),
 			request.getStock()
 		);
