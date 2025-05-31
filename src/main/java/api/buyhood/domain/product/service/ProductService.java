@@ -4,7 +4,7 @@ import api.buyhood.domain.cart.entity.Cart;
 import api.buyhood.domain.cart.entity.CartItem;
 import api.buyhood.domain.product.dto.response.GetProductRes;
 import api.buyhood.domain.product.dto.response.PageProductRes;
-import api.buyhood.domain.product.dto.response.RegisteringProductRes;
+import api.buyhood.domain.product.dto.response.RegisterProductRes;
 import api.buyhood.domain.product.entity.Category;
 import api.buyhood.domain.product.entity.CategoryProduct;
 import api.buyhood.domain.product.entity.Product;
@@ -46,7 +46,7 @@ public class ProductService {
 	 * @param description    상품 설명 (선택)
 	 */
 	@Transactional
-	public RegisteringProductRes registerProduct(
+	public RegisterProductRes registerProduct(
 		String productName,
 		Long price,
 		Long stock,
@@ -69,7 +69,7 @@ public class ProductService {
 
 		List<String> categoryNameList = categoryRepository.findCategoryNamesByCategoryIds(categoryIdList);
 
-		return RegisteringProductRes.of(product, categoryNameList);
+		return RegisterProductRes.of(product, categoryNameList);
 	}
 
 	/**

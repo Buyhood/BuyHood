@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public class RegisteringProductRes {
+public class RegisterProductRes {
 
 	private final Long productId;
 	private final String productName;
@@ -17,8 +17,8 @@ public class RegisteringProductRes {
 	private final List<String> categoryNameList;
 	private final String description;
 
-	public static RegisteringProductRes of(Product product, List<String> categoryNameList) {
-		return new RegisteringProductRes(
+	public static RegisterProductRes of(Product product, List<String> categoryNameList) {
+		return new RegisterProductRes(
 			product.getId(),
 			product.getName(),
 			product.getPrice(),

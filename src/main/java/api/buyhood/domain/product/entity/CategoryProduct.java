@@ -27,7 +27,7 @@ public class CategoryProduct extends BaseTimeEntity {
 	private Long id;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "categoryId")
+	@JoinColumn(name = "category_id")
 	private Category category;
 
 	@ManyToOne(fetch = FetchType.LAZY)

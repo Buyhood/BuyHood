@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public class RegisteringProductReq {
+public class RegisterProductReq {
 
 	@NotBlank(message = "상품 이름은 공백일 수 없습니다.")
 	private final String productName;
