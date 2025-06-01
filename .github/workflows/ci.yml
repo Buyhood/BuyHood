@@ -22,7 +22,11 @@ jobs:
           MYSQL_PASSWORD: testpass
         ports:
           - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     steps:
       - name: Checkout source code
@@ -38,9 +42,13 @@ jobs:
         run: |
           echo "MySQL 컨테이너가 완전히 기동될 때까지 기다림(mysql 준비될 시간 확보)"
           sleep 40
-          
+
       - name: Grant execute permission to Gradle wrapper
         run: chmod +x ./gradlew
 
-      - name: Run tests
+      - name: Run tests with CI profile
         run: ./gradlew clean test -Dspring.profiles.active=ci
+        env:
+          SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/buyhood
+          SPRING_DATASOURCE_USERNAME: testuser
+          SPRING_DATASOURCE_PASSWORD: testpass
