@@ -6,10 +6,10 @@ import api.buyhood.domain.product.dto.response.GetProductRes;
 import api.buyhood.domain.product.dto.response.PageProductRes;
 import api.buyhood.domain.product.dto.response.RegisterProductRes;
 import api.buyhood.domain.product.entity.Category;
-import api.buyhood.domain.product.entity.CategoryProduct;
 import api.buyhood.domain.product.entity.Product;
-import api.buyhood.domain.product.repository.CategoryProductRepository;
+import api.buyhood.domain.product.entity.ProductCategory;
 import api.buyhood.domain.product.repository.CategoryRepository;
+import api.buyhood.domain.product.repository.ProductCategoryRepository;
 import api.buyhood.domain.product.repository.ProductRepository;
 import api.buyhood.global.common.exception.ConflictException;
 import api.buyhood.global.common.exception.InvalidRequestException;
@@ -35,7 +35,7 @@ public class ProductService {
 
 	private final ProductRepository productRepository;
 	private final CategoryRepository categoryRepository;
-	private final CategoryProductRepository categoryProductRepository;
+	private final ProductCategoryRepository productCategoryRepository;
 
 	/**
 	 * 상품 등록
@@ -91,7 +91,7 @@ public class ProductService {
 			.orElseThrow(() -> new NotFoundException(ProductErrorCode.PRODUCT_NOT_FOUND));
 
 		// 중간 엔티티에서 카테고리 id 목록 조회
-		List<Long> categoryIds = categoryProductRepository.findCategoryIdsByProductId(productId);
+		List<Long> categoryIds = productCategoryRepository.findCategoryIdsByProductId(productId);
 
 		// 카테고리 이름 목록 조회
 		List<String> categoryNames = categoryRepository.findCategoryNamesByCategoryIds(categoryIds);
@@ -194,7 +194,7 @@ public class ProductService {
 		}
 
 		// 상품에 연결된 모든 카테고리 연결 해제
-		categoryProductRepository.deleteByProductId(productId);
+		productCategoryRepository.deleteByProductId(productId);
 
 		if (categoryIdList != null && !categoryIdList.isEmpty()) {
 			linkCategoriesToProduct(categoryIdList, getProduct);
@@ -213,8 +213,8 @@ public class ProductService {
 			.orElseThrow(() -> new NotFoundException(ProductErrorCode.PRODUCT_NOT_FOUND));
 
 		// 삭제하려는 상품과 연결된 카테고리가 있을 경우 연결 해제 (매핑 테이블에서 내용 삭제)
-		if (categoryProductRepository.existsByProductId(productId)) {
-			categoryProductRepository.deleteByProductId(productId);
+		if (productCategoryRepository.existsByProductId(productId)) {
+			productCategoryRepository.deleteByProductId(productId);
 		}
 
 		getProduct.markDeleted();
@@ -239,8 +239,8 @@ public class ProductService {
 
 		// 새로 연결한 카테고리 저장
 		for (Category category : categoryList) {
-			categoryProductRepository.save(
-				CategoryProduct.builder()
+			productCategoryRepository.save(
+				ProductCategory.builder()
 					.category(category)
 					.product(product)
 					.build()
@@ -250,7 +250,7 @@ public class ProductService {
 
 
 	private Map<Long, List<String>> getProductCategoryNameMap(List<Long> productIds) {
-		List<Object[]> results = categoryProductRepository.findCategoryNamesByProductIds(productIds);
+		List<Object[]> results = productCategoryRepository.findCategoryNamesByProductIds(productIds);
 		Map<Long, List<String>> categoryNameMap = new HashMap<>();
 
 		for (Object[] row : results) {
