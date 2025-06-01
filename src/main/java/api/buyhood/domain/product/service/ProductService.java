@@ -45,6 +45,7 @@ public class ProductService {
 	 * @param stock          상품 개수 (필수)
 	 * @param categoryIdList 상품 카테고리 (선택)
 	 * @param description    상품 설명 (선택)
+	 * @author dereck-jun
 	 */
 	@Transactional
 	public RegisterProductRes registerProduct(
@@ -54,6 +55,10 @@ public class ProductService {
 		List<Long> categoryIdList,
 		String description
 	) {
+		if (productRepository.existsByName(productName)) {
+			throw new ConflictException(ProductErrorCode.DUPLICATE_PRODUCT_NAME);
+		}
+
 		Product product = Product.builder()
 			.name(productName)
 			.price(price)
@@ -76,12 +81,13 @@ public class ProductService {
 	/**
 	 * 상품 단건 조회
 	 *
-	 * @param productId 상품 Id
+	 * @param productId 상품 ID
+	 * @author dereck-jun
 	 */
 	@Transactional(readOnly = true)
 	public GetProductRes getProduct(Long productId) {
 		// 상품 존재 여부 조회
-		Product product = productRepository.findByIdAndDeletedAtIsNull(productId)
+		Product product = productRepository.findActiveProductByIdAndDeletedAtIsNull(productId)
 			.orElseThrow(() -> new NotFoundException(ProductErrorCode.PRODUCT_NOT_FOUND));
 
 		// 중간 엔티티에서 카테고리 id 목록 조회
@@ -97,13 +103,14 @@ public class ProductService {
 	 * 상품 전체 페이징 조회
 	 *
 	 * @param pageable
+	 * @author dereck-jun
 	 */
 	@Transactional(readOnly = true)
 	public Page<PageProductRes> getAllProducts(Pageable pageable) {
 		PageRequest pageRequest =
 			PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Direction.ASC, "name");
 
-		Page<Product> productPage = productRepository.findAll(pageRequest);
+		Page<Product> productPage = productRepository.findActiveProducts(pageRequest);
 
 		List<Long> productIds = productPage.getContent()
 			.stream()
@@ -120,13 +127,14 @@ public class ProductService {
 	 *
 	 * @param keyword  상품 이름에 대한 키워드 (선택)
 	 * @param pageable
+	 * @author dereck-jun
 	 */
 	@Transactional(readOnly = true)
 	public Page<PageProductRes> getProductByKeyword(String keyword, Pageable pageable) {
 		PageRequest pageRequest =
 			PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Direction.ASC, "name");
 
-		Page<Product> productPage = productRepository.findByKeyword(keyword, pageRequest);
+		Page<Product> productPage = productRepository.findActiveProductsByKeyword(keyword, pageRequest);
 
 		List<Long> productIds = productPage.getContent()
 			.stream()
@@ -141,12 +149,13 @@ public class ProductService {
 	/**
 	 * 상품 수정
 	 *
-	 * @param productId      변경할 상품의 Id (필수)
-	 * @param productName    새로운 상품 이름 (선택)
-	 * @param price          새로운 상품 가격 (선택)
+	 * @param productId      수정할 상품의 ID (필수)
+	 * @param productName    변경하려고 하는 상품 이름 (선택)
+	 * @param price          변경하려고 하는 상품 가격 (선택)
 	 * @param categoryIdList 연결 또는 연결 해제할 categoryIdList (선택)
-	 * @param description    새로운 상품 설명 (선택)
-	 * @param stock          새로운 상품 개수 (선택)
+	 * @param description    변경하려고 하는 상품 설명 (선택)
+	 * @param stock          변경하려고 하는 상품 개수 (선택)
+	 * @author dereck-jun
 	 */
 	@Transactional
 	public void patchProduct(
@@ -157,7 +166,7 @@ public class ProductService {
 		String description,
 		Long stock
 	) {
-		Product getProduct = productRepository.findById(productId)
+		Product getProduct = productRepository.findActiveProductById(productId)
 			.orElseThrow(() -> new NotFoundException(ProductErrorCode.PRODUCT_NOT_FOUND));
 
 		if (StringUtils.hasText(productName)) {
@@ -193,18 +202,22 @@ public class ProductService {
 	}
 
 	/**
-	 * 상품 삭제 (물리적 삭제)
+	 * 상품 삭제 (논리적 삭제)
 	 *
-	 * @param productId 삭제할 상품 Id (필수)
+	 * @param productId 삭제할 상품 ID (필수)
+	 * @author dereck-jun
 	 */
 	@Transactional
 	public void deleteProduct(Long productId) {
-		Product getProduct = productRepository.findById(productId)
+		Product getProduct = productRepository.findActiveProductById(productId)
 			.orElseThrow(() -> new NotFoundException(ProductErrorCode.PRODUCT_NOT_FOUND));
 
-		categoryProductRepository.deleteByProductId(productId);
+		// 삭제하려는 상품과 연결된 카테고리가 있을 경우 연결 해제 (매핑 테이블에서 내용 삭제)
+		if (categoryProductRepository.existsByProductId(productId)) {
+			categoryProductRepository.deleteByProductId(productId);
+		}
 
-		productRepository.delete(getProduct);
+		getProduct.markDeleted();
 	}
 
 	@Transactional
@@ -215,12 +228,12 @@ public class ProductService {
 		}
 	}
 
-	private void linkCategoriesToProduct(List<Long> categoryIds, Product product) {
+	private void linkCategoriesToProduct(List<Long> categoryIdList, Product product) {
 		// 새로 등록할 카테고리 조회
-		List<Category> categoryList = categoryRepository.findAllById(categoryIds);
+		List<Category> categoryList = categoryRepository.findAllById(categoryIdList);
 
 		// 조회된 내용과 요청한 내용의 크기가 다르면 요청 내용 중 카테고리가 없는 항목이 존재한다는 의미
-		if (categoryIds.size() != categoryList.size()) {
+		if (categoryIdList.size() != categoryList.size()) {
 			throw new NotFoundException(CategoryErrorCode.CATEGORY_NOT_FOUND);
 		}
 
