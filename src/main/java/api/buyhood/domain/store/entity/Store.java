@@ -38,6 +38,9 @@ public class Store extends BaseTimeEntity {
 	@JoinColumn(name = "seller_id")
 	private Seller seller;
 
+	@Column(nullable = false)
+	private boolean isDeliverable;
+
 	@Column
 	private String description;
 
@@ -47,11 +50,13 @@ public class Store extends BaseTimeEntity {
 	@Column
 	private LocalTime closedAt;
 
+
 	@Builder
 	public Store(
 		String name,
 		String address,
 		Seller seller,
+		boolean isDeliverable,
 		String description,
 		LocalTime openedAt,
 		LocalTime closedAt
@@ -59,6 +64,7 @@ public class Store extends BaseTimeEntity {
 		this.name = name;
 		this.address = address;
 		this.seller = seller;
+		this.isDeliverable = isDeliverable;
 		this.description = description;
 		this.openedAt = openedAt;
 		this.closedAt = closedAt;
@@ -74,6 +80,10 @@ public class Store extends BaseTimeEntity {
 
 	public void patchSeller(Seller seller) {
 		this.seller = seller;
+	}
+
+	public void patchIsDeliverable(boolean isDeliverable) {
+		this.isDeliverable = isDeliverable;
 	}
 
 	public void patchDescription(String description) {

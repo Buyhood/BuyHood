@@ -14,16 +14,18 @@ public class GetStoreRes {
 	private final String storeName;
 	private final String address;
 	private final Long sellerId;
+	private final boolean isDeliverable;
 	private final String description;
 	private final LocalTime openedAt;
 	private final LocalTime closedAt;
 
-	public static GetStoreRes of(Store store, Long sellerId) {
+	public static GetStoreRes of(Store store) {
 		return new GetStoreRes(
 			store.getId(),
 			store.getName(),
 			store.getAddress(),
-			sellerId,
+			store.getSeller().getId(),
+			store.isDeliverable(),
 			store.getDescription(),
 			store.getOpenedAt(),
 			store.getClosedAt()
