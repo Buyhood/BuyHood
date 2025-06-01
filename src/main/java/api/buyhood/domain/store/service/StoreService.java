@@ -1,5 +1,9 @@
 package api.buyhood.domain.store.service;
 
+import api.buyhood.domain.product.dto.response.GetProductRes;
+import api.buyhood.domain.product.entity.Product;
+import api.buyhood.domain.product.repository.ProductCategoryRepository;
+import api.buyhood.domain.product.repository.ProductRepository;
 import api.buyhood.domain.seller.entity.Seller;
 import api.buyhood.domain.seller.repository.SellerRepository;
 import api.buyhood.domain.store.dto.response.GetStoreRes;
@@ -13,6 +17,10 @@ import api.buyhood.global.common.exception.NotFoundException;
 import api.buyhood.global.common.exception.enums.SellerErrorCode;
 import api.buyhood.global.common.exception.enums.StoreErrorCode;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,6 +36,8 @@ public class StoreService {
 
 	private final StoreRepository storeRepository;
 	private final SellerRepository sellerRepository;
+	private final ProductRepository productRepository;
+	private final ProductCategoryRepository productCategoryRepository;
 
 	/**
 	 * 가게 등록
@@ -76,7 +86,7 @@ public class StoreService {
 	/**
 	 * 가게 단건 조회
 	 *
-	 * @param storeId 조회할 가게의 ID
+	 * @param storeId 조회할 가게의 ID (필수)
 	 * @author dereck-jun
 	 */
 	@Transactional(readOnly = true)
@@ -84,7 +94,23 @@ public class StoreService {
 		Store getStore = storeRepository.findActiveStoreByIdFetchSeller(storeId)
 			.orElseThrow(() -> new NotFoundException(StoreErrorCode.STORE_NOT_FOUND));
 
-		return GetStoreRes.of(getStore);
+		List<Product> productList = productRepository.findActiveProductsByStoreId(storeId);
+
+		List<Long> productIdList = productList.stream()
+			.map(Product::getId)
+			.toList();
+
+		Map<Long, List<String>> productCategoryNameMap = getProductCategoryNameMap(productIdList);
+
+		List<GetProductRes> productResList = productList.stream()
+			.map(product ->
+				GetProductRes.of(
+					product,
+					productCategoryNameMap.getOrDefault(product.getId(), List.of())
+				)
+			).toList();
+
+		return GetStoreRes.of(getStore, productResList);
 	}
 
 	/**
@@ -105,7 +131,7 @@ public class StoreService {
 	/**
 	 * 가게 키워드 조회
 	 *
-	 * @param keyword  가게 이름에 대한 키워드
+	 * @param keyword  가게 이름에 대한 키워드 (선택)
 	 * @param pageable
 	 * @author dereck-jun
 	 */
@@ -121,6 +147,7 @@ public class StoreService {
 	/**
 	 * 가게 수정
 	 *
+	 * @param currentUserId 로그인한 사용자 ID (필수)
 	 * @param storeId       수정할 가게 ID (필수)
 	 * @param storeName     변경하려고 하는 가게 이름 (선택)
 	 * @param address       변경하려고 하는 가게 주소 (선택)
@@ -192,7 +219,8 @@ public class StoreService {
 	/**
 	 * 가게 폐업 (논리적 삭제)
 	 *
-	 * @param storeId 폐업할 가게 ID
+	 * @param currentUserId 로그인한 사용자 ID (필수)
+	 * @param storeId       폐업할 가게 ID (필수)
 	 */
 	@Transactional
 	public void deleteStore(Long currentUserId, Long storeId) {
@@ -203,6 +231,25 @@ public class StoreService {
 			throw new ForbiddenException(StoreErrorCode.NOT_STORE_OWNER);
 		}
 
+		// 가게에 등록된 상품 조회 후 모두 삭제
+		List<Product> productList = productRepository.findActiveProductsByStoreId(storeId);
+		for (Product product : productList) {
+			product.markDeleted();
+		}
+
 		getStore.markDeleted();
+	}
+
+	private Map<Long, List<String>> getProductCategoryNameMap(List<Long> productIds) {
+		List<Object[]> results = productCategoryRepository.findCategoryNamesByProductIds(productIds);
+		Map<Long, List<String>> categoryNameMap = new HashMap<>();
+
+		for (Object[] row : results) {
+			Long productId = (Long) row[0];
+			String categoryName = (String) row[1];
+			categoryNameMap.computeIfAbsent(productId, k -> new ArrayList<>()).add(categoryName);
+		}
+
+		return categoryNameMap;
 	}
 }
