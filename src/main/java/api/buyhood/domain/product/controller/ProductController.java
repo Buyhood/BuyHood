@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -29,6 +30,7 @@ public class ProductController {
 
 	private final ProductService productService;
 
+	@Secured("ROLE_SELLER")
 	@PostMapping("/v1/products")
 	public Response<RegisterProductRes> registeringProduct(@Valid @RequestBody RegisterProductReq request) {
 		RegisterProductRes response = productService.registerProduct(
@@ -41,18 +43,21 @@ public class ProductController {
 		return Response.ok(response);
 	}
 
+	@Secured("ROLE_SELLER")
 	@GetMapping("/v1/products/{productId}")
 	public Response<GetProductRes> getProduct(@PathVariable Long productId) {
 		GetProductRes response = productService.getProduct(productId);
 		return Response.ok(response);
 	}
 
+	@Secured("ROLE_SELLER")
 	@GetMapping("/v1/products")
 	public Response<Page<PageProductRes>> getAllProduct(@PageableDefault Pageable pageable) {
 		Page<PageProductRes> response = productService.getAllProducts(pageable);
 		return Response.ok(response);
 	}
 
+	@Secured("ROLE_SELLER")
 	@GetMapping("/v1/products/keyword")
 	public Response<Page<PageProductRes>> getProductByKeyword(
 		@RequestParam(required = false) String keyword,
@@ -62,6 +67,7 @@ public class ProductController {
 		return Response.ok(response);
 	}
 
+	@Secured("ROLE_SELLER")
 	@PatchMapping("/v1/products/{productId}")
 	public void patchProduct(@PathVariable Long productId, @Valid @RequestBody PatchProductReq request) {
 		productService.patchProduct(
@@ -74,6 +80,7 @@ public class ProductController {
 		);
 	}
 
+	@Secured("ROLE_SELLER")
 	@DeleteMapping("/v1/products/{productId}")
 	public void deleteProduct(@PathVariable Long productId) {
 		productService.deleteProduct(productId);

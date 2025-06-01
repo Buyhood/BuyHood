@@ -11,13 +11,21 @@ import org.springframework.data.repository.query.Param;
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
 	@Query(
-		value = "select p from Product p where p.name like %:keyword%",
-		countQuery = "select count(p) from Product p where p.name like %:keyword%")
-	Page<Product> findByKeyword(@Param("keyword") String keyword, Pageable pageable);
+		value = "select p from Product p where p.name like %:keyword% and p.deletedAt is null",
+		countQuery = "select count(p) from Product p where p.name like %:keyword% and p.deletedAt is null")
+	Page<Product> findActiveProductsByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
 	@Query("select count(p) > 0 from Product p where p.name = :productName")
 	boolean existsByName(String productName);
 
 	@Query("select p from Product p where p.id = :productId and p.deletedAt is null")
-	Optional<Product> findByIdAndDeletedAtIsNull(@Param("productId") Long productId);
+	Optional<Product> findActiveProductByIdAndDeletedAtIsNull(@Param("productId") Long productId);
+
+	@Query(
+		value = "select p from Product p where p.deletedAt is null",
+		countQuery = "select count(p) from Product p where p.deletedAt is null")
+	Page<Product> findActiveProducts(Pageable pageable);
+
+	@Query("select p from Product p where p.id = :productId and p.deletedAt is null")
+	Optional<Product> findActiveProductById(Long productId);
 }
