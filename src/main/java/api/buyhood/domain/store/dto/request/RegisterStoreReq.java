@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public class RegisteringStoreReq {
+public class RegisterStoreReq {
 
 	@NotBlank(message = "가게 이름은 공백일 수 없습니다.")
 	private final String storeName;
@@ -16,8 +16,8 @@ public class RegisteringStoreReq {
 	@NotBlank(message = "주소는 공백일 수 없습니다.")
 	private final String address;
 
-	@NotNull
-	private final Long sellerId;
+	@NotNull(message = "배달 가능 여부는 공백일 수 없습니다.")
+	private final Boolean isDeliverable;
 
 	private final String description;
 	private final LocalTime openedAt;

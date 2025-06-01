@@ -14,6 +14,7 @@ public class PageStoreRes {
 	private final Long storeId;
 	private final String storeName;
 	private final String address;
+	private final boolean isDeliverable;
 	private final LocalTime openedAt;
 	private final LocalTime closedAt;
 
@@ -23,6 +24,7 @@ public class PageStoreRes {
 				store.getId(),
 				store.getName(),
 				store.getAddress(),
+				store.isDeliverable(),
 				store.getOpenedAt(),
 				store.getClosedAt()
 			)

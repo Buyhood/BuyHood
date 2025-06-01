@@ -17,4 +17,7 @@ public interface SellerRepository extends JpaRepository<Seller, Long> {
 
 	@Query("SELECT s FROM Seller s WHERE s.deletedAt IS NULL ")
 	Page<Seller> findAllActiveSellers(Pageable pageable);
+
+	@Query("SELECT s FROM Seller s WHERE s.id = :sellerId AND s.deletedAt IS NULL")
+	Optional<Seller> findActiveSellerById(@Param("sellerId") Long sellerId);
 }

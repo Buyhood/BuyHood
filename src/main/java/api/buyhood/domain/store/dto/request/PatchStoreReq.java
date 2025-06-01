@@ -11,6 +11,7 @@ public class PatchStoreReq {
 	private final String storeName;
 	private final String address;
 	private final Long sellerId;
+	private final Boolean isDeliverable;
 	private final String description;
 	private final LocalTime openedAt;
 	private final LocalTime closedAt;
