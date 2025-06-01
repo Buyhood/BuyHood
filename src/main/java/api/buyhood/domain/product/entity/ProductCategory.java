@@ -17,9 +17,9 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@Table(name = "category_products")
+@Table(name = "product_categories")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class CategoryProduct extends BaseTimeEntity {
+public class ProductCategory extends BaseTimeEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,7 +35,7 @@ public class CategoryProduct extends BaseTimeEntity {
 	private Product product;
 
 	@Builder
-	public CategoryProduct(Category category, Product product) {
+	public ProductCategory(Category category, Product product) {
 		this.category = category;
 		this.product = product;
 	}
