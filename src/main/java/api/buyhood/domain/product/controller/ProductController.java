@@ -58,6 +58,7 @@ public class ProductController {
 		return Response.ok(response);
 	}
 
+	@Secured("ROLE_SELLER")
 	@GetMapping("/v1/stores/{storeId}/products")
 	public Response<Page<PageProductRes>> getAllProduct(
 		@PathVariable Long storeId,
