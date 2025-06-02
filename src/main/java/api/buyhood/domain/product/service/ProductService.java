@@ -11,11 +11,15 @@ import api.buyhood.domain.product.entity.ProductCategory;
 import api.buyhood.domain.product.repository.CategoryRepository;
 import api.buyhood.domain.product.repository.ProductCategoryRepository;
 import api.buyhood.domain.product.repository.ProductRepository;
+import api.buyhood.domain.store.entity.Store;
+import api.buyhood.domain.store.repository.StoreRepository;
 import api.buyhood.global.common.exception.ConflictException;
+import api.buyhood.global.common.exception.ForbiddenException;
 import api.buyhood.global.common.exception.InvalidRequestException;
 import api.buyhood.global.common.exception.NotFoundException;
 import api.buyhood.global.common.exception.enums.CategoryErrorCode;
 import api.buyhood.global.common.exception.enums.ProductErrorCode;
+import api.buyhood.global.common.exception.enums.StoreErrorCode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,10 +40,13 @@ public class ProductService {
 	private final ProductRepository productRepository;
 	private final CategoryRepository categoryRepository;
 	private final ProductCategoryRepository productCategoryRepository;
+	private final StoreRepository storeRepository;
 
 	/**
 	 * 상품 등록
 	 *
+	 * @param currentUserId  로그인한 사용자 ID (필수)
+	 * @param storeId        가게 ID (필수)
 	 * @param productName    상품 이름 (필수)
 	 * @param price          상품 가격 (필수)
 	 * @param stock          상품 개수 (필수)
@@ -49,13 +56,22 @@ public class ProductService {
 	 */
 	@Transactional
 	public RegisterProductRes registerProduct(
+		Long currentUserId,
+		Long storeId,
 		String productName,
 		Long price,
 		Long stock,
 		List<Long> categoryIdList,
 		String description
 	) {
-		if (productRepository.existsByName(productName)) {
+		Store getStore = storeRepository.findById(storeId)
+			.orElseThrow(() -> new NotFoundException(StoreErrorCode.STORE_NOT_FOUND));
+
+		if (!getStore.getSeller().getId().equals(currentUserId)) {
+			throw new ForbiddenException(StoreErrorCode.NOT_STORE_OWNER);
+		}
+
+		if (productRepository.existsByStoreIdAndProductName(storeId, productName)) {
 			throw new ConflictException(ProductErrorCode.DUPLICATE_PRODUCT_NAME);
 		}
 
@@ -64,14 +80,15 @@ public class ProductService {
 			.price(price)
 			.description(description)
 			.stock(stock)
+			.store(getStore)
 			.build();
+
+		productRepository.save(product);
 
 		// 중간 테이블 매핑
 		if (categoryIdList != null && !categoryIdList.isEmpty()) {
 			linkCategoriesToProduct(categoryIdList, product);
 		}
-
-		productRepository.save(product);
 
 		List<String> categoryNameList = categoryRepository.findCategoryNamesByCategoryIds(categoryIdList);
 
@@ -81,13 +98,14 @@ public class ProductService {
 	/**
 	 * 상품 단건 조회
 	 *
-	 * @param productId 상품 ID
+	 * @param storeId   가게 ID (필수)
+	 * @param productId 상품 ID (필수)
 	 * @author dereck-jun
 	 */
 	@Transactional(readOnly = true)
-	public GetProductRes getProduct(Long productId) {
+	public GetProductRes getProduct(Long storeId, Long productId) {
 		// 상품 존재 여부 조회
-		Product product = productRepository.findActiveProductByIdAndDeletedAtIsNull(productId)
+		Product product = productRepository.findActiveProductByStoreIdAndProductId(storeId, productId)
 			.orElseThrow(() -> new NotFoundException(ProductErrorCode.PRODUCT_NOT_FOUND));
 
 		// 중간 엔티티에서 카테고리 id 목록 조회
@@ -102,15 +120,16 @@ public class ProductService {
 	/**
 	 * 상품 전체 페이징 조회
 	 *
+	 * @param storeId  가게 ID (필수)
 	 * @param pageable
 	 * @author dereck-jun
 	 */
 	@Transactional(readOnly = true)
-	public Page<PageProductRes> getAllProducts(Pageable pageable) {
+	public Page<PageProductRes> getAllProducts(Long storeId, Pageable pageable) {
 		PageRequest pageRequest =
 			PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Direction.ASC, "name");
 
-		Page<Product> productPage = productRepository.findActiveProducts(pageRequest);
+		Page<Product> productPage = productRepository.findActiveProductsByStoreId(storeId, pageRequest);
 
 		List<Long> productIds = productPage.getContent()
 			.stream()
@@ -125,16 +144,18 @@ public class ProductService {
 	/**
 	 * 상품 키워드 조회
 	 *
+	 * @param storeId  가게 ID (필수)
 	 * @param keyword  상품 이름에 대한 키워드 (선택)
 	 * @param pageable
 	 * @author dereck-jun
 	 */
 	@Transactional(readOnly = true)
-	public Page<PageProductRes> getProductByKeyword(String keyword, Pageable pageable) {
+	public Page<PageProductRes> getProductByKeyword(Long storeId, String keyword, Pageable pageable) {
 		PageRequest pageRequest =
 			PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Direction.ASC, "name");
 
-		Page<Product> productPage = productRepository.findActiveProductsByKeyword(keyword, pageRequest);
+		Page<Product> productPage =
+			productRepository.findActiveProductsByStoreIdAndKeyword(storeId, keyword, pageRequest);
 
 		List<Long> productIds = productPage.getContent()
 			.stream()
@@ -149,6 +170,8 @@ public class ProductService {
 	/**
 	 * 상품 수정
 	 *
+	 * @param currentUserId  로그인한 사용자 ID (필수)
+	 * @param storeId        가게 ID (필수)
 	 * @param productId      수정할 상품의 ID (필수)
 	 * @param productName    변경하려고 하는 상품 이름 (선택)
 	 * @param price          변경하려고 하는 상품 가격 (선택)
@@ -159,6 +182,8 @@ public class ProductService {
 	 */
 	@Transactional
 	public void patchProduct(
+		Long currentUserId,
+		Long storeId,
 		Long productId,
 		String productName,
 		Long price,
@@ -166,7 +191,13 @@ public class ProductService {
 		String description,
 		Long stock
 	) {
-		Product getProduct = productRepository.findActiveProductById(productId)
+		Store getStore = getStoreOrElseThrow(storeId);
+
+		if (!getStore.getSeller().getId().equals(currentUserId)) {
+			throw new ForbiddenException(StoreErrorCode.NOT_STORE_OWNER);
+		}
+
+		Product getProduct = productRepository.findActiveProductByStoreIdAndProductId(storeId, productId)
 			.orElseThrow(() -> new NotFoundException(ProductErrorCode.PRODUCT_NOT_FOUND));
 
 		if (StringUtils.hasText(productName)) {
@@ -174,7 +205,7 @@ public class ProductService {
 				throw new InvalidRequestException(ProductErrorCode.PRODUCT_NAME_SAME_AS_OLD);
 			}
 
-			if (productRepository.existsByName(productName)) {
+			if (productRepository.existsByStoreIdAndProductName(storeId, productName)) {
 				throw new ConflictException(ProductErrorCode.DUPLICATE_PRODUCT_NAME);
 			}
 
@@ -204,12 +235,20 @@ public class ProductService {
 	/**
 	 * 상품 삭제 (논리적 삭제)
 	 *
-	 * @param productId 삭제할 상품 ID (필수)
+	 * @param currentUserId 로그인한 사용자 ID (필수)
+	 * @param storeId       가게 ID (필수)
+	 * @param productId     삭제할 상품 ID (필수)
 	 * @author dereck-jun
 	 */
 	@Transactional
-	public void deleteProduct(Long productId) {
-		Product getProduct = productRepository.findActiveProductById(productId)
+	public void deleteProduct(Long currentUserId, Long storeId, Long productId) {
+		Store getStore = getStoreOrElseThrow(storeId);
+
+		if (!getStore.getSeller().getId().equals(currentUserId)) {
+			throw new ForbiddenException(StoreErrorCode.NOT_STORE_OWNER);
+		}
+
+		Product getProduct = productRepository.findActiveProductByStoreIdAndProductId(storeId, productId)
 			.orElseThrow(() -> new NotFoundException(ProductErrorCode.PRODUCT_NOT_FOUND));
 
 		// 삭제하려는 상품과 연결된 카테고리가 있을 경우 연결 해제 (매핑 테이블에서 내용 삭제)
@@ -226,6 +265,11 @@ public class ProductService {
 			Product product = productMap.get(cartItem.getProductId());
 			product.decreaseStock(cartItem.getQuantity());
 		}
+	}
+
+	private Store getStoreOrElseThrow(Long storeId) {
+		return storeRepository.findActiveStoreById(storeId)
+			.orElseThrow(() -> new NotFoundException(StoreErrorCode.STORE_NOT_FOUND));
 	}
 
 	private void linkCategoriesToProduct(List<Long> categoryIdList, Product product) {

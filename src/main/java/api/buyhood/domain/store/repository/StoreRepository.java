@@ -12,6 +12,9 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
 
 	boolean existsByName(String storeName);
 
+	@Query("select s from Store s where s.id = :storeId and s.deletedAt is null")
+	Optional<Store> findActiveStoreById(Long storeId);
+
 	@Query("select s from Store s inner join fetch s.seller where s.id = :storeId and s.deletedAt is null")
 	Optional<Store> findActiveStoreByIdFetchSeller(Long storeId);
 
