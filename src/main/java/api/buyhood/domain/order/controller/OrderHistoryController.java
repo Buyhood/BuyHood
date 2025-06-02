@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,7 +36,8 @@ public class OrderHistoryController {
 	/**
 	 * 주문 다건 조회 (인증된 사용자의 주문 전체 내역)
 	 */
-	@GetMapping("/v1/orders/me")
+	@Secured("ROLE_USER")
+	@GetMapping("/v1/orders/me/all")
 	public Response<Page<OrderHistoryRes>> getOrdersByUser(
 		@RequestParam(defaultValue = "0") int pageNum,
 		@RequestParam(defaultValue = "10") int pageSize,
@@ -47,19 +49,21 @@ public class OrderHistoryController {
 	/**
 	 * 주문 다건 조회 (Seller)
 	 */
-	@GetMapping("/v1/orders/{storeId}")
+	@Secured("ROLE_SELLER")
+	@GetMapping("/v1/orders/{storeId}/all")
 	public Response<Page<OrderHistoryRes>> getOrdersBySeller(
+		@AuthenticationPrincipal AuthUser authUser,
 		@RequestParam(defaultValue = "0") int pageNum,
 		@RequestParam(defaultValue = "10") int pageSize,
 		@PathVariable @Valid Long storeId
 	) {
-		return Response.ok(orderHistoryService.getOrdersBySeller(pageSize, pageNum, storeId));
+		return Response.ok(orderHistoryService.getOrdersBySeller(pageNum, pageSize, storeId, authUser.getId()));
 	}
 
 	/**
 	 * 주문 다건 조회 (관리자용)
 	 */
-	@GetMapping("/v1/orders")
+	@GetMapping("/v1/orders/all")
 	public Response<Page<OrderHistoryRes>> getOrders(
 		@RequestParam(defaultValue = "0") int pageNum,
 		@RequestParam(defaultValue = "10") int pageSize

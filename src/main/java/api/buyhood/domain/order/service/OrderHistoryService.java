@@ -1,5 +1,6 @@
 package api.buyhood.domain.order.service;
 
+import api.buyhood.domain.auth.entity.AuthUser;
 import api.buyhood.domain.cart.entity.Cart;
 import api.buyhood.domain.cart.entity.CartItem;
 import api.buyhood.domain.order.dto.response.OrderHistoryRes;
@@ -8,10 +9,13 @@ import api.buyhood.domain.order.entity.OrderHistory;
 import api.buyhood.domain.order.repository.OrderHistoryRepository;
 import api.buyhood.domain.order.repository.OrderRepository;
 import api.buyhood.domain.product.entity.Product;
+import api.buyhood.domain.seller.entity.Seller;
+import api.buyhood.domain.seller.repository.SellerRepository;
 import api.buyhood.domain.store.entity.Store;
 import api.buyhood.domain.store.repository.StoreRepository;
 import api.buyhood.domain.user.entity.User;
 import api.buyhood.domain.user.repository.UserRepository;
+import api.buyhood.global.common.exception.ForbiddenException;
 import api.buyhood.global.common.exception.NotFoundException;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +26,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static api.buyhood.global.common.exception.enums.OrderErrorCode.NOT_FOUND_ORDER;
+import static api.buyhood.global.common.exception.enums.OrderErrorCode.NOT_OWNER_OF_STORE;
+import static api.buyhood.global.common.exception.enums.SellerErrorCode.SELLER_NOT_FOUND;
 import static api.buyhood.global.common.exception.enums.StoreErrorCode.STORE_NOT_FOUND;
 import static api.buyhood.global.common.exception.enums.UserErrorCode.USER_NOT_FOUND;
 
@@ -30,9 +36,9 @@ import static api.buyhood.global.common.exception.enums.UserErrorCode.USER_NOT_F
 public class OrderHistoryService {
 
 	private final OrderHistoryRepository orderHistoryRepository;
-	private final OrderRepository orderRepository;
 	private final UserRepository userRepository;
 	private final StoreRepository storeRepository;
+	private final SellerRepository sellerRepository;
 
 	@Transactional(readOnly = true)
 	public List<OrderHistoryRes> findOrder(Long orderId) {
@@ -75,9 +81,16 @@ public class OrderHistoryService {
 	}
 
 	@Transactional(readOnly = true)
-	public Page<OrderHistoryRes> getOrdersBySeller(int pageNum, int pageSize, Long storeId) {
+	public Page<OrderHistoryRes> getOrdersBySeller(int pageNum, int pageSize, Long storeId, Long userId) {
 		Store store = storeRepository.findById(storeId)
 			.orElseThrow(() -> new NotFoundException(STORE_NOT_FOUND));
+
+		Seller seller = sellerRepository.findById(userId)
+				.orElseThrow(() -> new NotFoundException(SELLER_NOT_FOUND));
+
+		if (!store.getSeller().getId().equals(seller.getId())) {
+			throw new ForbiddenException(NOT_OWNER_OF_STORE);
+		}
 
 		Page<OrderHistory> orderHistories = orderHistoryRepository.findAllByStoreId(store.getId(),
 			PageRequest.of(pageNum, pageSize));
