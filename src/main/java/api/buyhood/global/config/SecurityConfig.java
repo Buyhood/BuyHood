@@ -4,6 +4,7 @@ import api.buyhood.global.common.filter.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -35,7 +36,7 @@ public class SecurityConfig {
 				.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.authorizeHttpRequests(auth -> auth
 				.requestMatchers("/api/v1/auth/**", "/error").permitAll()
-				.requestMatchers("/v1/orders/{orderId}/accept", "/v1/orders/{orderId}/reject").hasRole("SELLER")
+				.requestMatchers(HttpMethod.GET, "api/v1/stores").permitAll() //비회원도 가게 조회는 가능
 				.requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
 				.anyRequest().authenticated()
 			)
