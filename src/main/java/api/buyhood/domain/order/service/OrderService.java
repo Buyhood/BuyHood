@@ -1,6 +1,5 @@
 package api.buyhood.domain.order.service;
 
-import api.buyhood.domain.auth.entity.AuthUser;
 import api.buyhood.domain.cart.dto.response.CartRes;
 import api.buyhood.domain.cart.entity.Cart;
 import api.buyhood.domain.cart.entity.CartItem;
@@ -22,8 +21,9 @@ import api.buyhood.domain.store.entity.Store;
 import api.buyhood.domain.store.repository.StoreRepository;
 import api.buyhood.domain.user.entity.User;
 import api.buyhood.domain.user.repository.UserRepository;
-import api.buyhood.global.common.exception.ForbiddenException;
-import api.buyhood.global.common.exception.NotFoundException;
+import api.exception.ForbiddenException;
+import api.exception.NotFoundException;
+import api.security.AuthUser;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -31,13 +31,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static api.buyhood.global.common.exception.enums.CartErrorCode.NOT_FOUND_CART;
-import static api.buyhood.global.common.exception.enums.OrderErrorCode.NOT_FOUND_ORDER;
-import static api.buyhood.global.common.exception.enums.OrderErrorCode.NOT_OWNER_OF_STORE;
-import static api.buyhood.global.common.exception.enums.ProductErrorCode.PRODUCT_NOT_FOUND;
-import static api.buyhood.global.common.exception.enums.SellerErrorCode.SELLER_NOT_FOUND;
-import static api.buyhood.global.common.exception.enums.StoreErrorCode.STORE_NOT_FOUND;
-import static api.buyhood.global.common.exception.enums.UserErrorCode.USER_NOT_FOUND;
+import static api.errorcode.CartErrorCode.NOT_FOUND_CART;
+import static api.errorcode.OrderErrorCode.NOT_FOUND_ORDER;
+import static api.errorcode.OrderErrorCode.NOT_OWNER_OF_STORE;
+import static api.errorcode.ProductErrorCode.PRODUCT_NOT_FOUND;
+import static api.errorcode.SellerErrorCode.SELLER_NOT_FOUND;
+import static api.errorcode.StoreErrorCode.STORE_NOT_FOUND;
+import static api.errorcode.UserErrorCode.USER_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
