@@ -1,3 +1,4 @@
 rootProject.name = 'buyhood'
-include 'apigateway'
-include 'common'
+include 'buyhood-common'
+include 'buyhood-auth'
+include 'buyhood-apigateway'

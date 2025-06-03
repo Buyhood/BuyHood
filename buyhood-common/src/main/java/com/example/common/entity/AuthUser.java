@@ -1,6 +1,5 @@
-package api.buyhood.domain.auth.entity;
+package com.example.common.entity;
 
-import api.buyhood.domain.user.enums.UserRole;
 import java.util.Collection;
 import java.util.List;
 import lombok.Getter;

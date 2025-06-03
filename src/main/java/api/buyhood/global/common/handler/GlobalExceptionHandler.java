@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
 
 	@ExceptionHandler(value = BaseException.class)
-	public Response<CustomExceptionDto> invalidRequestException(
+	public Response<CustomExceptionDto> baseExceptionHandler(
 		BaseException be,
 		HttpServletResponse response
 	) {
@@ -23,4 +23,5 @@ public class GlobalExceptionHandler {
 		response.setStatus(errorCode.getStatus().value());
 		return Response.error(new CustomExceptionDto(errorCode.getCode(), errorCode.getMessage()));
 	}
+
 }

@@ -1,0 +1,24 @@
+server:
+  port: 8000
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka # 유레카 서버 주소
+  instance:
+    prefer-ip-address: true
+    
+spring:
+  application:
+    name: apigateway
+  cloud:
+    gateway:
+      routes:
+        - id: auth-server
+          uri: http://localhost:8081 # 하드코딩되어있음 lb://AUTH-SERVICE 서비스 디스커버리 사용
+          predicates:
+            - Path=/api/v*/auth/**
+
+jwt:
+  secret:
+    key: Q1lXWmZJb2FjQ0d3V1lqT1p6d2d3QkFjQ0p6V2F1Y3p6R3d5b1F2eVd2b0p5N0l3bE1wT3pZPQ==
