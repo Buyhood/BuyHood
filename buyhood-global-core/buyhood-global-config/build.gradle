@@ -10,16 +10,16 @@ repositories {
 }
 
 // 빌드 시 현재 모듈의 .jar 생성
-jar {
+tasks.named("jar") {
     enabled = true
 }
 
-bootJar {
+tasks.named("bootJar") {
     enabled = false
 }
 
 dependencies {
-    implementation project(':buyhood-global-core:buyhood-global-common')
+    api project(':buyhood-global-core:buyhood-global-common')
     
     // spring data jpa
     api 'org.springframework.boot:spring-boot-starter-data-jpa'
