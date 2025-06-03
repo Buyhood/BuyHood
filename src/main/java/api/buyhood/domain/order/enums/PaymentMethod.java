@@ -4,8 +4,18 @@ import lombok.Getter;
 
 @Getter
 public enum PaymentMethod {
-    LOCAL_QR,
-    LOCAL_CARD,
-    CREDIT_CARD,
-    ZERO_PAY
+    CARD("card"),
+    VBANK("vbank"),
+    TRANS("trans"),
+    PHONE("phone");
+
+    private final String name;
+
+    PaymentMethod(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
 }
