@@ -1,8 +1,0 @@
-package payment.enums;
-
-public enum PayStatus {
-    READY,
-    PAID,
-    FAILED,
-    CANCELLED
-}
