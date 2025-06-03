@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+  <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
+  <script th:inline="javascript">
+    const paymentData = {
+      pg: '[[${paymentRequest.pg}]]',
+      pay_method: '[[${paymentRequest.paymentMethod}]]',
+      merchant_uid: '[[${paymentRequest.merchantUid}]]',
+      amount: '[[${paymentRequest.totalPrice}]]',
+      buyer_email: '[[${paymentRequest.buyerEmail}]]',
+    };
+  </script>
+  <script>
+    function requestPay() {
+      const IMP = window.IMP;
+      IMP.init("imp82703454");
+      IMP.request_pay(
+              {
+                channelKey: "channel-key-f15b9c73-788d-48c4-93e4-eaa9ad7ee1bf",
+                pg: paymentData.pg,
+                pay_method: paymentData.pay_method,
+                merchant_uid: paymentData.merchant_uid,
+                amount: paymentData.amount,
+                buyer_email: paymentData.buyer_email,
+              },
+              function (rsp) {
+                if (rsp.success) {
+                  console.log(rsp)
+                } else {
+                  console.log(rsp)
+                }
+              },
+      );
+    }
+  </script>
+</head>
+<body>
+<button onclick="requestPay()"> 결제하기</button>
+</body>
+<div id="paymentResult" style="margin-top: 20px; white-space: pre-wrap;"></div>
+</html>

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Sample Payment</title>
+  <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+  <script src="https://cdn.iamport.kr/js/iamport.payment-1.2.0.js"></script>
+</head>
+<body>
+<button onclick="requestPay()">결제하기</button>
+
+<script th:inline="javascript">
+  const paymentData = {
+    pg: /*[[${paymentRequest.pg}]]*/ "",
+    pay_method: /*[[${paymentRequest.paymentMethod.toLowerCase()}]]*/ "",
+    merchant_uid: /*[[${paymentRequest.merchantUid}]]*/ "",
+    amount: (/*[[${paymentRequest.totalPrice}]]*/ 0),
+    buyer_email: /*[[${paymentRequest.buyerEmail}]]*/ ""
+  };
+</script>
+
+<script>
+  const IMP = window.IMP;
+  IMP.init("imp82703454");
+
+  function requestPay() {
+    IMP.request_pay(
+            {
+              channelKey: "channel-key-b354e446-eca5-4b18-b89f-c9baab33bce0",
+              pg: paymentData.pg,
+              pay_method: paymentData.pay_method,
+              merchant_uid: paymentData.merchant_uid,
+              amount: paymentData.amount,
+              buyer_email: paymentData.buyer_email,
+            },
+            function (rsp) {
+              if (rsp.success) {
+                console.log(rsp)
+              } else {
+                console.log(rsp)
+              }
+            },
+    );
+  }
+</script>
+</body>
+<div id="paymentResult" style="margin-top: 20px; white-space: pre-wrap;"></div>
+</html>

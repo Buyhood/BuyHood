@@ -1,8 +1,8 @@
-package api.buyhood.domain.payment.enums;
+package payment.enums;
 
 public enum PGProvider {
     KAKAOPAY("kakaopay"),
-    TOSS("uplus"),
+    TOSS("tosspay"),
     NAVERPAY("naverpay"),
     NICE("nice"),
     KCP("kcp"),

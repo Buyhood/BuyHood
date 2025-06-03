@@ -1,6 +1,6 @@
-package api.buyhood.domain.payment.repository;
+package payment.repository;
 
-import api.buyhood.domain.payment.entity.Payment;
+import payment.entity.Payment;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

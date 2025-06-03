@@ -1,13 +1,13 @@
-package api.buyhood.domain.payment.service;
+package payment.service;
 
 import api.buyhood.domain.auth.entity.AuthUser;
 import api.buyhood.domain.order.entity.Order;
 import api.buyhood.domain.order.repository.OrderRepository;
-import api.buyhood.domain.payment.dto.request.ApplyPaymentReq;
-import api.buyhood.domain.payment.dto.request.PaymentReq;
-import api.buyhood.domain.payment.dto.response.PaymentRes;
-import api.buyhood.domain.payment.entity.Payment;
-import api.buyhood.domain.payment.repository.PaymentRepository;
+import payment.dto.request.ApplyPaymentReq;
+import payment.dto.request.PaymentReq;
+import payment.dto.response.PaymentRes;
+import payment.entity.Payment;
+import payment.repository.PaymentRepository;
 import api.buyhood.domain.user.entity.User;
 import api.buyhood.domain.user.repository.UserRepository;
 import api.buyhood.global.common.exception.InvalidRequestException;
@@ -17,7 +17,6 @@ import com.siot.IamportRestClient.exception.IamportResponseException;
 import com.siot.IamportRestClient.request.PrepareData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -37,7 +36,6 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final IamportClient iamportClient;
 
-    @Transactional
     public PaymentRes preparePayment(AuthUser authUser, Long orderId, PaymentReq paymentReq) throws IamportResponseException, IOException {
         User user = userRepository.findByEmail(authUser.getEmail())
                 .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
@@ -66,11 +64,10 @@ public class PaymentService {
         return PaymentRes.of(payment.getId(), orderId, payment.getPg(), payment.getPaymentMethod(), payment.getBuyerEmail(), payment.getTotalPrice(), payment.getPayStatus());
     }
 
-    @Transactional(readOnly = true)
     public ApplyPaymentReq applyPayment(Long paymentId) {
         Payment payment = paymentRepository.findNotDeletedById(paymentId)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_PAYMENT));
 
-        return ApplyPaymentReq.of(payment.getPg().getName(), payment.getPaymentMethod().getName(), payment.getMerchantUid(), BigDecimal.valueOf(payment.getTotalPrice()), payment.getBuyerEmail());
+        return ApplyPaymentReq.of(payment.getPg(), payment.getPaymentMethod(), payment.getMerchantUid(), BigDecimal.valueOf(payment.getTotalPrice()), payment.getBuyerEmail());
     }
 }

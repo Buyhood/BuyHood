@@ -1,1 +1,3 @@
 rootProject.name = 'buyhood'
+include 'buyhood-payment'
+
