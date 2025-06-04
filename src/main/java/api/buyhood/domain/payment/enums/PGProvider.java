@@ -8,8 +8,8 @@ public enum PGProvider {
     KCP("kcp"),
     DANAL("danal"),
     UPLUS("uplus"),
-    PAYCO("payco"),
-    KG("html5_inicis");
+    KG("html5_inicis"),
+    ZERO_PAY("zeropay");
 
     private final String name;
 

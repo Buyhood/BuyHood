@@ -17,7 +17,7 @@ public class PaymentController {
 
     private final PaymentService paymentService;
 
-    /* 결제 요청 */
+    /* 결제 요청 (portone) */
     @GetMapping("/v1/payments/{paymentId}")
     public String applyPayment(
             @PathVariable Long paymentId,
@@ -25,6 +25,6 @@ public class PaymentController {
     ) {
         ApplyPaymentReq applyPaymentReq = paymentService.applyPayment(paymentId);
         model.addAttribute("paymentRequest", applyPaymentReq);
-        return "payment";
+        return "payment-portone";
     }
 }

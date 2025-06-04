@@ -24,8 +24,10 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 import static api.buyhood.domain.order.enums.OrderStatus.PENDING;
+import static api.buyhood.domain.payment.enums.PGProvider.ZERO_PAY;
 import static api.buyhood.global.common.exception.enums.OrderErrorCode.*;
 import static api.buyhood.global.common.exception.enums.PaymentErrorCode.NOT_FOUND_PAYMENT;
+import static api.buyhood.global.common.exception.enums.PaymentErrorCode.NOT_SUPPORTED_ZERO_PAY;
 import static api.buyhood.global.common.exception.enums.UserErrorCode.USER_NOT_FOUND;
 
 @Service
@@ -71,6 +73,10 @@ public class PaymentService {
         Payment payment = paymentRepository.findNotDeletedById(paymentId)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_PAYMENT));
 
-        return ApplyPaymentReq.of(payment.getPg().getName(), payment.getPaymentMethod().getName(), payment.getMerchantUid(), BigDecimal.valueOf(payment.getTotalPrice()), payment.getBuyerEmail());
+        if (ZERO_PAY.equals(payment.getPg())) {
+            throw new InvalidRequestException(NOT_SUPPORTED_ZERO_PAY);
+        }
+
+        return ApplyPaymentReq.of(payment.getPg().getName(), String.valueOf(payment.getPaymentMethod()), payment.getMerchantUid(), BigDecimal.valueOf(payment.getTotalPrice()), payment.getBuyerEmail());
     }
 }
