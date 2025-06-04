@@ -12,7 +12,7 @@
 <script th:inline="javascript">
   const paymentData = {
     pg: /*[[${paymentRequest.pg}]]*/ "",
-    pay_method: /*[[${paymentRequest.paymentMethod.toLowerCase()}]]*/ "",
+    pay_method: /*[[${paymentRequest.paymentMethod}]]*/ "",
     name: /*[[${paymentRequest.name}]]*/ "",
     merchant_uid: /*[[${paymentRequest.merchantUid}]]*/ "",
     amount: (/*[[${paymentRequest.totalPrice}]]*/ 0),

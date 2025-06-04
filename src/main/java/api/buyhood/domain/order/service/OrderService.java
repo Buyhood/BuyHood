@@ -83,6 +83,7 @@ public class OrderService {
 			.store(store)
 			.user(user)
 			.name(orderName)
+			.paymentMethod(req.getPaymentMethod())
 			.requestMessage(req.getRequestMessage())
 			.status(OrderStatus.PENDING)
 			.totalPrice(getTotalPrice(productMap, cart.getCart()))
@@ -93,7 +94,7 @@ public class OrderService {
 
 		productService.decreaseStock(cart, productMap);
 
-		return ApplyOrderRes.of(order.getStore().getId(), CartRes.of(cart), order.getTotalPrice(), order.getStatus(), order.getCreatedAt(), order.getRequestMessage());
+		return ApplyOrderRes.of(order.getStore().getId(), CartRes.of(cart),order.getPaymentMethod(), order.getTotalPrice(), order.getStatus(), order.getCreatedAt(), order.getRequestMessage());
 	}
 
 	//주문 승인

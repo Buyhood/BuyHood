@@ -32,10 +32,6 @@ public class Payment extends BaseTimeEntity {
     @Column(name = "pg", columnDefinition = "VARCHAR(50)")
     private PGProvider pg;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "payment_method", columnDefinition = "VARCHAR(50)")
-    private PaymentMethod paymentMethod;
-
     @Column(nullable = false)
     private String buyerEmail;
 
@@ -50,21 +46,19 @@ public class Payment extends BaseTimeEntity {
     private String merchantUid;
 
     @Builder
-    public Payment (Order order, PGProvider pg, PaymentMethod paymentMethod, String buyerEmail, BigDecimal totalPrice, String merchantUid ) {
+    public Payment (Order order, PGProvider pg,  String buyerEmail, BigDecimal totalPrice, String merchantUid ) {
         this.order = order;
         this.pg = pg;
-        this.paymentMethod = paymentMethod;
         this.buyerEmail = buyerEmail;
         this.totalPrice = totalPrice;
         this.merchantUid = merchantUid;
         this.payStatus = PayStatus.READY;
     }
 
-    public static Payment of(Order order, PGProvider pg, PaymentMethod paymentMethod, String buyerEmail, BigDecimal totalPrice, String merchantUid) {
+    public static Payment of(Order order, PGProvider pg,  String buyerEmail, BigDecimal totalPrice, String merchantUid) {
         return Payment.builder()
                 .order(order)
                 .pg(pg)
-                .paymentMethod(paymentMethod)
                 .buyerEmail(buyerEmail)
                 .totalPrice(totalPrice)
                 .merchantUid(merchantUid)

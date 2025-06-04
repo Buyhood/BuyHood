@@ -21,11 +21,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.UUID;
 
 import static api.buyhood.domain.order.enums.OrderStatus.PENDING;
-import static api.buyhood.domain.payment.enums.PGProvider.ZERO_PAY;
+import static api.buyhood.domain.order.enums.PaymentMethod.ZERO_PAY;
 import static api.buyhood.global.common.exception.enums.OrderErrorCode.*;
 import static api.buyhood.global.common.exception.enums.PaymentErrorCode.*;
 import static api.buyhood.global.common.exception.enums.UserErrorCode.USER_NOT_FOUND;
@@ -48,7 +47,7 @@ public class PaymentService {
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_ORDER));
 
         if (!order.getUser().getId().equals(user.getId())) {
-            throw new InvalidRequestException(NOT_OWNER_OF_STORE);
+            throw new InvalidRequestException(NOT_OWNER_OF_ORDER);
         }
 
         if (!PENDING.equals(order.getStatus())) {
@@ -58,16 +57,14 @@ public class PaymentService {
         //결제 고유번호
         String merchantUid = String.valueOf(UUID.randomUUID());
 
-        Payment payment = Payment.of(order, paymentReq.getPg(), paymentReq.getPaymentMethod(), authUser.getEmail(), order.getTotalPrice(), merchantUid);
+        Payment payment = Payment.of(order, paymentReq.getPg(), authUser.getEmail(), order.getTotalPrice(), merchantUid);
         paymentRepository.save(payment);
 
         //사전 검증 요청 객체
         PrepareData prepareData = new PrepareData(payment.getMerchantUid(), payment.getTotalPrice());
-
-
         iamportClient.postPrepare(prepareData);
 
-        return PaymentRes.of(payment.getId(), orderId, payment.getPg(), payment.getPaymentMethod(), payment.getBuyerEmail(), payment.getTotalPrice(), payment.getPayStatus());
+        return PaymentRes.of(payment.getId(), orderId, payment.getPg(), payment.getBuyerEmail(), payment.getTotalPrice(), payment.getPayStatus());
     }
 
     @Transactional(readOnly = true)
@@ -79,14 +76,14 @@ public class PaymentService {
             throw new InvalidRequestException(CANNOT_REQUEST_PAYMENT);
         }
 
-        if (ZERO_PAY.equals(payment.getPg())) {
+        if (ZERO_PAY.equals(payment.getOrder().getPaymentMethod())) {
             throw new InvalidRequestException(NOT_SUPPORTED_ZERO_PAY);
         }
 
         return ApplyPaymentReq.of(
                 payment.getPg().getName(),
-                String.valueOf(payment.getPaymentMethod()),
                 payment.getOrder().getName(),
+                String.valueOf(payment.getOrder().getPaymentMethod()),
                 payment.getMerchantUid(),
                 payment.getTotalPrice(),
                 payment.getBuyerEmail());
