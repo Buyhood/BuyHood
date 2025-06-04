@@ -3,6 +3,7 @@ package api.buyhood.domain.payment.controller;
 import api.buyhood.domain.payment.dto.request.ApplyPaymentReq;
 import api.buyhood.domain.payment.service.PaymentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;

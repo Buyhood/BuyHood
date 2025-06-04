@@ -2,11 +2,14 @@ package api.buyhood.domain.payment.controller;
 
 import api.buyhood.domain.auth.entity.AuthUser;
 import api.buyhood.domain.payment.dto.request.PaymentReq;
+import api.buyhood.domain.payment.dto.request.ValidPaymentReq;
 import api.buyhood.domain.payment.dto.response.PaymentRes;
 import api.buyhood.domain.payment.service.PaymentService;
 import api.buyhood.global.common.dto.Response;
 import com.siot.IamportRestClient.exception.IamportResponseException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,8 +26,20 @@ public class PaymentRestController {
     public Response<PaymentRes> preparePayment(
             @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long orderId,
-            @RequestBody PaymentReq paymentReq
+            @Valid @RequestBody PaymentReq paymentReq
     ) throws IamportResponseException, IOException {
         return Response.ok(paymentService.preparePayment(authUser, orderId, paymentReq));
     }
+
+    /* 결제 후 검증*/
+    @Secured("ROLE_USER")
+    @PostMapping("/v1/payments/{paymentId}")
+    public Response<String> validPayment(
+            @PathVariable Long paymentId,
+            @Valid @RequestBody ValidPaymentReq validPaymentReq
+    ) throws IamportResponseException, IOException {
+        paymentService.validPayment(paymentId, validPaymentReq);
+        return Response.ok("결제가 완료되었습니다.");
+    }
+
 }
