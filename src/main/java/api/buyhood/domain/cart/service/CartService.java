@@ -36,6 +36,7 @@ public class CartService {
 
 		List<Long> productIdList = createCartReq.getCartItems().stream()
 			.map(CartReq::getProductId)
+			.distinct()
 			.toList();
 
 		// 조회된 상품의 ID 수가 요청된 상품의 ID 수보다 적다면 존재하지않는 상품이 있다는 의미(뭐가 없는진 모름)
