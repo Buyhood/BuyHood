@@ -60,6 +60,11 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
-tasks.named('test') {
-	useJUnitPlatform()
+tasks.withType(org.gradle.api.tasks.testing.Test) {
+    useJUnitPlatform()
+
+    if (System.getenv("CI") == "true") {
+        systemProperty "spring.profiles.active", "ci"
+    }
+    // 로컬에서는 아무 프로파일도 강제하지 않으므로 application.properties(H2) 사용
 }
