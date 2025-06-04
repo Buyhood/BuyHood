@@ -6,6 +6,7 @@ import api.buyhood.domain.order.repository.OrderRepository;
 import api.buyhood.domain.payment.dto.request.ApplyPaymentReq;
 import api.buyhood.domain.payment.dto.request.PaymentReq;
 import api.buyhood.domain.payment.dto.request.ValidPaymentReq;
+import api.buyhood.domain.payment.dto.request.ZPayValidationReq;
 import api.buyhood.domain.payment.dto.response.PaymentRes;
 import api.buyhood.domain.payment.entity.Payment;
 import api.buyhood.domain.payment.enums.PGProvider;
@@ -34,6 +35,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -137,6 +139,34 @@ public class PaymentService {
             payment.failPayment();
 
             refund(validPaymentReq);
+            throw new InvalidRequestException(NOT_MATCHE_ACCOUNT);
+        }
+
+        payment.successPayment();
+    }
+
+    @Transactional
+    public void validPaymentWithZeroPay(Long paymentId, ZPayValidationReq zPayValidationReq) {
+        Payment payment = paymentRepository.findNotDeletedById(paymentId)
+                .orElseThrow(() -> new NotFoundException(NOT_FOUND_PAYMENT));
+
+        if (payment.isPaid()) {
+            throw new InvalidRequestException(ALREADY_PAID);
+        }
+
+        if (!"paid".equals(zPayValidationReq.getStatus())) {
+            payment.failPayment();
+            throw new InvalidRequestException(NOT_PAID);
+        }
+
+        if (!payment.getMerchantUid().equals(zPayValidationReq.getMerchantUid())) {
+            payment.failPayment();
+            throw new InvalidRequestException(NOT_MATCHE_MERCHANT_UID);
+        }
+
+        if (payment.getTotalPrice().compareTo(BigDecimal.valueOf(zPayValidationReq.getTotalPrice())) != 0) {
+            payment.failPayment();
+
             throw new InvalidRequestException(NOT_MATCHE_ACCOUNT);
         }
 
