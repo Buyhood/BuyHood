@@ -16,8 +16,8 @@ public enum PaymentErrorCode implements ErrorCode {
     NOT_PAID(3014, "결제가 완료되지 않았습니다.", HttpStatus.BAD_REQUEST),
     ALREADY_PAID(3015, "이미 처리된 결제입니다.", HttpStatus.BAD_REQUEST),
     FAILED_CANCEL(3016, "결체 취소에 실패하였습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
-    FAILED_CREATE_QR(3017, "QR생성에 실패하였습니다.", HttpStatus.INTERNAL_SERVER_ERROR)
-    ;
+    FAILED_CREATE_QR(3017, "QR생성에 실패하였습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    NOT_OWNER_OF_PAYMENT(3019, "자신의 결제가 아닙니다.", HttpStatus.BAD_REQUEST);
 
     private final int code;
     private final String message;
