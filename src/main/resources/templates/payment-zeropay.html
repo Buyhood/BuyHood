@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>제로페이 결제 확인</title>
+</head>
+<body>
+<h2>제로페이 결제 확인</h2>
+
+<button onclick="showPaymentInfo()">결제하기</button>
+
+<script th:inline="javascript">
+    let merchantUid = /*[[${paymentRequest.merchantUid}]]*/ 'defaultUuid';
+    let name = /*[[${paymentRequest.name}]]*/ 'defaultItemName';
+    let amount = /*[[${paymentRequest.totalPrice}]]*/ 0;
+    let state = 'paid'
+</script>
+
+<script th:inline="javascript">
+    function showPaymentInfo() {
+        alert(`결제 UUID: ${merchantUid}\n상품명: ${name}\n금액: ${amount}원\n상태: ${state}`);
+        console.log(merchantUid, name, amount, )
+    }
+</script>
+</body>
+</html>
