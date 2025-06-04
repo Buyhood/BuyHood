@@ -40,7 +40,6 @@ public class Category extends BaseTimeEntity {
 	private String name;
 
 	@Column(nullable = false)
-	@Min(0)
 	private int depth;
 
 	@ManyToOne(fetch = FetchType.LAZY)
