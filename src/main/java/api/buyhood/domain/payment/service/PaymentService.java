@@ -7,6 +7,7 @@ import api.buyhood.domain.payment.dto.request.ApplyPaymentReq;
 import api.buyhood.domain.payment.dto.request.PaymentReq;
 import api.buyhood.domain.payment.dto.response.PaymentRes;
 import api.buyhood.domain.payment.entity.Payment;
+import api.buyhood.domain.payment.enums.PayStatus;
 import api.buyhood.domain.payment.repository.PaymentRepository;
 import api.buyhood.domain.user.entity.User;
 import api.buyhood.domain.user.repository.UserRepository;
@@ -26,8 +27,7 @@ import java.util.UUID;
 import static api.buyhood.domain.order.enums.OrderStatus.PENDING;
 import static api.buyhood.domain.payment.enums.PGProvider.ZERO_PAY;
 import static api.buyhood.global.common.exception.enums.OrderErrorCode.*;
-import static api.buyhood.global.common.exception.enums.PaymentErrorCode.NOT_FOUND_PAYMENT;
-import static api.buyhood.global.common.exception.enums.PaymentErrorCode.NOT_SUPPORTED_ZERO_PAY;
+import static api.buyhood.global.common.exception.enums.PaymentErrorCode.*;
 import static api.buyhood.global.common.exception.enums.UserErrorCode.USER_NOT_FOUND;
 
 @Service
@@ -73,10 +73,19 @@ public class PaymentService {
         Payment payment = paymentRepository.findNotDeletedById(paymentId)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_PAYMENT));
 
+        if (!PayStatus.READY.equals(payment.getPayStatus())) {
+            throw new InvalidRequestException(CANNOT_REQUEST_PAYMENT);
+        }
+
         if (ZERO_PAY.equals(payment.getPg())) {
             throw new InvalidRequestException(NOT_SUPPORTED_ZERO_PAY);
         }
 
-        return ApplyPaymentReq.of(payment.getPg().getName(), String.valueOf(payment.getPaymentMethod()), payment.getMerchantUid(), BigDecimal.valueOf(payment.getTotalPrice()), payment.getBuyerEmail());
+        return ApplyPaymentReq.of(
+                payment.getPg().getName(),
+                String.valueOf(payment.getPaymentMethod()),
+                payment.getMerchantUid(),
+                BigDecimal.valueOf(payment.getTotalPrice()),
+                payment.getBuyerEmail());
     }
 }

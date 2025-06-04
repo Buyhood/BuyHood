@@ -15,7 +15,8 @@
     pay_method: /*[[${paymentRequest.paymentMethod.toLowerCase()}]]*/ "",
     merchant_uid: /*[[${paymentRequest.merchantUid}]]*/ "",
     amount: (/*[[${paymentRequest.totalPrice}]]*/ 0),
-    buyer_email: /*[[${paymentRequest.buyerEmail}]]*/ ""
+    buyer_email: /*[[${paymentRequest.buyerEmail}]]*/ "",
+    name: /*[[${paymentRequest.name}]]*/ ""
   };
 </script>
 
@@ -32,6 +33,7 @@
               merchant_uid: paymentData.merchant_uid,
               amount: paymentData.amount,
               buyer_email: paymentData.buyer_email,
+              name: paymentData.name
             },
             function (rsp) {
               if (rsp.success) {
