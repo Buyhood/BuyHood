@@ -11,12 +11,15 @@ import api.buyhood.domain.product.entity.Product;
 import api.buyhood.domain.product.repository.ProductRepository;
 import api.buyhood.domain.user.entity.User;
 import api.buyhood.domain.user.repository.UserRepository;
+import api.buyhood.global.common.exception.InvalidRequestException;
 import api.buyhood.global.common.exception.NotFoundException;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
+import static api.buyhood.global.common.exception.enums.CartErrorCode.MULTIPLE_STORE_NOT_ALLOWED;
 import static api.buyhood.global.common.exception.enums.CartErrorCode.NOT_FOUND_CART;
 import static api.buyhood.global.common.exception.enums.ProductErrorCode.PRODUCT_NOT_FOUND;
 import static api.buyhood.global.common.exception.enums.UserErrorCode.USER_NOT_FOUND;
@@ -45,6 +48,9 @@ public class CartService {
 			throw new NotFoundException(PRODUCT_NOT_FOUND);
 
 		}
+
+		//가게 중복 검증
+		validateSingleStoreInCart(products);
 
 		List<CartItem> cartItemList = createCartReq.getCartItems().stream()
 			.map(item ->
@@ -87,5 +93,16 @@ public class CartService {
 		}
 
 		cartRepository.clearCart(user.getId());
+	}
+
+	private void validateSingleStoreInCart(List<Product> products) {
+		long storeCount = products.stream()
+				.map(product -> product.getStore().getId())
+				.distinct()
+				.count();
+
+		if (storeCount != 1) {
+			throw new InvalidRequestException(MULTIPLE_STORE_NOT_ALLOWED);
+		}
 	}
 }
