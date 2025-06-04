@@ -2,6 +2,7 @@ package api.buyhood.domain.product.service;
 
 import api.buyhood.domain.cart.entity.Cart;
 import api.buyhood.domain.cart.entity.CartItem;
+import api.buyhood.domain.order.entity.OrderHistory;
 import api.buyhood.domain.product.dto.response.GetProductRes;
 import api.buyhood.domain.product.dto.response.PageProductRes;
 import api.buyhood.domain.product.dto.response.RegisterProductRes;
@@ -264,6 +265,16 @@ public class ProductService {
 		for (CartItem cartItem : cart.getCart()) {
 			Product product = productMap.get(cartItem.getProductId());
 			product.decreaseStock(cartItem.getQuantity());
+		}
+	}
+
+	@Transactional
+	public void rollBackStock(List<OrderHistory> orderHistories) {
+		for (OrderHistory orderHistory : orderHistories) {
+			Product product = orderHistory.getProduct();
+			int quantity = orderHistory.getQuantity();
+
+			product.rollBackStock(quantity);
 		}
 	}
 

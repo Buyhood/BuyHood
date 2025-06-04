@@ -65,6 +65,11 @@ public class Product extends BaseTimeEntity {
 		this.stock -= quantity;
 	}
 
+	//재고 롤백
+	public void rollBackStock(int quantity) {
+		this.stock += quantity;
+	}
+
 	public void patchName(String productName) {
 		this.name = productName;
 	}

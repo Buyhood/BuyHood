@@ -14,7 +14,8 @@ public enum PaymentErrorCode implements ErrorCode {
     NOT_MATCHE_MERCHANT_UID(3102,"MerchantUid가 일치하지 않습니다.", HttpStatus.UNAUTHORIZED),
     NOT_MATCHE_ACCOUNT(3103, "결제 금액이 일치하지 않습니다.", HttpStatus.BAD_REQUEST),
     NOT_PAID(3014, "결제가 완료되지 않았습니다.", HttpStatus.BAD_REQUEST),
-    ALREADY_PAID(3015, "이미 처리된 결제입니다.", HttpStatus.BAD_REQUEST)
+    ALREADY_PAID(3015, "이미 처리된 결제입니다.", HttpStatus.BAD_REQUEST),
+    FAILED_CANCEL(3016, "결체 취소에 실패하였습니다.", HttpStatus.INTERNAL_SERVER_ERROR)
     ;
 
     private final int code;
