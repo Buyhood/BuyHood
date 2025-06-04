@@ -11,6 +11,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Getter
 @Entity
 @Table(name = "payments")
@@ -38,17 +40,17 @@ public class Payment extends BaseTimeEntity {
     private String buyerEmail;
 
     @Column(nullable = false)
-    private long totalPrice;
+    private BigDecimal totalPrice;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "pay_status", columnDefinition = "VARCHAR(50)")
     private PayStatus payStatus;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String merchantUid;
 
     @Builder
-    public Payment (Order order, PGProvider pg, PaymentMethod paymentMethod, String buyerEmail, long totalPrice, String merchantUid ) {
+    public Payment (Order order, PGProvider pg, PaymentMethod paymentMethod, String buyerEmail, BigDecimal totalPrice, String merchantUid ) {
         this.order = order;
         this.pg = pg;
         this.paymentMethod = paymentMethod;
@@ -58,7 +60,7 @@ public class Payment extends BaseTimeEntity {
         this.payStatus = PayStatus.READY;
     }
 
-    public static Payment of(Order order, PGProvider pg, PaymentMethod paymentMethod, String buyerEmail, long totalPrice, String merchantUid) {
+    public static Payment of(Order order, PGProvider pg, PaymentMethod paymentMethod, String buyerEmail, BigDecimal totalPrice, String merchantUid) {
         return Payment.builder()
                 .order(order)
                 .pg(pg)

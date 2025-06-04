@@ -6,6 +6,8 @@ import api.buyhood.domain.payment.enums.PayStatus;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.math.BigDecimal;
+
 @Getter
 
 public class PaymentRes {
@@ -14,11 +16,11 @@ public class PaymentRes {
     private PGProvider pg;
     private PaymentMethod paymentMethod;
     private String buyerEmail;
-    private long totalPrice;
+    private BigDecimal totalPrice;
     private PayStatus payStatus;
 
     @Builder
-    public PaymentRes(Long paymentId, Long orderId, PGProvider pg, PaymentMethod paymentMethod, String buyerEmail, long totalPrice, PayStatus payStatus) {
+    public PaymentRes(Long paymentId, Long orderId, PGProvider pg, PaymentMethod paymentMethod, String buyerEmail, BigDecimal totalPrice, PayStatus payStatus) {
         this.paymentId = paymentId;
         this.orderId = orderId;
         this.pg = pg;
@@ -28,7 +30,7 @@ public class PaymentRes {
         this.payStatus = payStatus;
     }
 
-    public static PaymentRes of(Long paymentId, Long orderId, PGProvider pg, PaymentMethod paymentMethod, String buyerEmail, long totalPrice, PayStatus payStatus) {
+    public static PaymentRes of(Long paymentId, Long orderId, PGProvider pg, PaymentMethod paymentMethod, String buyerEmail, BigDecimal totalPrice, PayStatus payStatus) {
         return PaymentRes.builder()
                 .paymentId(paymentId)
                 .orderId(orderId)

@@ -39,7 +39,7 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final IamportClient iamportClient;
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public PaymentRes preparePayment(AuthUser authUser, Long orderId, PaymentReq paymentReq) throws IamportResponseException, IOException {
         User user = userRepository.findByEmail(authUser.getEmail())
                 .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
@@ -62,7 +62,9 @@ public class PaymentService {
         paymentRepository.save(payment);
 
         //사전 검증 요청 객체
-        PrepareData prepareData = new PrepareData(payment.getMerchantUid(), BigDecimal.valueOf(payment.getTotalPrice()));
+        PrepareData prepareData = new PrepareData(payment.getMerchantUid(), payment.getTotalPrice());
+
+
         iamportClient.postPrepare(prepareData);
 
         return PaymentRes.of(payment.getId(), orderId, payment.getPg(), payment.getPaymentMethod(), payment.getBuyerEmail(), payment.getTotalPrice(), payment.getPayStatus());
@@ -84,8 +86,9 @@ public class PaymentService {
         return ApplyPaymentReq.of(
                 payment.getPg().getName(),
                 String.valueOf(payment.getPaymentMethod()),
+                payment.getOrder().getName(),
                 payment.getMerchantUid(),
-                BigDecimal.valueOf(payment.getTotalPrice()),
+                payment.getTotalPrice(),
                 payment.getBuyerEmail());
     }
 }

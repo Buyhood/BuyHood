@@ -13,10 +13,10 @@
   const paymentData = {
     pg: /*[[${paymentRequest.pg}]]*/ "",
     pay_method: /*[[${paymentRequest.paymentMethod.toLowerCase()}]]*/ "",
+    name: /*[[${paymentRequest.name}]]*/ "",
     merchant_uid: /*[[${paymentRequest.merchantUid}]]*/ "",
     amount: (/*[[${paymentRequest.totalPrice}]]*/ 0),
-    buyer_email: /*[[${paymentRequest.buyerEmail}]]*/ "",
-    name: /*[[${paymentRequest.name}]]*/ ""
+    buyer_email: /*[[${paymentRequest.buyerEmail}]]*/ ""
   };
 </script>
 
@@ -30,10 +30,10 @@
               channelKey: "channel-key-b354e446-eca5-4b18-b89f-c9baab33bce0",
               pg: paymentData.pg,
               pay_method: paymentData.pay_method,
+              name: paymentData.name,
               merchant_uid: paymentData.merchant_uid,
               amount: paymentData.amount,
-              buyer_email: paymentData.buyer_email,
-              name: paymentData.name
+              buyer_email: paymentData.buyer_email
             },
             function (rsp) {
               if (rsp.success) {

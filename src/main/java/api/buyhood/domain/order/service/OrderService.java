@@ -24,6 +24,8 @@ import api.buyhood.domain.user.entity.User;
 import api.buyhood.domain.user.repository.UserRepository;
 import api.buyhood.global.common.exception.ForbiddenException;
 import api.buyhood.global.common.exception.NotFoundException;
+
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -151,15 +153,16 @@ public class OrderService {
 		order.delete();
 	}
 
-	private long getTotalPrice(Map<Long, Product> productMap, List<CartItem> cartItemList) {
-		long totalPrice = 0L;
+	private BigDecimal getTotalPrice(Map<Long, Product> productMap, List<CartItem> cartItemList) {
+		BigDecimal totalPrice = BigDecimal.ZERO;
 
 		for (CartItem item : cartItemList) {
 			Product product = productMap.get(item.getProductId());
 			if (product == null) {
 				throw new NotFoundException(PRODUCT_NOT_FOUND);
 			}
-			totalPrice += product.getPrice() * item.getQuantity();
+			BigDecimal itemTotal  = BigDecimal.valueOf(product.getPrice()).multiply(BigDecimal.valueOf(item.getQuantity()));
+			totalPrice = totalPrice.add(itemTotal);
 		}
 
 		return totalPrice;
