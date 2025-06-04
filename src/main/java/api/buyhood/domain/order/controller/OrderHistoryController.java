@@ -1,7 +1,7 @@
 package api.buyhood.domain.order.controller;
 
 import api.buyhood.domain.auth.entity.AuthUser;
-import api.buyhood.domain.order.dto.response.OrderHistoryRes;
+import api.buyhood.domain.order.dto.response.GetOrderRes;
 import api.buyhood.domain.order.service.OrderHistoryService;
 import api.buyhood.global.common.dto.Response;
 import jakarta.validation.Valid;
@@ -27,7 +27,7 @@ public class OrderHistoryController {
 	 * 주문 단건 조회
 	 */
 	@GetMapping("/v1/orders/{orderId}")
-	public Response<List<OrderHistoryRes>> getOrder(
+	public Response<List<GetOrderRes>> getOrder(
 		@PathVariable Long orderId
 	) {
 		return Response.ok(orderHistoryService.findOrder(orderId));
@@ -38,7 +38,7 @@ public class OrderHistoryController {
 	 */
 	@Secured("ROLE_USER")
 	@GetMapping("/v1/orders/me/all")
-	public Response<Page<OrderHistoryRes>> getOrdersByUser(
+	public Response<Page<GetOrderRes>> getOrdersByUser(
 		@RequestParam(defaultValue = "0") int pageNum,
 		@RequestParam(defaultValue = "10") int pageSize,
 		@AuthenticationPrincipal AuthUser authUser
@@ -51,7 +51,7 @@ public class OrderHistoryController {
 	 */
 	@Secured("ROLE_SELLER")
 	@GetMapping("/v1/orders/{storeId}/all")
-	public Response<Page<OrderHistoryRes>> getOrdersBySeller(
+	public Response<Page<GetOrderRes>> getOrdersBySeller(
 		@AuthenticationPrincipal AuthUser authUser,
 		@RequestParam(defaultValue = "0") int pageNum,
 		@RequestParam(defaultValue = "10") int pageSize,
@@ -64,7 +64,7 @@ public class OrderHistoryController {
 	 * 주문 다건 조회 (관리자용)
 	 */
 	@GetMapping("/v1/orders/all")
-	public Response<Page<OrderHistoryRes>> getOrders(
+	public Response<Page<GetOrderRes>> getOrders(
 		@RequestParam(defaultValue = "0") int pageNum,
 		@RequestParam(defaultValue = "10") int pageSize
 	) {

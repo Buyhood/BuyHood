@@ -43,6 +43,13 @@ public class Order extends BaseTimeEntity {
 	private User user;
 
 	@Column(nullable = false)
+	private String name;
+
+	@Column(nullable = false)
+	@Enumerated(EnumType.STRING)
+	private PaymentMethod paymentMethod;
+
+	@Column(nullable = false)
 	private long totalPrice;
 
 	@Column
@@ -56,12 +63,14 @@ public class Order extends BaseTimeEntity {
 	private LocalTime readyAt;
 
 	@Builder
-	public Order(Store store, User user, String requestMessage, long totalPrice,
+	public Order(Store store, User user,String name, String requestMessage, PaymentMethod paymentMethod, long totalPrice,
 		OrderStatus status,
 		LocalTime readyAt) {
 		this.store = store;
 		this.user = user;
+		this.name = name;
 		this.requestMessage = requestMessage;
+		this.paymentMethod = paymentMethod;
 		this.totalPrice = totalPrice;
 		this.status = status;
 		this.readyAt = readyAt;

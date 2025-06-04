@@ -75,9 +75,12 @@ public class OrderService {
 		Map<Long, Product> productMap = productRepository.findAllById(productIdList).stream()
 			.collect(Collectors.toMap(Product::getId, p -> p));
 
+		String orderName = creatOrderName(productMap);
+
 		Order order = Order.builder()
 			.store(store)
 			.user(user)
+			.name(orderName)
 			.requestMessage(req.getRequestMessage())
 			.status(OrderStatus.PENDING)
 			.totalPrice(getTotalPrice(productMap, cart.getCart()))
@@ -92,6 +95,7 @@ public class OrderService {
 	}
 
 	//주문 승인
+
 	@Transactional
 	public AcceptOrderRes acceptOrder(AcceptOrderReq req, Long orderId, AuthUser authUser) {
 
@@ -112,8 +116,8 @@ public class OrderService {
 
 		return AcceptOrderRes.of(order);
 	}
-
 	//주문 거절
+
 	@Transactional
 	public RejectOrderRes rejectOrder(Long orderId, AuthUser authUser) {
 
@@ -134,7 +138,6 @@ public class OrderService {
 
 		return RejectOrderRes.of(order);
 	}
-
 	@Transactional
 	public void deleteOrder(AuthUser authUser, Long orderId) {
 		User user = userRepository.findByEmail(authUser.getEmail())
@@ -160,5 +163,16 @@ public class OrderService {
 		}
 
 		return totalPrice;
+	}
+
+	private String creatOrderName(Map<Long, Product> productMap) {
+		int size = productMap.size();
+		Product product = productMap.values().iterator().next();
+
+		if (size == 1) {
+			return String.format("%s", product.getName());
+		}
+
+		return String.format("%s 외 %d", product.getName(), size - 1);
 	}
 }

@@ -1,13 +1,11 @@
 package api.buyhood.domain.order.service;
 
-import api.buyhood.domain.auth.entity.AuthUser;
 import api.buyhood.domain.cart.entity.Cart;
 import api.buyhood.domain.cart.entity.CartItem;
-import api.buyhood.domain.order.dto.response.OrderHistoryRes;
+import api.buyhood.domain.order.dto.response.GetOrderRes;
 import api.buyhood.domain.order.entity.Order;
 import api.buyhood.domain.order.entity.OrderHistory;
 import api.buyhood.domain.order.repository.OrderHistoryRepository;
-import api.buyhood.domain.order.repository.OrderRepository;
 import api.buyhood.domain.product.entity.Product;
 import api.buyhood.domain.seller.entity.Seller;
 import api.buyhood.domain.seller.repository.SellerRepository;
@@ -41,7 +39,7 @@ public class OrderHistoryService {
 	private final SellerRepository sellerRepository;
 
 	@Transactional(readOnly = true)
-	public List<OrderHistoryRes> findOrder(Long orderId) {
+	public List<GetOrderRes> findOrder(Long orderId) {
 
 		List<OrderHistory> orderHistories = orderHistoryRepository.findAllByOrderId(orderId);
 
@@ -51,7 +49,7 @@ public class OrderHistoryService {
 
 		return orderHistories.stream()
 			.map(orderHistory ->
-				OrderHistoryRes.of(
+				GetOrderRes.of(
 					orderHistory.getOrder().getId(),
 					orderHistory.getProduct().getId(),
 					orderHistory.getQuantity(),
@@ -62,7 +60,7 @@ public class OrderHistoryService {
 	}
 
 	@Transactional(readOnly = true)
-	public Page<OrderHistoryRes> getOrdersByUser(int pageNum, int pageSize, Long userId) {
+	public Page<GetOrderRes> getOrdersByUser(int pageNum, int pageSize, Long userId) {
 		User user = userRepository.findById(userId)
 			.orElseThrow(() -> new NotFoundException(USER_NOT_FOUND)
 			);
@@ -71,7 +69,7 @@ public class OrderHistoryService {
 			PageRequest.of(pageNum, pageSize));
 
 		return orderHistories.map(orderHistory ->
-			OrderHistoryRes.of(
+			GetOrderRes.of(
 				orderHistory.getOrder().getId(),
 				orderHistory.getProduct().getId(),
 				orderHistory.getQuantity(),
@@ -81,7 +79,7 @@ public class OrderHistoryService {
 	}
 
 	@Transactional(readOnly = true)
-	public Page<OrderHistoryRes> getOrdersBySeller(int pageNum, int pageSize, Long storeId, Long userId) {
+	public Page<GetOrderRes> getOrdersBySeller(int pageNum, int pageSize, Long storeId, Long userId) {
 		Store store = storeRepository.findById(storeId)
 			.orElseThrow(() -> new NotFoundException(STORE_NOT_FOUND));
 
@@ -96,7 +94,7 @@ public class OrderHistoryService {
 			PageRequest.of(pageNum, pageSize));
 
 		return orderHistories.map(orderHistory ->
-			OrderHistoryRes.of(
+			GetOrderRes.of(
 				orderHistory.getOrder().getId(),
 				orderHistory.getProduct().getId(),
 				orderHistory.getQuantity(),
@@ -106,12 +104,12 @@ public class OrderHistoryService {
 	}
 
 	@Transactional(readOnly = true)
-	public Page<OrderHistoryRes> getOrders(int pageNum, int pageSize) {
+	public Page<GetOrderRes> getOrders(int pageNum, int pageSize) {
 		//todo: 로그인한 유저가 관리자인지 확인
 		Page<OrderHistory> orderHistories = orderHistoryRepository.findAll(PageRequest.of(pageNum, pageSize));
 
 		return orderHistories.map(orderHistory ->
-			OrderHistoryRes.of(
+			GetOrderRes.of(
 				orderHistory.getOrder().getId(),
 				orderHistory.getProduct().getId(),
 				orderHistory.getQuantity(),
