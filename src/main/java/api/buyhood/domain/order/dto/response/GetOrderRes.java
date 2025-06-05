@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 @Builder
 @Getter
 @RequiredArgsConstructor
-public class OrderHistoryRes {
+public class GetOrderRes {
 
 	private final Long orderId;
 	private final Long productId;
@@ -16,8 +16,8 @@ public class OrderHistoryRes {
 	private final LocalDateTime createdAt;
 
 
-	public static OrderHistoryRes of(Long orderId, Long productId, int quantity, LocalDateTime createdAt) {
-		return OrderHistoryRes.builder()
+	public static GetOrderRes of(Long orderId, Long productId, int quantity, LocalDateTime createdAt) {
+		return GetOrderRes.builder()
 			.orderId(orderId)
 			.productId(productId)
 			.quantity(quantity)

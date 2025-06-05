@@ -1,0 +1,62 @@
+name: CD - Deploy via AWS CodeDeploy
+
+on:
+  push:
+    branches:
+      - develop   
+
+env:
+  AWS_REGION: ap-northeast-2                 
+  DEPLOYMENT_BUCKET: buyhood-deploy          
+  APPLICATION_NAME: BuyHood-Service          
+  DEPLOYMENT_GROUP: BuyHood-EC2-Deployment   
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4    
+
+      - name: Set up JDK 21 (Amazon Corretto)
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'corretto'
+          java-version: '21'        
+
+      - name: Grant execute permission to Gradle wrapper
+        run: chmod +x ./gradlew       
+
+      - name: Build with Gradle
+        run: |
+          ./gradlew clean build -x test -Dspring.profiles.active=local
+
+      - name: Prepare artifact for CodeDeploy
+        run: |
+          mkdir -p deploy
+          cp build/libs/*.jar deploy/                      
+          cp appspec.yml deploy/                            
+          if [ -d "./scripts" ]; then cp -r scripts deploy/; fi
+          cd deploy
+          zip -r ../buyhood_deploy_package.zip .              
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2      
+        with:
+          aws-access-key-id:  ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Upload artifact to S3
+        run: |
+          aws s3 cp buyhood_deploy_package.zip \
+            s3://${{ env.DEPLOYMENT_BUCKET }}/buyhood_deploy_package.zip   
+
+      - name: Create CodeDeploy deployment
+        run: |
+          aws deploy create-deployment \
+            --application-name ${{ env.APPLICATION_NAME }} \
+            --deployment-group-name ${{ env.DEPLOYMENT_GROUP }} \
+            --s3-location bucket=${{ env.DEPLOYMENT_BUCKET }},key=buyhood_deploy_package.zip,bundleType=zip \
+            --file-exists-behavior OVERWRITE                 
