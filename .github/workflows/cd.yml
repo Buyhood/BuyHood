@@ -1,15 +1,12 @@
-name: Deploy to EC2
+name: CD - Deploy to EC2
 
 on:
   push:
     branches:
       - develop
-  pull_request:
-    branches:
-      - develop
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -32,7 +29,7 @@ jobs:
       run: chmod +x ./gradlew
 
     - name: Build with Gradle
-      run: ./gradlew clean build
+      run: ./gradlew clean build -x test -Dspring.profiles.active=local
 
     - name: Copy JAR file to EC2
       run: |

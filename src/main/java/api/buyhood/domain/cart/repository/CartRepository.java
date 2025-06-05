@@ -2,6 +2,11 @@ package api.buyhood.domain.cart.repository;
 
 import api.buyhood.domain.cart.entity.Cart;
 import api.exception.InvalidRequestException;
+import api.buyhood.domain.cart.entity.CartItem;
+import api.buyhood.domain.product.entity.Product;
+import api.buyhood.domain.product.repository.ProductRepository;
+import api.buyhood.global.common.exception.InvalidRequestException;
+import api.buyhood.global.common.exception.NotFoundException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
@@ -12,12 +17,16 @@ import org.springframework.stereotype.Repository;
 
 import static api.errorcode.CommonErrorCode.JSON_PARSING_FAILED;
 import static api.errorcode.CommonErrorCode.REDIS_SERIALIZE_FAILED;
+import static api.buyhood.global.common.exception.enums.CommonErrorCode.JSON_PARSING_FAILED;
+import static api.buyhood.global.common.exception.enums.CommonErrorCode.REDIS_SERIALIZE_FAILED;
+import static api.buyhood.global.common.exception.enums.StoreErrorCode.STORE_NOT_FOUND;
 
 @Repository
 @RequiredArgsConstructor
 @Slf4j
 public class CartRepository {
 
+	private final ProductRepository productRepository;
 	private final RedisTemplate<Object, Object> redisTemplate;
 	private final ObjectMapper objectMapper;
 	private static final String CART_KEY_PREFIX = "cart:";
@@ -42,6 +51,26 @@ public class CartRepository {
 
 		try {
 			return objectMapper.readValue(value, Cart.class);
+		} catch (JsonProcessingException e) {
+			log.error("Failed to serialize {}: {}", userId, value, e);
+			throw new InvalidRequestException(JSON_PARSING_FAILED);
+		}
+
+	}
+
+	//장바구니에 담긴 가게 조회
+	public Long findCartWithStore(Long userId) {
+		String value = (String) redisTemplate.opsForValue().get(CART_KEY_PREFIX + userId);
+
+		try {
+			Cart cart = objectMapper.readValue(value, Cart.class);
+			CartItem cartItem = cart.getCart().stream().iterator().next();
+
+			Product product = productRepository.findById(cartItem.getProductId())
+					.orElseThrow(() -> new NotFoundException(STORE_NOT_FOUND));
+
+			return product.getStore().getId();
+
 		} catch (JsonProcessingException e) {
 			log.error("Failed to serialize {}: {}", userId, value, e);
 			throw new InvalidRequestException(JSON_PARSING_FAILED);

@@ -13,6 +13,8 @@ import api.buyhood.domain.user.repository.UserRepository;
 import api.exception.NotFoundException;
 import api.security.AuthUser;
 import java.util.List;
+import api.buyhood.global.common.exception.InvalidRequestException;
+import api.buyhood.global.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +22,12 @@ import org.springframework.transaction.annotation.Transactional;
 import static api.errorcode.CartErrorCode.NOT_FOUND_CART;
 import static api.errorcode.ProductErrorCode.PRODUCT_NOT_FOUND;
 import static api.errorcode.UserErrorCode.USER_NOT_FOUND;
+import java.util.List;
+
+import static api.buyhood.global.common.exception.enums.CartErrorCode.MULTIPLE_STORE_NOT_ALLOWED;
+import static api.buyhood.global.common.exception.enums.CartErrorCode.NOT_FOUND_CART;
+import static api.buyhood.global.common.exception.enums.ProductErrorCode.PRODUCT_NOT_FOUND;
+import static api.buyhood.global.common.exception.enums.UserErrorCode.USER_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +44,7 @@ public class CartService {
 
 		List<Long> productIdList = createCartReq.getCartItems().stream()
 			.map(CartReq::getProductId)
+			.distinct()
 			.toList();
 
 		// 조회된 상품의 ID 수가 요청된 상품의 ID 수보다 적다면 존재하지않는 상품이 있다는 의미(뭐가 없는진 모름)
@@ -44,6 +53,9 @@ public class CartService {
 			throw new NotFoundException(PRODUCT_NOT_FOUND);
 
 		}
+
+		//가게 중복 검증
+		validateSingleStoreInCart(products);
 
 		List<CartItem> cartItemList = createCartReq.getCartItems().stream()
 			.map(item ->
@@ -86,5 +98,16 @@ public class CartService {
 		}
 
 		cartRepository.clearCart(user.getId());
+	}
+
+	private void validateSingleStoreInCart(List<Product> products) {
+		long storeCount = products.stream()
+				.map(product -> product.getStore().getId())
+				.distinct()
+				.count();
+
+		if (storeCount != 1) {
+			throw new InvalidRequestException(MULTIPLE_STORE_NOT_ALLOWED);
+		}
 	}
 }
