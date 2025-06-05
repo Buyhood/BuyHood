@@ -20,7 +20,7 @@ repositories {
 dependencies {
 	implementation project(':buyhood-global-core:buyhood-global-common')
 	implementation project(':buyhood-global-core:buyhood-global-config')
-	implementation project(':buyhood-domain-user')
+	implementation project(':buyhood-user')
 	// spring validation
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter'
