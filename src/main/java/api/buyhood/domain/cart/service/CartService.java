@@ -10,24 +10,18 @@ import api.buyhood.domain.product.entity.Product;
 import api.buyhood.domain.product.repository.ProductRepository;
 import api.buyhood.domain.user.entity.User;
 import api.buyhood.domain.user.repository.UserRepository;
+import api.exception.InvalidRequestException;
 import api.exception.NotFoundException;
 import api.security.AuthUser;
 import java.util.List;
-import api.buyhood.global.common.exception.InvalidRequestException;
-import api.buyhood.global.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static api.errorcode.CartErrorCode.MULTIPLE_STORE_NOT_ALLOWED;
 import static api.errorcode.CartErrorCode.NOT_FOUND_CART;
 import static api.errorcode.ProductErrorCode.PRODUCT_NOT_FOUND;
 import static api.errorcode.UserErrorCode.USER_NOT_FOUND;
-import java.util.List;
-
-import static api.buyhood.global.common.exception.enums.CartErrorCode.MULTIPLE_STORE_NOT_ALLOWED;
-import static api.buyhood.global.common.exception.enums.CartErrorCode.NOT_FOUND_CART;
-import static api.buyhood.global.common.exception.enums.ProductErrorCode.PRODUCT_NOT_FOUND;
-import static api.buyhood.global.common.exception.enums.UserErrorCode.USER_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -54,7 +48,7 @@ public class CartService {
 
 		}
 
-		//가게 중복 검증
+		// 가게 중복 검증
 		validateSingleStoreInCart(products);
 
 		List<CartItem> cartItemList = createCartReq.getCartItems().stream()
