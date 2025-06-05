@@ -2,9 +2,9 @@ package api.buyhood.global.common.exception;
 
 import api.buyhood.global.common.exception.enums.ErrorCode;
 
-public class UnAuthorizedException extends BaseException {
+public class AuthenticationException extends BaseException {
 
-	protected UnAuthorizedException(ErrorCode errorCode) {
+	public AuthenticationException(ErrorCode errorCode) {
 		super(errorCode);
 	}
 }

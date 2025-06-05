@@ -40,14 +40,35 @@ public class User extends BaseTimeEntity {
 	private UserRole role;
 
 	@Column(nullable = false)
+	private String phoneNumber;
+
+	@Column(nullable = false)
 	private String address;
 
 	@Builder
-	public User(String username, String email, String password, UserRole role, String address) {
+	public User(String username, String email, String password, String address, String phoneNumber) {
 		this.username = username;
 		this.email = email;
 		this.password = password;
-		this.role = role;
+		this.role = UserRole.USER;
+		this.phoneNumber = phoneNumber;
 		this.address = address;
+	}
+
+	public void changePassword(String encodedPassword) {
+		this.password = encodedPassword;
+	}
+
+	public void deleteUser() {
+		this.markDeleted();
+	}
+
+	public void patchUser(String username, String address) {
+		if (username != null) {
+			this.username = username;
+		}
+		if (address != null) {
+			this.address = address;
+		}
 	}
 }

@@ -1,8 +1,11 @@
 package api.buyhood.domain.seller.entity;
 
+import api.buyhood.domain.user.enums.UserRole;
 import api.buyhood.global.common.entity.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -36,25 +39,29 @@ public class Seller extends BaseTimeEntity {
 	private String businessNumber;
 
 	@Column(nullable = false)
-	private String businessName;
+	private String phoneNumber;
 
 	@Column(nullable = false)
-	private String address;
+	@Enumerated(EnumType.STRING)
+	private UserRole role;
 
 	@Builder
-	public Seller(
-		String username,
-		String email,
-		String password,
-		String businessNumber,
-		String businessName,
-		String address
+	public Seller(String username, String email, String password, String businessNumber, String phoneNumber
 	) {
 		this.username = username;
 		this.email = email;
 		this.password = password;
 		this.businessNumber = businessNumber;
-		this.businessName = businessName;
-		this.address = address;
+		this.phoneNumber = phoneNumber;
+		this.role = UserRole.SELLER;
 	}
+
+	public void changePassword(String encodedPassword) {
+		this.password = encodedPassword;
+	}
+
+	public void deleteSeller() {
+		this.markDeleted();
+	}
+
 }

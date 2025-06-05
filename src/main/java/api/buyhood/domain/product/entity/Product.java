@@ -1,16 +1,23 @@
 package api.buyhood.domain.product.entity;
 
+import api.buyhood.domain.store.entity.Store;
 import api.buyhood.global.common.entity.BaseTimeEntity;
+import api.buyhood.global.common.exception.InvalidRequestException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import static api.buyhood.global.common.exception.enums.ProductErrorCode.OUT_OF_STOCK;
 
 @Entity
 @Getter
@@ -24,13 +31,10 @@ public class Product extends BaseTimeEntity {
 	private Long id;
 
 	@Column(nullable = false)
-	private String productName;
+	private String name;
 
 	@Column(nullable = false)
 	private Long price;
-
-	@Column
-	private String category;
 
 	@Column
 	private String description;
@@ -38,12 +42,42 @@ public class Product extends BaseTimeEntity {
 	@Column(nullable = false)
 	private Long stock;
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "store_id")
+	private Store store;
+
 	@Builder
-	public Product(String productName, Long price, String category, String description, Long stock) {
-		this.productName = productName;
+	public Product(String name, Long price, String description, Long stock, Store store) {
+		this.name = name;
 		this.price = price;
-		this.category = category;
 		this.description = description;
+		this.stock = stock;
+		this.store = store;
+	}
+
+	//재고 감소
+	public void decreaseStock(int quantity) {
+
+		if (stock < quantity) {
+			throw new InvalidRequestException(OUT_OF_STOCK);
+		}
+
+		this.stock -= quantity;
+	}
+
+	public void patchName(String productName) {
+		this.name = productName;
+	}
+
+	public void patchPrice(Long price) {
+		this.price = price;
+	}
+
+	public void patchDescription(String description) {
+		this.description = description;
+	}
+
+	public void patchStock(Long stock) {
 		this.stock = stock;
 	}
 }
