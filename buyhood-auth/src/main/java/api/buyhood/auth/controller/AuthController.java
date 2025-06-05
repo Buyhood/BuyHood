@@ -1,6 +1,8 @@
 package api.buyhood.auth.controller;
 
+import api.buyhood.auth.dto.req.SignInUserReq;
 import api.buyhood.auth.dto.req.SignupUserReq;
+import api.buyhood.auth.dto.res.SignInUserRes;
 import api.buyhood.auth.dto.res.SignupUserRes;
 import api.buyhood.auth.service.AuthService;
 import api.dto.Response;
@@ -33,6 +35,21 @@ public class AuthController {
 		headers.add("Authorization", "Bearer " + accessToken);
 
 		return ResponseEntity.ok().headers(headers).body(Response.ok(signupUserRes));
+	}
+
+	//USER
+	@PostMapping("/v1/auth/users/signin")
+	public ResponseEntity<Response<SignInUserRes>> signIn(
+		@Valid @RequestBody SignInUserReq signInUserReq,
+		HttpHeaders headers
+	) {
+		SignInUserRes signInUserRes = authService.signinUser(signInUserReq);
+
+		String accessToken = signInUserRes.getToken();
+
+		headers.add("Authorization", "Bearer " + accessToken);
+
+		return ResponseEntity.ok().headers(headers).body(Response.ok(signInUserRes));
 	}
 
 }
