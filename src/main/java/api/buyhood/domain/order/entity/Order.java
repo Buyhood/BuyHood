@@ -4,7 +4,7 @@ import api.buyhood.domain.order.enums.OrderStatus;
 import api.buyhood.domain.order.enums.PaymentMethod;
 import api.buyhood.domain.store.entity.Store;
 import api.buyhood.domain.user.entity.User;
-import api.buyhood.global.common.entity.BaseTimeEntity;
+import api.entity.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

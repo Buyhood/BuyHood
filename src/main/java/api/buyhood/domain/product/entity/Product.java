@@ -1,8 +1,8 @@
 package api.buyhood.domain.product.entity;
 
 import api.buyhood.domain.store.entity.Store;
-import api.buyhood.global.common.entity.BaseTimeEntity;
-import api.buyhood.global.common.exception.InvalidRequestException;
+import api.entity.BaseTimeEntity;
+import api.exception.InvalidRequestException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -17,7 +17,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import static api.buyhood.global.common.exception.enums.ProductErrorCode.OUT_OF_STOCK;
+import static api.errorcode.ProductErrorCode.OUT_OF_STOCK;
 
 @Entity
 @Getter
