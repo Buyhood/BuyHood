@@ -12,8 +12,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
-import static api.buyhood.domain.payment.enums.PayStatus.FAILED;
-import static api.buyhood.domain.payment.enums.PayStatus.PAID;
+import static api.buyhood.domain.payment.enums.PayStatus.*;
 
 @Getter
 @Entity
@@ -77,5 +76,9 @@ public class Payment extends BaseTimeEntity {
 
     public boolean isPaid() {
         return PAID.equals(this.payStatus);
+    }
+
+    public void cancel() {
+        this.payStatus = CANCELLED;
     }
 }

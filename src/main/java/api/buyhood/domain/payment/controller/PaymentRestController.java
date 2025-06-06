@@ -32,7 +32,7 @@ public class PaymentRestController {
         return Response.ok(paymentService.preparePayment(authUser, orderId, paymentReq));
     }
 
-    /* 결제 후 검증*/
+    /* 결제 후 검증 (postone)*/
     @Secured("ROLE_USER")
     @PostMapping("/v1/payments/{paymentId}")
     public Response<String> validPayment(
@@ -42,5 +42,4 @@ public class PaymentRestController {
         paymentService.validPayment(paymentId, validPaymentReq);
         return Response.ok("결제가 완료되었습니다.");
     }
-
 }
