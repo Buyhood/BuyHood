@@ -1,6 +1,6 @@
 package api.buyhood.domain.payment.controller;
 
-import api.buyhood.domain.payment.dto.request.ApplyPaymentReq;
+import api.buyhood.domain.payment.dto.response.ApplyPaymentRes;
 import api.buyhood.domain.payment.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.annotation.Secured;
@@ -24,8 +24,8 @@ public class PaymentController {
             @PathVariable Long paymentId,
             Model model
     ) {
-        ApplyPaymentReq applyPaymentReq = paymentService.applyPayment(paymentId);
-        model.addAttribute("paymentRequest", applyPaymentReq);
+        ApplyPaymentRes applyPaymentRes = paymentService.applyPayment(paymentId);
+        model.addAttribute("paymentRequest", applyPaymentRes);
         return "payment-portone";
     }
 }
