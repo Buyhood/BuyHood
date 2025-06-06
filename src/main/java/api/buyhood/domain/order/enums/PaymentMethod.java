@@ -4,8 +4,9 @@ import lombok.Getter;
 
 @Getter
 public enum PaymentMethod {
-    LOCAL_QR,
-    LOCAL_CARD,
-    CREDIT_CARD,
-    ZERO_PAY
+    CARD,
+    VBANK,
+    TRANS,
+    ZERO_PAY,
+    PHONE;
 }

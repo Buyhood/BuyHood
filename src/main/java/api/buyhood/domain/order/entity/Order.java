@@ -16,6 +16,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+
+import java.math.BigDecimal;
 import java.time.LocalTime;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -50,7 +52,7 @@ public class Order extends BaseTimeEntity {
 	private PaymentMethod paymentMethod;
 
 	@Column(nullable = false)
-	private long totalPrice;
+	private BigDecimal totalPrice;
 
 	@Column
 	@Enumerated(EnumType.STRING)
@@ -63,7 +65,7 @@ public class Order extends BaseTimeEntity {
 	private LocalTime readyAt;
 
 	@Builder
-	public Order(Store store, User user,String name, String requestMessage, PaymentMethod paymentMethod, long totalPrice,
+	public Order(Store store, User user,String name, String requestMessage, PaymentMethod paymentMethod, BigDecimal totalPrice,
 		OrderStatus status,
 		LocalTime readyAt) {
 		this.store = store;
