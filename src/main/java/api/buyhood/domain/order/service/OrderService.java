@@ -46,6 +46,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static api.buyhood.domain.order.enums.OrderStatus.ACCEPTED;
+import static api.buyhood.domain.payment.enums.PayStatus.PAID;
 import static api.errorcode.CartErrorCode.NOT_FOUND_CART;
 import static api.errorcode.OrderErrorCode.*;
 import static api.errorcode.PaymentErrorCode.FAILED_CANCEL;
@@ -125,7 +126,14 @@ public class OrderService {
 		Order order = orderRepository.findById(orderId)
 			.orElseThrow(() -> new NotFoundException(NOT_FOUND_ORDER));
 
-		Long sellerIdInStore = order.getStore().getSeller().getId();
+		Payment payment = paymentRepository.findNotDeletedByOrderId(orderId)
+				.orElseThrow(() -> new NotFoundException(NOT_FOUND_PAYMENT));
+
+        if (!payment.isPaid()) {
+			throw new InvalidRequestException(CANNOT_ACCEPT_ORDER);
+		}
+
+        Long sellerIdInStore = order.getStore().getSeller().getId();
 
 		//셀러 스토어가 같은 업장인지
 		if (!sellerIdInStore.equals(seller.getId())) {
