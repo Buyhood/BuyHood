@@ -25,6 +25,7 @@ repositories {
 
 dependencies {
 	implementation project(':buyhood-global-core:buyhood-global-config')
+	implementation project(':buyhood-product-category')
 	
 	// spring validation
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
@@ -71,7 +72,7 @@ subprojects {
 		// lombok
 		compileOnly 'org.projectlombok:lombok'
 		annotationProcessor 'org.projectlombok:lombok'
-
+		
 		// etc
 		testImplementation 'org.springframework.boot:spring-boot-starter-test'
 		testImplementation 'org.springframework.security:spring-security-test'

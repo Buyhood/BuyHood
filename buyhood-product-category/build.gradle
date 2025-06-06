@@ -1,0 +1,48 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.5.0'
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'api'
+version = '0.0.1-SNAPSHOT'
+
+// 빌드 시 현재 모듈의 .jar 생성
+tasks.named("jar") {
+	enabled = false
+}
+
+tasks.named("bootJar") {
+	enabled = true
+}
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation project(':buyhood-global-core:buyhood-global-config')
+	
+	// spring validation
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	
+	// h2 database
+	runtimeOnly 'com.h2database:h2'
+	
+	// mysql driver
+	runtimeOnly 'com.mysql:mysql-connector-j'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
+tasks.register("prepareKotlinBuildScriptModel") {
+
+}

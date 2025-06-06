@@ -5,14 +5,12 @@ import api.buyhood.domain.cart.entity.CartItem;
 import api.buyhood.domain.product.dto.response.GetProductRes;
 import api.buyhood.domain.product.dto.response.PageProductRes;
 import api.buyhood.domain.product.dto.response.RegisterProductRes;
-import api.buyhood.domain.product.entity.Category;
 import api.buyhood.domain.product.entity.Product;
-import api.buyhood.domain.product.entity.ProductCategory;
-import api.buyhood.domain.product.repository.CategoryRepository;
 import api.buyhood.domain.product.repository.ProductCategoryRepository;
 import api.buyhood.domain.product.repository.ProductRepository;
 import api.buyhood.domain.store.entity.Store;
 import api.buyhood.domain.store.repository.StoreRepository;
+import api.buyhood.productcategory.entity.Category;
 import api.errorcode.CategoryErrorCode;
 import api.errorcode.ProductErrorCode;
 import api.errorcode.StoreErrorCode;
@@ -38,7 +36,6 @@ import org.springframework.util.StringUtils;
 public class ProductService {
 
 	private final ProductRepository productRepository;
-	private final CategoryRepository categoryRepository;
 	private final ProductCategoryRepository productCategoryRepository;
 	private final StoreRepository storeRepository;
 
@@ -90,7 +87,7 @@ public class ProductService {
 			linkCategoriesToProduct(categoryIdList, product);
 		}
 
-		List<String> categoryNameList = categoryRepository.findCategoryNamesByCategoryIds(categoryIdList);
+		List<String> categoryNameList = productCategoryRepository.findCategoryNamesByCategoryIds(categoryIdList);
 
 		return RegisterProductRes.of(product, categoryNameList);
 	}
@@ -116,7 +113,7 @@ public class ProductService {
 		List<Long> categoryIds = productCategoryRepository.findCategoryIdsByProductId(productId);
 
 		// 카테고리 이름 목록 조회
-		List<String> categoryNames = categoryRepository.findCategoryNamesByCategoryIds(categoryIds);
+		List<String> categoryNames = productCategoryRepository.findCategoryNamesByCategoryIds(categoryIds);
 
 		return GetProductRes.of(product, categoryNames);
 	}
@@ -286,7 +283,7 @@ public class ProductService {
 
 	private void linkCategoriesToProduct(List<Long> categoryIdList, Product product) {
 		// 새로 등록할 카테고리 조회
-		List<Category> categoryList = categoryRepository.findAllById(categoryIdList);
+		List<Category> categoryList = productCategoryRepository.findAllById(categoryIdList);
 
 		// 조회된 내용과 요청한 내용의 크기가 다르면 요청 내용 중 카테고리가 없는 항목이 존재한다는 의미
 		if (categoryIdList.size() != categoryList.size()) {
@@ -296,7 +293,7 @@ public class ProductService {
 		// 새로 연결한 카테고리 저장
 		for (Category category : categoryList) {
 			productCategoryRepository.save(
-				ProductCategory.builder()
+				Category.builder()
 					.category(category)
 					.product(product)
 					.build()

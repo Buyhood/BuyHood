@@ -1,6 +1,6 @@
-package api.buyhood.domain.product.dto.response;
+package api.buyhood.productcategory.dto.response.store;
 
-import api.buyhood.domain.product.entity.Category;
+import api.buyhood.productcategory.entity.StoreCategory;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -8,17 +8,15 @@ import org.springframework.data.domain.Page;
 
 @Getter
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public class PageCategoryRes {
+public class PageStoreCategoryRes {
 
 	private final Long categoryId;
-	private final int depth;
 	private final String categoryName;
 
-	public static Page<PageCategoryRes> of(Page<Category> categoryPage) {
+	public static Page<PageStoreCategoryRes> of(Page<StoreCategory> categoryPage) {
 		return categoryPage.map(category ->
-			new PageCategoryRes(
+			new PageStoreCategoryRes(
 				category.getId(),
-				category.getDepth(),
 				category.getName()
 			)
 		);
