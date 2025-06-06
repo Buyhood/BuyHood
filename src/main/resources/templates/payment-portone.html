@@ -38,8 +38,12 @@
             function (rsp) {
               if (rsp.success) {
                 console.log(rsp)
+                // imp_uid만 추출해서 alert로 표시
+                const message = `결제 성공\nimp_uid: ${rsp.imp_uid}`;
+                alert(message);
               } else {
                 console.log(rsp)
+                alert("결제에 실패했습니다: " + rsp.error_msg);
               }
             },
     );

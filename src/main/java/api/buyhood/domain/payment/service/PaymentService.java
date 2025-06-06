@@ -4,6 +4,7 @@ import api.buyhood.domain.order.entity.Order;
 import api.buyhood.domain.order.repository.OrderRepository;
 import api.buyhood.domain.payment.dto.response.ApplyPaymentRes;
 import api.buyhood.domain.payment.dto.request.PaymentReq;
+import api.buyhood.domain.payment.dto.request.ValidPaymentReq;
 import api.buyhood.domain.payment.dto.response.PaymentRes;
 import api.buyhood.domain.payment.entity.Payment;
 import api.buyhood.domain.payment.enums.PayStatus;
@@ -15,7 +16,9 @@ import api.exception.NotFoundException;
 import api.security.AuthUser;
 import com.siot.IamportRestClient.IamportClient;
 import com.siot.IamportRestClient.exception.IamportResponseException;
+import com.siot.IamportRestClient.request.CancelData;
 import com.siot.IamportRestClient.request.PrepareData;
+import com.siot.IamportRestClient.response.IamportResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -88,5 +91,45 @@ public class PaymentService {
                 payment.getMerchantUid(),
                 payment.getTotalPrice(),
                 payment.getBuyerEmail());
+    }
+
+    @Transactional(rollbackFor = Exception.class, noRollbackFor = InvalidRequestException.class)
+    public void validPayment(Long paymentId, ValidPaymentReq validPaymentReq) throws IamportResponseException, IOException {
+        Payment payment = paymentRepository.findNotDeletedById(paymentId)
+                .orElseThrow(() -> new NotFoundException(NOT_FOUND_PAYMENT));
+
+        //IamportRestClient 관련 Payment 도메인
+        IamportResponse<com.siot.IamportRestClient.response.Payment> response = iamportClient.paymentByImpUid(validPaymentReq.getImpUid());
+        com.siot.IamportRestClient.response.Payment iamportPayment = response.getResponse();
+
+        if (payment.isPaid()) {
+            throw new InvalidRequestException(ALREADY_PAID);
+        }
+
+        if (!"paid".equals(iamportPayment.getStatus())) {
+            payment.failPayment();
+            throw new InvalidRequestException(FAILED_PAID);
+        }
+
+        if (!payment.getMerchantUid().equals(iamportPayment.getMerchantUid())) {
+            payment.failPayment();
+
+            refund(validPaymentReq);
+            throw new InvalidRequestException(NOT_MATCHE_MERCHANT_UID);
+        }
+
+        if (payment.getTotalPrice().compareTo(iamportPayment.getAmount()) != 0) {
+            payment.failPayment();
+
+            refund(validPaymentReq);
+            throw new InvalidRequestException(NOT_MATCHE_ACCOUNT);
+        }
+
+        payment.successPayment();
+    }
+
+    private void refund(ValidPaymentReq validPaymentReq) throws IamportResponseException, IOException {
+        CancelData cancelData = new CancelData(validPaymentReq.getImpUid(), true);
+        iamportClient.cancelPaymentByImpUid(cancelData);
     }
 }
