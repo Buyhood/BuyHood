@@ -1,8 +1,7 @@
 package api.buyhood.domain.payment.controller;
 
-import api.buyhood.domain.payment.dto.request.ApplyPaymentReq;
+import api.buyhood.domain.payment.dto.response.ApplyPaymentRes;
 import api.buyhood.domain.payment.service.PaymentService;
-import api.buyhood.global.common.dto.Response;
 import com.google.zxing.WriterException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -28,8 +27,8 @@ public class PaymentController {
             @PathVariable Long paymentId,
             Model model
     ) {
-        ApplyPaymentReq applyPaymentReq = paymentService.applyPayment(paymentId);
-        model.addAttribute("paymentRequest", applyPaymentReq);
+        ApplyPaymentRes applyPaymentRes = paymentService.applyPayment(paymentId);
+        model.addAttribute("paymentRequest", applyPaymentRes);
         return "payment-portone";
     }
 
@@ -51,8 +50,8 @@ public class PaymentController {
             @PathVariable Long paymentId,
             Model model
     ) {
-        ApplyPaymentReq applyPaymentReq = paymentService.applyPaymentWithZeroPay(paymentId);
-        model.addAttribute("paymentRequest", applyPaymentReq);
+        ApplyPaymentRes applyPaymentRes = paymentService.applyPaymentWithZeroPay(paymentId);
+        model.addAttribute("paymentRequest", applyPaymentRes);
         return "payment-zeropay";
     }
 

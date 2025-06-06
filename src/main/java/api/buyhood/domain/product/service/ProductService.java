@@ -14,13 +14,13 @@ import api.buyhood.domain.product.repository.ProductCategoryRepository;
 import api.buyhood.domain.product.repository.ProductRepository;
 import api.buyhood.domain.store.entity.Store;
 import api.buyhood.domain.store.repository.StoreRepository;
-import api.buyhood.global.common.exception.ConflictException;
-import api.buyhood.global.common.exception.ForbiddenException;
-import api.buyhood.global.common.exception.InvalidRequestException;
-import api.buyhood.global.common.exception.NotFoundException;
-import api.buyhood.global.common.exception.enums.CategoryErrorCode;
-import api.buyhood.global.common.exception.enums.ProductErrorCode;
-import api.buyhood.global.common.exception.enums.StoreErrorCode;
+import api.errorcode.CategoryErrorCode;
+import api.errorcode.ProductErrorCode;
+import api.errorcode.StoreErrorCode;
+import api.exception.ConflictException;
+import api.exception.ForbiddenException;
+import api.exception.InvalidRequestException;
+import api.exception.NotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -105,6 +105,10 @@ public class ProductService {
 	 */
 	@Transactional(readOnly = true)
 	public GetProductRes getProduct(Long storeId, Long productId) {
+		if (!storeRepository.existsActiveStoreById(storeId)) {
+			throw new NotFoundException(StoreErrorCode.STORE_NOT_FOUND);
+		}
+
 		// 상품 존재 여부 조회
 		Product product = productRepository.findActiveProductByStoreIdAndProductId(storeId, productId)
 			.orElseThrow(() -> new NotFoundException(ProductErrorCode.PRODUCT_NOT_FOUND));
@@ -127,6 +131,10 @@ public class ProductService {
 	 */
 	@Transactional(readOnly = true)
 	public Page<PageProductRes> getAllProducts(Long storeId, Pageable pageable) {
+		if (!storeRepository.existsActiveStoreById(storeId)) {
+			throw new NotFoundException(StoreErrorCode.STORE_NOT_FOUND);
+		}
+
 		PageRequest pageRequest =
 			PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Direction.ASC, "name");
 
@@ -152,6 +160,10 @@ public class ProductService {
 	 */
 	@Transactional(readOnly = true)
 	public Page<PageProductRes> getProductByKeyword(Long storeId, String keyword, Pageable pageable) {
+		if (!storeRepository.existsActiveStoreById(storeId)) {
+			throw new NotFoundException(StoreErrorCode.STORE_NOT_FOUND);
+		}
+
 		PageRequest pageRequest =
 			PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Direction.ASC, "name");
 

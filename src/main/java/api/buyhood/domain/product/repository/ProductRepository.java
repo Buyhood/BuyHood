@@ -12,8 +12,8 @@ import org.springframework.data.repository.query.Param;
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
 	@Query(
-		value = "select p from Product p join p.store s where s.id = :storeId and p.name like %:keyword% and p.deletedAt is null",
-		countQuery = "select count(p) from Product p join p.store s where s.id = :storeId and p.name like %:keyword% and p.deletedAt is null")
+		value = "select p from Product p join p.store s where s.id = :storeId and p.name like %:keyword% and s.deletedAt is null and p.deletedAt is null",
+		countQuery = "select count(p) from Product p join p.store s where s.id = :storeId and p.name like %:keyword% and s.deletedAt is null and p.deletedAt is null")
 	Page<Product> findActiveProductsByStoreIdAndKeyword(
 		@Param("storeId") Long storeId,
 		@Param("keyword") String keyword,
@@ -23,17 +23,17 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 	@Query("select count(p) > 0 from Product p join p.store s where s.id = :storeId and p.name = :productName")
 	boolean existsByStoreIdAndProductName(@Param("storeId") Long storeId, @Param("productName") String productName);
 
-	@Query("select p from Product p join p.store s where s.id = :storeId and p.id = :productId and p.deletedAt is null")
+	@Query("select p from Product p join p.store s where s.id = :storeId and p.id = :productId and s.deletedAt is null and p.deletedAt is null")
 	Optional<Product> findActiveProductByStoreIdAndProductId(
 		@Param("storeId") Long storeId,
 		@Param("productId") Long productId
 	);
 
 	@Query(
-		value = "select p from Product p join p.store s where s.id = :storeId and p.deletedAt is null",
-		countQuery = "select count(p) from Product p join p.store s where s.id = :storeId and p.deletedAt is null")
+		value = "select p from Product p join p.store s where s.id = :storeId and s.deletedAt is null and p.deletedAt is null",
+		countQuery = "select count(p) from Product p join p.store s where s.id = :storeId and s.deletedAt is null and p.deletedAt is null")
 	Page<Product> findActiveProductsByStoreId(@Param("storeId") Long storeId, Pageable pageable);
 
-	@Query("select p from Product p join p.store s where s.id = :storeId and p.deletedAt is null")
+	@Query("select p from Product p join p.store s where s.id = :storeId and s.deletedAt is null and p.deletedAt is null")
 	List<Product> findActiveProductsByStoreId(Long storeId);
 }

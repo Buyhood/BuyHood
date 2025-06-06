@@ -1,0 +1,27 @@
+plugins {
+    id 'java'
+}
+
+group = 'api'
+version = '0.0.1-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+// 빌드 시 현재 모듈의 .jar 생성
+tasks.named("jar") {
+    enabled = true
+}
+
+tasks.named("bootJar") {
+    enabled = false
+}
+
+dependencies {
+    api 'org.springframework.boot:spring-boot-starter-data-jpa'
+}
+
+test {
+    useJUnitPlatform()
+}
