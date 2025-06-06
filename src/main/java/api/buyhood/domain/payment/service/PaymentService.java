@@ -2,7 +2,7 @@ package api.buyhood.domain.payment.service;
 
 import api.buyhood.domain.order.entity.Order;
 import api.buyhood.domain.order.repository.OrderRepository;
-import api.buyhood.domain.payment.dto.request.ApplyPaymentReq;
+import api.buyhood.domain.payment.dto.response.ApplyPaymentRes;
 import api.buyhood.domain.payment.dto.request.PaymentReq;
 import api.buyhood.domain.payment.dto.response.PaymentRes;
 import api.buyhood.domain.payment.entity.Payment;
@@ -69,7 +69,7 @@ public class PaymentService {
     }
 
     @Transactional(readOnly = true)
-    public ApplyPaymentReq applyPayment(Long paymentId) {
+    public ApplyPaymentRes applyPayment(Long paymentId) {
         Payment payment = paymentRepository.findNotDeletedById(paymentId)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_PAYMENT));
 
@@ -81,7 +81,7 @@ public class PaymentService {
             throw new InvalidRequestException(NOT_SUPPORTED_ZERO_PAY);
         }
 
-        return ApplyPaymentReq.of(
+        return ApplyPaymentRes.of(
                 payment.getPg().getName(),
                 payment.getOrder().getName(),
                 String.valueOf(payment.getOrder().getPaymentMethod()),

@@ -1,4 +1,4 @@
-package api.buyhood.domain.payment.dto.request;
+package api.buyhood.domain.payment.dto.response;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -6,7 +6,7 @@ import lombok.Getter;
 import java.math.BigDecimal;
 
 @Getter
-public class ApplyPaymentReq {
+public class ApplyPaymentRes {
     private final String pg;
     private final String name;
     private final String paymentMethod;
@@ -15,7 +15,7 @@ public class ApplyPaymentReq {
     private final String buyerEmail;
 
     @Builder
-    public ApplyPaymentReq(String pg,  String name, String paymentMethod, String merchantUid, BigDecimal totalPrice, String buyerEmail) {
+    public ApplyPaymentRes(String pg, String name, String paymentMethod, String merchantUid, BigDecimal totalPrice, String buyerEmail) {
         this.pg = pg;
         this.name = name;
         this.paymentMethod = paymentMethod;
@@ -24,8 +24,8 @@ public class ApplyPaymentReq {
         this.buyerEmail = buyerEmail;
     }
 
-    public static ApplyPaymentReq of (String pg,  String name,String paymentMethod, String merchantUid, BigDecimal totalPrice, String buyerEmail) {
-        return ApplyPaymentReq.builder()
+    public static ApplyPaymentRes of (String pg, String name, String paymentMethod, String merchantUid, BigDecimal totalPrice, String buyerEmail) {
+        return ApplyPaymentRes.builder()
                 .pg(pg)
                 .name(name)
                 .paymentMethod(paymentMethod)
