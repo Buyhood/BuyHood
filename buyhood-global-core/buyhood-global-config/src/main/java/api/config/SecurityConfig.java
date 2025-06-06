@@ -36,7 +36,8 @@ public class SecurityConfig {
 				.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.authorizeHttpRequests(auth -> auth
 				.requestMatchers("/api/v1/auth/**", "/error").permitAll()
-				.requestMatchers(HttpMethod.GET, "api/v1/stores").permitAll() //비회원도 가게 조회는 가능
+				.requestMatchers(HttpMethod.GET, "api/v1/stores").permitAll()
+				.requestMatchers(HttpMethod.GET, "/api/v1/payments/**").permitAll()
 				.requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
 				.anyRequest().authenticated()
 			)

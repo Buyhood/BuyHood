@@ -51,4 +51,6 @@ jobs:
           SPRING_DATASOURCE_USERNAME: testuser
           SPRING_DATASOURCE_PASSWORD: testpass
           JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+          IMP_ACCESS: ${{ secrets.IMP_ACCESS }}
+          IMP_SECRET: ${{ secrets.IMP_SECRET }}
           JWT_EXPIRATION: '3600000'

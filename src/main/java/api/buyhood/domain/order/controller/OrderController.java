@@ -2,12 +2,14 @@ package api.buyhood.domain.order.controller;
 
 import api.buyhood.domain.order.dto.request.AcceptOrderReq;
 import api.buyhood.domain.order.dto.request.ApplyOrderReq;
+import api.buyhood.domain.order.dto.request.RefundPaymentReq;
 import api.buyhood.domain.order.dto.response.AcceptOrderRes;
 import api.buyhood.domain.order.dto.response.ApplyOrderRes;
 import api.buyhood.domain.order.dto.response.RejectOrderRes;
 import api.buyhood.domain.order.service.OrderService;
 import api.dto.Response;
 import api.security.AuthUser;
+import com.siot.IamportRestClient.exception.IamportResponseException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.annotation.Secured;
@@ -20,6 +22,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+
+import java.io.IOException;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
@@ -28,6 +33,7 @@ public class OrderController {
 	private final OrderService orderService;
 
 	//주문 요청
+	@Secured("ROLE_USER")
 	@PostMapping("/v1/orders/apply")
 	public Response<ApplyOrderRes> applyOrder(
 		@Valid @RequestBody ApplyOrderReq applyOrderReq,
@@ -36,17 +42,18 @@ public class OrderController {
 		return Response.ok(orderService.applyOrder(applyOrderReq, authUser));
 	}
 
-	/**
-	 * 주문 취소
-	 */
+	//주문 취소
+	@Secured("ROLE_USER")
 	@DeleteMapping("/v1/orders/{orderId}")
 	public Response<String> deleteOrder(
 		@AuthenticationPrincipal AuthUser authUser,
-		@PathVariable Long orderId
-	) {
-		orderService.deleteOrder(authUser, orderId);
+		@PathVariable Long orderId,
+		@Valid @RequestBody RefundPaymentReq refundPaymentReq
+	) throws IamportResponseException, IOException {
+		orderService.deleteOrder(authUser, orderId, refundPaymentReq);
 		return Response.ok("주문 취소 성공");
 	}
+
 
 	//주문 승인
 	@Secured("ROLE_SELLER")
