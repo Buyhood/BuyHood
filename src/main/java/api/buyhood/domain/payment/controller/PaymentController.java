@@ -33,18 +33,21 @@ public class PaymentController {
     }
 
     /* 결제를 위한 QR 요청*/
-    @GetMapping("/v1/payments/{paymentId}/zeropay")
+    @GetMapping("/v1/payments/{paymentId}/qr")
     public String createQR(
             @PathVariable Long paymentId,
             Model model
-    )  throws IOException, WriterException {
+    ) {
         byte[] qrImage = paymentService.createQR(paymentId);
         String base64Qr = Base64.getEncoder().encodeToString(qrImage);
         model.addAttribute("qrImage", base64Qr);
         return "payment-qr";
     }
 
-    /* 결제 요청 (제로페이) */
+    /* 결제 요청 (제로페이)
+    *
+    * qr코드 링크를 통해 호출되는 api입니다.
+    *  */
     @GetMapping("/v1/payments/{paymentId}")
     public String applyPaymentWithZeroPay(
             @PathVariable Long paymentId,

@@ -1,6 +1,7 @@
 package api.buyhood.domain.payment.service;
 
 import api.buyhood.domain.order.entity.Order;
+import api.buyhood.domain.order.enums.PaymentMethod;
 import api.buyhood.domain.order.repository.OrderRepository;
 import api.buyhood.domain.payment.dto.response.ApplyPaymentRes;
 import api.buyhood.domain.payment.dto.request.PaymentReq;
@@ -73,6 +74,7 @@ public class PaymentService {
 
         //결제 고유번호
         String merchantUid = String.valueOf(UUID.randomUUID());
+        validateZeroPayConsistency(paymentReq, order);
 
         Payment payment = Payment.of(order, paymentReq.getPg(), authUser.getEmail(), order.getTotalPrice(), merchantUid);
         paymentRepository.save(payment);
@@ -94,10 +96,6 @@ public class PaymentService {
 
         if (!PayStatus.READY.equals(payment.getPayStatus())) {
             throw new InvalidRequestException(CANNOT_REQUEST_PAYMENT);
-        }
-
-        if (ZERO_PAY.equals(payment.getOrder().getPaymentMethod())) {
-            throw new InvalidRequestException(NOT_SUPPORTED_ZERO_PAY);
         }
 
         return ApplyPaymentRes.of(
@@ -146,6 +144,18 @@ public class PaymentService {
 
     @Transactional(rollbackFor = Exception.class)
     public byte[] createQR(Long paymentId) {
+
+        Payment payment = paymentRepository.findNotDeletedById(paymentId)
+                .orElseThrow(() -> new NotFoundException(NOT_FOUND_PAYMENT));
+
+        if (payment.isPaid()) {
+            throw new InvalidRequestException(ALREADY_PAID);
+        }
+
+        if (!ZERO_PAY.equals(payment.getOrder().getPaymentMethod())) {
+            throw new InvalidRequestException(INVALID_PAYMENT_METHOD_FOR_ZERO_PAY);
+        }
+
         try {
             int width = 200, height = 200;
 
@@ -178,11 +188,6 @@ public class PaymentService {
         }
     }
 
-    private void refund(ValidPaymentReq validPaymentReq) throws IamportResponseException, IOException {
-        CancelData cancelData = new CancelData(validPaymentReq.getImpUid(), true);
-        iamportClient.cancelPaymentByImpUid(cancelData);
-    }
-
     public ApplyPaymentRes applyPaymentWithZeroPay(Long paymentId) {
         Payment payment = paymentRepository.findNotDeletedById(paymentId)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_PAYMENT));
@@ -197,5 +202,22 @@ public class PaymentService {
                 payment.getMerchantUid(),
                 payment.getTotalPrice(),
                 payment.getBuyerEmail());
+    }
+
+    private void refund(ValidPaymentReq validPaymentReq) throws IamportResponseException, IOException {
+        CancelData cancelData = new CancelData(validPaymentReq.getImpUid(), true);
+        iamportClient.cancelPaymentByImpUid(cancelData);
+    }
+
+    private void validateZeroPayConsistency(PaymentReq paymentReq, Order order) {
+        // 요청이 제로페이인 경우 기존 주문도 제로페이인지 확인
+        if (!PGProvider.ZERO_PAY.equals(paymentReq.getPg()) && PaymentMethod.ZERO_PAY.equals(order.getPaymentMethod())) {
+            throw new InvalidRequestException(NOT_SUPPORTED_ZERO_PAY);
+        }
+
+        // 요청이 PG사인 경우 기존 주문도 PG사가 제공하는 결제 방식인지 확인
+        if (PGProvider.ZERO_PAY.equals(paymentReq.getPg()) && !PaymentMethod.ZERO_PAY.equals(order.getPaymentMethod())) {
+            throw new InvalidRequestException(INVALID_PAYMENT_METHOD_FOR_ZERO_PAY);
+        }
     }
 }
