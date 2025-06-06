@@ -1,9 +1,8 @@
 package api.buyhood.domain.payment.service;
 
-import api.buyhood.domain.auth.entity.AuthUser;
 import api.buyhood.domain.order.entity.Order;
 import api.buyhood.domain.order.repository.OrderRepository;
-import api.buyhood.domain.payment.dto.request.ApplyPaymentReq;
+import api.buyhood.domain.payment.dto.response.ApplyPaymentRes;
 import api.buyhood.domain.payment.dto.request.PaymentReq;
 import api.buyhood.domain.payment.dto.request.ValidPaymentReq;
 import api.buyhood.domain.payment.dto.response.PaymentRes;
@@ -12,8 +11,9 @@ import api.buyhood.domain.payment.enums.PayStatus;
 import api.buyhood.domain.payment.repository.PaymentRepository;
 import api.buyhood.domain.user.entity.User;
 import api.buyhood.domain.user.repository.UserRepository;
-import api.buyhood.global.common.exception.InvalidRequestException;
-import api.buyhood.global.common.exception.NotFoundException;
+import api.exception.InvalidRequestException;
+import api.exception.NotFoundException;
+import api.security.AuthUser;
 import com.siot.IamportRestClient.IamportClient;
 import com.siot.IamportRestClient.exception.IamportResponseException;
 import com.siot.IamportRestClient.request.CancelData;
@@ -28,9 +28,10 @@ import java.util.UUID;
 
 import static api.buyhood.domain.order.enums.OrderStatus.PENDING;
 import static api.buyhood.domain.order.enums.PaymentMethod.ZERO_PAY;
-import static api.buyhood.global.common.exception.enums.OrderErrorCode.*;
-import static api.buyhood.global.common.exception.enums.PaymentErrorCode.*;
-import static api.buyhood.global.common.exception.enums.UserErrorCode.USER_NOT_FOUND;
+import static api.errorcode.OrderErrorCode.*;
+import static api.errorcode.PaymentErrorCode.*;
+import static api.errorcode.UserErrorCode.USER_NOT_FOUND;
+
 
 @Service
 @RequiredArgsConstructor
@@ -71,7 +72,7 @@ public class PaymentService {
     }
 
     @Transactional(readOnly = true)
-    public ApplyPaymentReq applyPayment(Long paymentId) {
+    public ApplyPaymentRes applyPayment(Long paymentId) {
         Payment payment = paymentRepository.findNotDeletedById(paymentId)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_PAYMENT));
 
@@ -83,7 +84,7 @@ public class PaymentService {
             throw new InvalidRequestException(NOT_SUPPORTED_ZERO_PAY);
         }
 
-        return ApplyPaymentReq.of(
+        return ApplyPaymentRes.of(
                 payment.getPg().getName(),
                 payment.getOrder().getName(),
                 String.valueOf(payment.getOrder().getPaymentMethod()),
@@ -92,12 +93,12 @@ public class PaymentService {
                 payment.getBuyerEmail());
     }
 
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(rollbackFor = Exception.class, noRollbackFor = InvalidRequestException.class)
     public void validPayment(Long paymentId, ValidPaymentReq validPaymentReq) throws IamportResponseException, IOException {
         Payment payment = paymentRepository.findNotDeletedById(paymentId)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_PAYMENT));
 
-        //로컬 내 Payment 도메인과의 구별을 위해 import를 따로 진행하지 않았습니다.
+        //IamportRestClient 관련 Payment 도메인
         IamportResponse<com.siot.IamportRestClient.response.Payment> response = iamportClient.paymentByImpUid(validPaymentReq.getImpUid());
         com.siot.IamportRestClient.response.Payment iamportPayment = response.getResponse();
 
@@ -107,7 +108,7 @@ public class PaymentService {
 
         if (!"paid".equals(iamportPayment.getStatus())) {
             payment.failPayment();
-            throw new InvalidRequestException(NOT_PAID);
+            throw new InvalidRequestException(FAILED_PAID);
         }
 
         if (!payment.getMerchantUid().equals(iamportPayment.getMerchantUid())) {

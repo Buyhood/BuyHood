@@ -9,7 +9,7 @@ import api.buyhood.domain.auth.dto.res.SignInUserRes;
 import api.buyhood.domain.auth.dto.res.SignupSellerRes;
 import api.buyhood.domain.auth.dto.res.SignupUserRes;
 import api.buyhood.domain.auth.service.AuthService;
-import api.buyhood.global.common.dto.Response;
+import api.dto.Response;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;

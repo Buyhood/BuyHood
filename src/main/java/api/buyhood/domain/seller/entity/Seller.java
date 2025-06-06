@@ -1,7 +1,7 @@
 package api.buyhood.domain.seller.entity;
 
-import api.buyhood.domain.user.enums.UserRole;
-import api.buyhood.global.common.entity.BaseTimeEntity;
+import api.entity.BaseTimeEntity;
+import api.enums.UserRole;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

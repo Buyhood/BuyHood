@@ -1,6 +1,5 @@
 package api.buyhood.domain.order.service;
 
-import api.buyhood.domain.auth.entity.AuthUser;
 import api.buyhood.domain.cart.dto.response.CartRes;
 import api.buyhood.domain.cart.entity.Cart;
 import api.buyhood.domain.cart.entity.CartItem;
@@ -27,9 +26,9 @@ import api.buyhood.domain.store.entity.Store;
 import api.buyhood.domain.store.repository.StoreRepository;
 import api.buyhood.domain.user.entity.User;
 import api.buyhood.domain.user.repository.UserRepository;
-import api.buyhood.global.common.exception.ForbiddenException;
-import api.buyhood.global.common.exception.InvalidRequestException;
-import api.buyhood.global.common.exception.NotFoundException;
+import api.exception.ForbiddenException;
+import api.exception.InvalidRequestException;
+import api.exception.NotFoundException;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -37,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import api.security.AuthUser;
 import com.siot.IamportRestClient.IamportClient;
 import com.siot.IamportRestClient.exception.IamportResponseException;
 import com.siot.IamportRestClient.request.CancelData;
@@ -46,14 +46,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static api.buyhood.domain.order.enums.OrderStatus.ACCEPTED;
-import static api.buyhood.global.common.exception.enums.CartErrorCode.NOT_FOUND_CART;
-import static api.buyhood.global.common.exception.enums.OrderErrorCode.*;
-import static api.buyhood.global.common.exception.enums.PaymentErrorCode.FAILED_CANCEL;
-import static api.buyhood.global.common.exception.enums.PaymentErrorCode.NOT_FOUND_PAYMENT;
-import static api.buyhood.global.common.exception.enums.ProductErrorCode.PRODUCT_NOT_FOUND;
-import static api.buyhood.global.common.exception.enums.SellerErrorCode.SELLER_NOT_FOUND;
-import static api.buyhood.global.common.exception.enums.StoreErrorCode.STORE_NOT_FOUND;
-import static api.buyhood.global.common.exception.enums.UserErrorCode.USER_NOT_FOUND;
+import static api.errorcode.CartErrorCode.NOT_FOUND_CART;
+import static api.errorcode.OrderErrorCode.*;
+import static api.errorcode.PaymentErrorCode.FAILED_CANCEL;
+import static api.errorcode.PaymentErrorCode.NOT_FOUND_PAYMENT;
+import static api.errorcode.ProductErrorCode.PRODUCT_NOT_FOUND;
+import static api.errorcode.SellerErrorCode.SELLER_NOT_FOUND;
+import static api.errorcode.StoreErrorCode.STORE_NOT_FOUND;
+import static api.errorcode.UserErrorCode.USER_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
