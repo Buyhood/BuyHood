@@ -1,11 +1,11 @@
-package api.buyhood.productcategory.controller;
+package api.buyhood.category.controller;
 
-import api.buyhood.productcategory.dto.request.store.CreateStoreCategoryReq;
-import api.buyhood.productcategory.dto.request.store.PatchStoreCategoryReq;
-import api.buyhood.productcategory.dto.response.store.CreateStoreCategoryRes;
-import api.buyhood.productcategory.dto.response.store.GetStoreCategoryRes;
-import api.buyhood.productcategory.dto.response.store.PageStoreCategoryRes;
-import api.buyhood.productcategory.service.StoreCategoryService;
+import api.buyhood.category.dto.request.store.CreateStoreCategoryReq;
+import api.buyhood.category.dto.request.store.PatchStoreCategoryReq;
+import api.buyhood.category.dto.response.store.CreateStoreCategoryRes;
+import api.buyhood.category.dto.response.store.GetStoreCategoryRes;
+import api.buyhood.category.dto.response.store.PageStoreCategoryRes;
+import api.buyhood.category.service.StoreCategoryService;
 import api.dto.Response;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

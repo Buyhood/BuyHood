@@ -1,6 +1,6 @@
 package api.buyhood.domain.product.entity;
 
-import api.buyhood.productcategory.entity.Category;
+import api.buyhood.category.entity.Category;
 import api.entity.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

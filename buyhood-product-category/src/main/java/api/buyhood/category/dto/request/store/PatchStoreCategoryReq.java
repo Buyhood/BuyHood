@@ -1,4 +1,4 @@
-package api.buyhood.productcategory.dto.request.store;
+package api.buyhood.category.dto.request.store;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

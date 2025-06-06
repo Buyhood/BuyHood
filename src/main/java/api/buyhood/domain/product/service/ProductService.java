@@ -1,5 +1,6 @@
 package api.buyhood.domain.product.service;
 
+import api.buyhood.category.entity.Category;
 import api.buyhood.domain.cart.entity.Cart;
 import api.buyhood.domain.cart.entity.CartItem;
 import api.buyhood.domain.product.dto.response.GetProductRes;
@@ -10,7 +11,6 @@ import api.buyhood.domain.product.repository.ProductCategoryRepository;
 import api.buyhood.domain.product.repository.ProductRepository;
 import api.buyhood.domain.store.entity.Store;
 import api.buyhood.domain.store.repository.StoreRepository;
-import api.buyhood.productcategory.entity.Category;
 import api.errorcode.CategoryErrorCode;
 import api.errorcode.ProductErrorCode;
 import api.errorcode.StoreErrorCode;

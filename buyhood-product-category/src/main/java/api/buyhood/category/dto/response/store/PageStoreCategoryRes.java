@@ -1,6 +1,6 @@
-package api.buyhood.productcategory.dto.response.store;
+package api.buyhood.category.dto.response.store;
 
-import api.buyhood.productcategory.entity.StoreCategory;
+import api.buyhood.category.entity.StoreCategory;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

@@ -1,10 +1,10 @@
-package api.buyhood.productcategory.service;
+package api.buyhood.category.service;
 
-import api.buyhood.productcategory.dto.response.store.CreateStoreCategoryRes;
-import api.buyhood.productcategory.dto.response.store.GetStoreCategoryRes;
-import api.buyhood.productcategory.dto.response.store.PageStoreCategoryRes;
-import api.buyhood.productcategory.entity.StoreCategory;
-import api.buyhood.productcategory.repository.StoreCategoryRepository;
+import api.buyhood.category.dto.response.store.CreateStoreCategoryRes;
+import api.buyhood.category.dto.response.store.GetStoreCategoryRes;
+import api.buyhood.category.dto.response.store.PageStoreCategoryRes;
+import api.buyhood.category.entity.StoreCategory;
+import api.buyhood.category.repository.StoreCategoryRepository;
 import api.errorcode.CategoryErrorCode;
 import api.exception.ConflictException;
 import api.exception.NotFoundException;
