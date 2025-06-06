@@ -3,7 +3,7 @@ package api.buyhood.storecategory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"api.buyhood"})
 public class BuyHoodStoreCategoryApplication {
 
 	public static void main(String[] args) {

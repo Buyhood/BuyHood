@@ -1,17 +1,17 @@
 package api.buyhood.domain.product.repository;
 
-import api.buyhood.domain.product.entity.ProductCategory;
+import api.buyhood.domain.product.entity.ProductCategoryMapping;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
-public interface ProductCategoryRepository extends JpaRepository<ProductCategory, Long> {
+public interface ProductCategoryRepository extends JpaRepository<ProductCategoryMapping, Long> {
 
-	@Query("select pc.category.id from ProductCategory pc where pc.product.id = :productId")
+	@Query("select pc.categoryId from ProductCategoryMapping pc where pc.productId = :productId")
 	List<Long> findCategoryIdsByProductId(Long productId);
 
-	@Query("select pc.product.id, c.name from Category pc join pc.category c where pc.product.id in :productIds")
+	@Query("select pc.product.id, c.name from ProductCategory pc join pc.category c where pc.product.id in :productIds")
 	List<Object[]> findCategoryNamesByProductIds(List<Long> productIds);
 
 	@Modifying

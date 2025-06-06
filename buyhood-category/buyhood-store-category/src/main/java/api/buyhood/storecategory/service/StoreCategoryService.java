@@ -1,13 +1,13 @@
 package api.buyhood.storecategory.service;
 
+import api.buyhood.errorcode.CategoryErrorCode;
+import api.buyhood.exception.ConflictException;
+import api.buyhood.exception.NotFoundException;
 import api.buyhood.storecategory.dto.response.CreateStoreCategoryRes;
 import api.buyhood.storecategory.dto.response.GetStoreCategoryRes;
 import api.buyhood.storecategory.dto.response.PageStoreCategoryRes;
 import api.buyhood.storecategory.entity.StoreCategory;
 import api.buyhood.storecategory.repository.StoreCategoryRepository;
-import api.errorcode.CategoryErrorCode;
-import api.exception.ConflictException;
-import api.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

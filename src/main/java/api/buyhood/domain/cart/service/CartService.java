@@ -10,18 +10,18 @@ import api.buyhood.domain.product.entity.Product;
 import api.buyhood.domain.product.repository.ProductRepository;
 import api.buyhood.domain.user.entity.User;
 import api.buyhood.domain.user.repository.UserRepository;
-import api.exception.InvalidRequestException;
-import api.exception.NotFoundException;
-import api.security.AuthUser;
+import api.buyhood.exception.InvalidRequestException;
+import api.buyhood.exception.NotFoundException;
+import api.buyhood.security.AuthUser;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static api.errorcode.CartErrorCode.MULTIPLE_STORE_NOT_ALLOWED;
-import static api.errorcode.CartErrorCode.NOT_FOUND_CART;
-import static api.errorcode.ProductErrorCode.PRODUCT_NOT_FOUND;
-import static api.errorcode.UserErrorCode.USER_NOT_FOUND;
+import static api.buyhood.errorcode.CartErrorCode.MULTIPLE_STORE_NOT_ALLOWED;
+import static api.buyhood.errorcode.CartErrorCode.NOT_FOUND_CART;
+import static api.buyhood.errorcode.ProductErrorCode.PRODUCT_NOT_FOUND;
+import static api.buyhood.errorcode.UserErrorCode.USER_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -96,9 +96,9 @@ public class CartService {
 
 	private void validateSingleStoreInCart(List<Product> products) {
 		long storeCount = products.stream()
-				.map(product -> product.getStore().getId())
-				.distinct()
-				.count();
+			.map(product -> product.getStore().getId())
+			.distinct()
+			.count();
 
 		if (storeCount != 1) {
 			throw new InvalidRequestException(MULTIPLE_STORE_NOT_ALLOWED);

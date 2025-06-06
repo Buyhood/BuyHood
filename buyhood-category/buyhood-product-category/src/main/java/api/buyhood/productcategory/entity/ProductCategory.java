@@ -1,6 +1,6 @@
 package api.buyhood.productcategory.entity;
 
-import api.entity.BaseTimeEntity;
+import api.buyhood.entity.BaseTimeEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

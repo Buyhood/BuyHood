@@ -5,7 +5,7 @@ import api.buyhood.auth.dto.req.SignupUserReq;
 import api.buyhood.auth.dto.res.SignInUserRes;
 import api.buyhood.auth.dto.res.SignupUserRes;
 import api.buyhood.auth.service.AuthService;
-import api.dto.Response;
+import api.buyhood.dto.Response;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;

@@ -26,7 +26,8 @@ repositories {
 
 dependencies {
 	implementation project(':buyhood-global-core:buyhood-global-config')
-	implementation project(':buyhood-category')
+	implementation project(':buyhood-category:buyhood-product-category')
+	implementation project(':buyhood-category:buyhood-store-category')
 	
 	// spring validation
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
@@ -48,11 +49,11 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
+	
 	//portone
 	implementation 'com.github.iamport:iamport-rest-client-java:0.2.23'
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-
+	
 }
 
 subprojects {

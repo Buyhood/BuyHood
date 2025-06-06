@@ -1,12 +1,12 @@
 package api.buyhood.productcategory.controller;
 
+import api.buyhood.dto.Response;
 import api.buyhood.productcategory.dto.request.CreateProductCategoryReq;
 import api.buyhood.productcategory.dto.request.PatchProductCategoryReq;
 import api.buyhood.productcategory.dto.response.CreateProductCategoryRes;
 import api.buyhood.productcategory.dto.response.GetProductCategoryRes;
 import api.buyhood.productcategory.dto.response.PageProductCategoryRes;
 import api.buyhood.productcategory.service.ProductCategoryService;
-import api.dto.Response;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

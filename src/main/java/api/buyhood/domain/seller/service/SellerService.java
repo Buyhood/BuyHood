@@ -5,9 +5,9 @@ import api.buyhood.domain.seller.dto.req.DeleteSellerReq;
 import api.buyhood.domain.seller.dto.res.GetSellerRes;
 import api.buyhood.domain.seller.entity.Seller;
 import api.buyhood.domain.seller.repository.SellerRepository;
-import api.exception.InvalidRequestException;
-import api.exception.NotFoundException;
-import api.security.AuthUser;
+import api.buyhood.exception.InvalidRequestException;
+import api.buyhood.exception.NotFoundException;
+import api.buyhood.security.AuthUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,10 +15,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static api.errorcode.SellerErrorCode.SELLER_NOT_FOUND;
-import static api.errorcode.UserErrorCode.PASSWORD_SAME_AS_OLD;
-import static api.errorcode.UserErrorCode.USER_INVALID_PASSWORD;
-import static api.errorcode.UserErrorCode.USER_NOT_FOUND;
+import static api.buyhood.errorcode.SellerErrorCode.SELLER_NOT_FOUND;
+import static api.buyhood.errorcode.UserErrorCode.PASSWORD_SAME_AS_OLD;
+import static api.buyhood.errorcode.UserErrorCode.USER_INVALID_PASSWORD;
+import static api.buyhood.errorcode.UserErrorCode.USER_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor

@@ -1,12 +1,12 @@
 package api.buyhood.storecategory.controller;
 
+import api.buyhood.dto.Response;
 import api.buyhood.storecategory.dto.request.CreateStoreCategoryReq;
 import api.buyhood.storecategory.dto.request.PatchStoreCategoryReq;
 import api.buyhood.storecategory.dto.response.CreateStoreCategoryRes;
 import api.buyhood.storecategory.dto.response.GetStoreCategoryRes;
 import api.buyhood.storecategory.dto.response.PageStoreCategoryRes;
 import api.buyhood.storecategory.service.StoreCategoryService;
-import api.dto.Response;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
