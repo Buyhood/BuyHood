@@ -18,7 +18,6 @@ repositories {
 }
 
 dependencies {
-	implementation project(':buyhood-global-core:buyhood-global-common')
 	implementation project(':buyhood-global-core:buyhood-global-config')
 	implementation project(':buyhood-user')
 	// spring validation
