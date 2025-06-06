@@ -28,6 +28,7 @@ public class OrderController {
 	private final OrderService orderService;
 
 	//주문 요청
+	@Secured("ROLE_USER")
 	@PostMapping("/v1/orders/apply")
 	public Response<ApplyOrderRes> applyOrder(
 		@Valid @RequestBody ApplyOrderReq applyOrderReq,
@@ -39,6 +40,7 @@ public class OrderController {
 	/**
 	 * 주문 취소
 	 */
+	@Secured("ROLE_USER")
 	@DeleteMapping("/v1/orders/{orderId}")
 	public Response<String> deleteOrder(
 		@AuthenticationPrincipal AuthUser authUser,

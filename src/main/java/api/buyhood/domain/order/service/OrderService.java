@@ -23,10 +23,13 @@ import api.buyhood.domain.user.entity.User;
 import api.buyhood.domain.user.repository.UserRepository;
 import api.exception.ForbiddenException;
 import api.exception.NotFoundException;
-import api.security.AuthUser;
+
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import api.security.AuthUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -92,8 +95,7 @@ public class OrderService {
 
 		productService.decreaseStock(cart, productMap);
 
-		return ApplyOrderRes.of(order.getStore().getId(), CartRes.of(cart), order.getTotalPrice(),
-			order.getPaymentMethod(), order.getStatus(), order.getCreatedAt(), order.getRequestMessage());
+		return ApplyOrderRes.of(order.getStore().getId(), CartRes.of(cart),order.getPaymentMethod(), order.getTotalPrice(), order.getStatus(), order.getCreatedAt(), order.getRequestMessage());
 	}
 
 	//주문 승인
@@ -153,15 +155,16 @@ public class OrderService {
 		order.delete();
 	}
 
-	private long getTotalPrice(Map<Long, Product> productMap, List<CartItem> cartItemList) {
-		long totalPrice = 0L;
+	private BigDecimal getTotalPrice(Map<Long, Product> productMap, List<CartItem> cartItemList) {
+		BigDecimal totalPrice = BigDecimal.ZERO;
 
 		for (CartItem item : cartItemList) {
 			Product product = productMap.get(item.getProductId());
 			if (product == null) {
 				throw new NotFoundException(PRODUCT_NOT_FOUND);
 			}
-			totalPrice += product.getPrice() * item.getQuantity();
+			BigDecimal itemTotal  = BigDecimal.valueOf(product.getPrice()).multiply(BigDecimal.valueOf(item.getQuantity()));
+			totalPrice = totalPrice.add(itemTotal);
 		}
 
 		return totalPrice;
