@@ -1,10 +1,11 @@
 package api.buyhood.domain.payment.controller;
 
-import api.buyhood.domain.auth.entity.AuthUser;
+
 import api.buyhood.domain.payment.dto.request.PaymentReq;
 import api.buyhood.domain.payment.dto.response.PaymentRes;
 import api.buyhood.domain.payment.service.PaymentService;
-import api.buyhood.global.common.dto.Response;
+import api.dto.Response;
+import api.security.AuthUser;
 import com.siot.IamportRestClient.exception.IamportResponseException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

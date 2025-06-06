@@ -38,3 +38,5 @@ out/
 
 ### properties ###
 *local.properties
+src/main/resources/application-local.properties
+src/main/resources/application-ci.properties

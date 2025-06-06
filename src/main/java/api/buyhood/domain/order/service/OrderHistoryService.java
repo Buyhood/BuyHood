@@ -13,8 +13,8 @@ import api.buyhood.domain.store.entity.Store;
 import api.buyhood.domain.store.repository.StoreRepository;
 import api.buyhood.domain.user.entity.User;
 import api.buyhood.domain.user.repository.UserRepository;
-import api.buyhood.global.common.exception.ForbiddenException;
-import api.buyhood.global.common.exception.NotFoundException;
+import api.exception.ForbiddenException;
+import api.exception.NotFoundException;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -23,11 +23,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static api.buyhood.global.common.exception.enums.OrderErrorCode.NOT_FOUND_ORDER;
-import static api.buyhood.global.common.exception.enums.OrderErrorCode.NOT_OWNER_OF_STORE;
-import static api.buyhood.global.common.exception.enums.SellerErrorCode.SELLER_NOT_FOUND;
-import static api.buyhood.global.common.exception.enums.StoreErrorCode.STORE_NOT_FOUND;
-import static api.buyhood.global.common.exception.enums.UserErrorCode.USER_NOT_FOUND;
+import static api.errorcode.OrderErrorCode.NOT_FOUND_ORDER;
+import static api.errorcode.OrderErrorCode.NOT_OWNER_OF_STORE;
+import static api.errorcode.SellerErrorCode.SELLER_NOT_FOUND;
+import static api.errorcode.StoreErrorCode.STORE_NOT_FOUND;
+import static api.errorcode.UserErrorCode.USER_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor

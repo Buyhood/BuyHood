@@ -1,10 +1,9 @@
 package api.buyhood.domain.payment.entity;
 
 import api.buyhood.domain.order.entity.Order;
-import api.buyhood.domain.order.enums.PaymentMethod;
 import api.buyhood.domain.payment.enums.PGProvider;
 import api.buyhood.domain.payment.enums.PayStatus;
-import api.buyhood.global.common.entity.BaseTimeEntity;
+import api.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
