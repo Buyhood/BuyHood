@@ -93,12 +93,12 @@ public class PaymentService {
                 payment.getBuyerEmail());
     }
 
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(rollbackFor = Exception.class, noRollbackFor = InvalidRequestException.class)
     public void validPayment(Long paymentId, ValidPaymentReq validPaymentReq) throws IamportResponseException, IOException {
         Payment payment = paymentRepository.findNotDeletedById(paymentId)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_PAYMENT));
 
-        //로컬 내 Payment 도메인과의 구별을 위해 import를 따로 진행하지 않았습니다.
+        //IamportRestClient 관련 Payment 도메인
         IamportResponse<com.siot.IamportRestClient.response.Payment> response = iamportClient.paymentByImpUid(validPaymentReq.getImpUid());
         com.siot.IamportRestClient.response.Payment iamportPayment = response.getResponse();
 
@@ -108,7 +108,7 @@ public class PaymentService {
 
         if (!"paid".equals(iamportPayment.getStatus())) {
             payment.failPayment();
-            throw new InvalidRequestException(NOT_PAID);
+            throw new InvalidRequestException(FAILED_PAID);
         }
 
         if (!payment.getMerchantUid().equals(iamportPayment.getMerchantUid())) {
