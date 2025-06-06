@@ -1,6 +1,5 @@
 package api.buyhood.domain.payment.service;
 
-import api.buyhood.domain.auth.entity.AuthUser;
 import api.buyhood.domain.order.entity.Order;
 import api.buyhood.domain.order.repository.OrderRepository;
 import api.buyhood.domain.payment.dto.request.ApplyPaymentReq;
@@ -12,8 +11,9 @@ import api.buyhood.domain.payment.enums.PayStatus;
 import api.buyhood.domain.payment.repository.PaymentRepository;
 import api.buyhood.domain.user.entity.User;
 import api.buyhood.domain.user.repository.UserRepository;
-import api.buyhood.global.common.exception.InvalidRequestException;
-import api.buyhood.global.common.exception.NotFoundException;
+import api.exception.InvalidRequestException;
+import api.exception.NotFoundException;
+import api.security.AuthUser;
 import com.siot.IamportRestClient.IamportClient;
 import com.siot.IamportRestClient.exception.IamportResponseException;
 import com.siot.IamportRestClient.request.CancelData;
@@ -28,9 +28,10 @@ import java.util.UUID;
 
 import static api.buyhood.domain.order.enums.OrderStatus.PENDING;
 import static api.buyhood.domain.order.enums.PaymentMethod.ZERO_PAY;
-import static api.buyhood.global.common.exception.enums.OrderErrorCode.*;
-import static api.buyhood.global.common.exception.enums.PaymentErrorCode.*;
-import static api.buyhood.global.common.exception.enums.UserErrorCode.USER_NOT_FOUND;
+import static api.errorcode.OrderErrorCode.*;
+import static api.errorcode.PaymentErrorCode.*;
+import static api.errorcode.UserErrorCode.USER_NOT_FOUND;
+
 
 @Service
 @RequiredArgsConstructor

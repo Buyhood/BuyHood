@@ -6,7 +6,7 @@ import api.buyhood.domain.product.dto.response.CreateCategoryRes;
 import api.buyhood.domain.product.dto.response.GetCategoryRes;
 import api.buyhood.domain.product.dto.response.PageCategoryRes;
 import api.buyhood.domain.product.service.CategoryService;
-import api.buyhood.global.common.dto.Response;
+import api.dto.Response;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
