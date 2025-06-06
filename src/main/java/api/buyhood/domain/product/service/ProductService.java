@@ -24,11 +24,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import jakarta.persistence.OptimisticLockException;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -271,12 +278,29 @@ public class ProductService {
 		getProduct.markDeleted();
 	}
 
+	@Retryable(
+			retryFor = {
+					OptimisticLockException.class,
+					ObjectOptimisticLockingFailureException.class
+			},
+			backoff = @Backoff(delay = 100)
+	)
 	@Transactional
 	public void decreaseStock(Cart cart, Map<Long, Product> productMap) {
 		for (CartItem cartItem : cart.getCart()) {
 			Product product = productMap.get(cartItem.getProductId());
 			product.decreaseStock(cartItem.getQuantity());
 		}
+	}
+
+	@Recover
+	public void recover(OptimisticLockException e, Cart cart, Map<Long, Product> productMap) {
+		throw new InvalidRequestException(ProductErrorCode.STOCK_UPDATE_CONFLICT);
+	}
+
+	@Recover
+	public void recover(ObjectOptimisticLockingFailureException e, Cart cart, Map<Long, Product> productMap) {
+		throw new InvalidRequestException(ProductErrorCode.STOCK_UPDATE_CONFLICT);
 	}
 
 	private Store getStoreOrElseThrow(Long storeId) {

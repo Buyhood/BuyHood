@@ -75,8 +75,9 @@ public class OrderService {
 			.map(CartItem::getProductId)
 			.toList();
 
-		Map<Long, Product> productMap = productRepository.findAllById(productIdList).stream()
-			.collect(Collectors.toMap(Product::getId, p -> p));
+		Map<Long, Product> productMap = productRepository.findAllProductById(productIdList)
+				.stream()
+				.collect(Collectors.toMap(Product::getId, p -> p));
 
 		String orderName = creatOrderName(productMap);
 

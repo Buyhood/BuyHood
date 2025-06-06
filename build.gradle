@@ -52,6 +52,9 @@ dependencies {
 	implementation 'com.github.iamport:iamport-rest-client-java:0.2.23'
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
+	// retry
+	implementation 'org.springframework.retry:spring-retry'
+
 }
 
 subprojects {
