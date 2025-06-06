@@ -25,7 +25,7 @@ repositories {
 
 dependencies {
 	implementation project(':buyhood-global-core:buyhood-global-config')
-	implementation project(':buyhood-product-category')
+	implementation project(':buyhood-category')
 	
 	// spring validation
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
