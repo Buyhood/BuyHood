@@ -1,10 +1,10 @@
-package api.buyhood.domain.auth.controller;
+package api.buyhood.auth.controller;
 
-import api.buyhood.domain.auth.dto.req.SignInUserReq;
-import api.buyhood.domain.auth.dto.req.SignupUserReq;
-import api.buyhood.domain.auth.dto.res.SignInUserRes;
-import api.buyhood.domain.auth.dto.res.SignupUserRes;
-import api.buyhood.domain.auth.service.AuthService;
+import api.buyhood.auth.dto.req.SignInUserReq;
+import api.buyhood.auth.dto.req.SignupUserReq;
+import api.buyhood.auth.dto.res.SignInUserRes;
+import api.buyhood.auth.dto.res.SignupUserRes;
+import api.buyhood.auth.service.AuthService;
 import api.dto.Response;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
