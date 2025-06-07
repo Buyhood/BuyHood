@@ -1,6 +1,5 @@
 package api.buyhood.domain.payment.controller;
 
-
 import api.buyhood.domain.payment.dto.request.PaymentReq;
 import api.buyhood.domain.payment.dto.request.ValidPaymentReq;
 import api.buyhood.domain.payment.dto.response.PaymentRes;

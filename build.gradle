@@ -49,11 +49,15 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-	
-	//portone
+
+	// portone
 	implementation 'com.github.iamport:iamport-rest-client-java:0.2.23'
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-	
+
+	// QR Code - zxing
+	implementation group: 'com.google.zxing', name: 'javase', version: '3.5.0'
+	implementation group: 'com.google.zxing', name: 'core', version: '3.5.0'
+
 }
 
 subprojects {
@@ -79,7 +83,7 @@ subprojects {
 		// lombok
 		compileOnly 'org.projectlombok:lombok'
 		annotationProcessor 'org.projectlombok:lombok'
-		
+
 		// etc
 		testImplementation 'org.springframework.boot:spring-boot-starter-test'
 		testImplementation 'org.springframework.security:spring-security-test'
