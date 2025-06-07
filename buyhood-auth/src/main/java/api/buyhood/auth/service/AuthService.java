@@ -6,18 +6,18 @@ import api.buyhood.auth.dto.res.SignInUserRes;
 import api.buyhood.auth.dto.res.SignupUserRes;
 import api.buyhood.domain.user.entity.User;
 import api.buyhood.domain.user.repository.UserRepository;
-import api.exception.ConflictException;
-import api.exception.InvalidRequestException;
-import api.exception.NotFoundException;
-import api.security.JwtProvider;
+import api.buyhood.exception.ConflictException;
+import api.buyhood.exception.InvalidRequestException;
+import api.buyhood.exception.NotFoundException;
+import api.buyhood.security.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static api.errorcode.AuthErrorCode.USER_EMAIL_DUPLICATED;
-import static api.errorcode.UserErrorCode.USER_INVALID_PASSWORD;
-import static api.errorcode.UserErrorCode.USER_NOT_FOUND;
+import static api.buyhood.errorcode.AuthErrorCode.USER_EMAIL_DUPLICATED;
+import static api.buyhood.errorcode.UserErrorCode.USER_INVALID_PASSWORD;
+import static api.buyhood.errorcode.UserErrorCode.USER_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
