@@ -1,13 +1,13 @@
 package api.buyhood.domain.product.controller;
 
-import api.buyhood.domain.auth.entity.AuthUser;
 import api.buyhood.domain.product.dto.request.PatchProductReq;
 import api.buyhood.domain.product.dto.request.RegisterProductReq;
 import api.buyhood.domain.product.dto.response.GetProductRes;
 import api.buyhood.domain.product.dto.response.PageProductRes;
 import api.buyhood.domain.product.dto.response.RegisterProductRes;
 import api.buyhood.domain.product.service.ProductService;
-import api.buyhood.global.common.dto.Response;
+import api.buyhood.dto.Response;
+import api.buyhood.security.AuthUser;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

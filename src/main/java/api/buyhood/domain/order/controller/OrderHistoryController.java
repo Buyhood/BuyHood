@@ -1,9 +1,9 @@
 package api.buyhood.domain.order.controller;
 
-import api.buyhood.domain.auth.entity.AuthUser;
 import api.buyhood.domain.order.dto.response.GetOrderRes;
 import api.buyhood.domain.order.service.OrderHistoryService;
-import api.buyhood.global.common.dto.Response;
+import api.buyhood.dto.Response;
+import api.buyhood.security.AuthUser;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;

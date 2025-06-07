@@ -10,6 +10,9 @@ import org.springframework.data.repository.query.Param;
 
 public interface StoreRepository extends JpaRepository<Store, Long> {
 
+	@Query("select count(s) > 0 from Store s where s.id = :storeId and s.deletedAt is null")
+	boolean existsActiveStoreById(Long storeId);
+
 	boolean existsByName(String storeName);
 
 	@Query("select s from Store s where s.id = :storeId and s.deletedAt is null")

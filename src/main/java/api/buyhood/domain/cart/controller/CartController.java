@@ -1,10 +1,10 @@
 package api.buyhood.domain.cart.controller;
 
-import api.buyhood.domain.auth.entity.AuthUser;
 import api.buyhood.domain.cart.dto.request.CreateCartReq;
 import api.buyhood.domain.cart.dto.response.CartRes;
 import api.buyhood.domain.cart.service.CartService;
-import api.buyhood.global.common.dto.Response;
+import api.buyhood.dto.Response;
+import api.buyhood.security.AuthUser;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

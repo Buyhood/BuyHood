@@ -1,6 +1,5 @@
 package api.buyhood.domain.order.service;
 
-import api.buyhood.domain.auth.entity.AuthUser;
 import api.buyhood.domain.cart.dto.response.CartRes;
 import api.buyhood.domain.cart.entity.Cart;
 import api.buyhood.domain.cart.entity.CartItem;
@@ -27,33 +26,32 @@ import api.buyhood.domain.store.entity.Store;
 import api.buyhood.domain.store.repository.StoreRepository;
 import api.buyhood.domain.user.entity.User;
 import api.buyhood.domain.user.repository.UserRepository;
-import api.buyhood.global.common.exception.ForbiddenException;
-import api.buyhood.global.common.exception.InvalidRequestException;
-import api.buyhood.global.common.exception.NotFoundException;
-
+import api.buyhood.exception.ForbiddenException;
+import api.buyhood.exception.InvalidRequestException;
+import api.buyhood.exception.NotFoundException;
+import api.buyhood.security.AuthUser;
+import com.siot.IamportRestClient.IamportClient;
+import com.siot.IamportRestClient.exception.IamportResponseException;
+import com.siot.IamportRestClient.request.CancelData;
+import com.siot.IamportRestClient.response.IamportResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import com.siot.IamportRestClient.IamportClient;
-import com.siot.IamportRestClient.exception.IamportResponseException;
-import com.siot.IamportRestClient.request.CancelData;
-import com.siot.IamportRestClient.response.IamportResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static api.buyhood.domain.order.enums.OrderStatus.ACCEPTED;
-import static api.buyhood.global.common.exception.enums.CartErrorCode.NOT_FOUND_CART;
-import static api.buyhood.global.common.exception.enums.OrderErrorCode.*;
-import static api.buyhood.global.common.exception.enums.PaymentErrorCode.FAILED_CANCEL;
-import static api.buyhood.global.common.exception.enums.PaymentErrorCode.NOT_FOUND_PAYMENT;
-import static api.buyhood.global.common.exception.enums.ProductErrorCode.PRODUCT_NOT_FOUND;
-import static api.buyhood.global.common.exception.enums.SellerErrorCode.SELLER_NOT_FOUND;
-import static api.buyhood.global.common.exception.enums.StoreErrorCode.STORE_NOT_FOUND;
-import static api.buyhood.global.common.exception.enums.UserErrorCode.USER_NOT_FOUND;
+import static api.buyhood.errorcode.CartErrorCode.NOT_FOUND_CART;
+import static api.buyhood.errorcode.OrderErrorCode.*;
+import static api.buyhood.errorcode.PaymentErrorCode.FAILED_CANCEL;
+import static api.buyhood.errorcode.PaymentErrorCode.NOT_FOUND_PAYMENT;
+import static api.buyhood.errorcode.ProductErrorCode.PRODUCT_NOT_FOUND;
+import static api.buyhood.errorcode.SellerErrorCode.SELLER_NOT_FOUND;
+import static api.buyhood.errorcode.StoreErrorCode.STORE_NOT_FOUND;
+import static api.buyhood.errorcode.UserErrorCode.USER_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -111,7 +109,8 @@ public class OrderService {
 
 		productService.decreaseStock(cart, productMap);
 
-		return ApplyOrderRes.of(order.getStore().getId(), CartRes.of(cart),order.getPaymentMethod(), order.getTotalPrice(), order.getStatus(), order.getCreatedAt(), order.getRequestMessage());
+		return ApplyOrderRes.of(order.getStore().getId(), CartRes.of(cart), order.getPaymentMethod(),
+			order.getTotalPrice(), order.getStatus(), order.getCreatedAt(), order.getRequestMessage());
 	}
 
 	//주문 승인
@@ -124,6 +123,13 @@ public class OrderService {
 
 		Order order = orderRepository.findById(orderId)
 			.orElseThrow(() -> new NotFoundException(NOT_FOUND_ORDER));
+
+		Payment payment = paymentRepository.findNotDeletedByOrderId(orderId)
+			.orElseThrow(() -> new NotFoundException(NOT_FOUND_PAYMENT));
+
+		if (!payment.isPaid()) {
+			throw new InvalidRequestException(CANNOT_ACCEPT_ORDER);
+		}
 
 		Long sellerIdInStore = order.getStore().getSeller().getId();
 
@@ -160,7 +166,8 @@ public class OrderService {
 	}
 
 	@Transactional(rollbackFor = Exception.class)
-	public void deleteOrder(AuthUser authUser, Long orderId, RefundPaymentReq refundPaymentReq) throws IamportResponseException, IOException {
+	public void deleteOrder(AuthUser authUser, Long orderId, RefundPaymentReq refundPaymentReq)
+		throws IamportResponseException, IOException {
 		User user = userRepository.findByEmail(authUser.getEmail())
 			.orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
 
@@ -177,7 +184,7 @@ public class OrderService {
 		}
 
 		Payment payment = paymentRepository.findNotDeletedByOrderId(order.getId())
-				.orElseThrow(() -> new NotFoundException(NOT_FOUND_PAYMENT));
+			.orElseThrow(() -> new NotFoundException(NOT_FOUND_PAYMENT));
 
 		order.delete();
 		refundPayment(payment, refundPaymentReq.getImpUid());
@@ -186,12 +193,13 @@ public class OrderService {
 		productService.rollBackStock(orderHistories);
 	}
 
-	private void refundPayment(Payment payment,String impUid) throws IamportResponseException, IOException {
+	private void refundPayment(Payment payment, String impUid) throws IamportResponseException, IOException {
 		payment.cancel();
 		CancelData cancelData = new CancelData(impUid, true);
-		IamportResponse<com.siot.IamportRestClient.response.Payment> cancelResponse = iamportClient.cancelPaymentByImpUid(cancelData);
+		IamportResponse<com.siot.IamportRestClient.response.Payment> cancelResponse = iamportClient.cancelPaymentByImpUid(
+			cancelData);
 
-		if(!"cancelled".equals(cancelResponse.getResponse().getStatus())){
+		if (!"cancelled".equals(cancelResponse.getResponse().getStatus())) {
 			throw new InvalidRequestException(FAILED_CANCEL);
 		}
 	}
@@ -204,7 +212,8 @@ public class OrderService {
 			if (product == null) {
 				throw new NotFoundException(PRODUCT_NOT_FOUND);
 			}
-			BigDecimal itemTotal  = BigDecimal.valueOf(product.getPrice()).multiply(BigDecimal.valueOf(item.getQuantity()));
+			BigDecimal itemTotal = BigDecimal.valueOf(product.getPrice())
+				.multiply(BigDecimal.valueOf(item.getQuantity()));
 			totalPrice = totalPrice.add(itemTotal);
 		}
 

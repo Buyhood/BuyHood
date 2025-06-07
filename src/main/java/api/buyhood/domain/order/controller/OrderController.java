@@ -1,6 +1,5 @@
 package api.buyhood.domain.order.controller;
 
-import api.buyhood.domain.auth.entity.AuthUser;
 import api.buyhood.domain.order.dto.request.AcceptOrderReq;
 import api.buyhood.domain.order.dto.request.ApplyOrderReq;
 import api.buyhood.domain.order.dto.request.RefundPaymentReq;
@@ -8,9 +7,11 @@ import api.buyhood.domain.order.dto.response.AcceptOrderRes;
 import api.buyhood.domain.order.dto.response.ApplyOrderRes;
 import api.buyhood.domain.order.dto.response.RejectOrderRes;
 import api.buyhood.domain.order.service.OrderService;
-import api.buyhood.global.common.dto.Response;
+import api.buyhood.dto.Response;
+import api.buyhood.security.AuthUser;
 import com.siot.IamportRestClient.exception.IamportResponseException;
 import jakarta.validation.Valid;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -21,8 +22,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.io.IOException;
 
 @RestController
 @RequiredArgsConstructor

@@ -1,3 +1,9 @@
 rootProject.name = 'buyhood'
-include 'buyhood-payment'
-
+include 'buyhood-auth'
+include 'buyhood-user'
+include 'buyhood-global-core'
+include 'buyhood-global-core:buyhood-global-common'
+include 'buyhood-global-core:buyhood-global-config'
+include 'buyhood-category'
+include 'buyhood-category:buyhood-store-category'
+include 'buyhood-category:buyhood-product-category'
