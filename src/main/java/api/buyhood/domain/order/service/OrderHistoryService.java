@@ -13,8 +13,8 @@ import api.buyhood.domain.store.entity.Store;
 import api.buyhood.domain.store.repository.StoreRepository;
 import api.buyhood.domain.user.entity.User;
 import api.buyhood.domain.user.repository.UserRepository;
-import api.exception.ForbiddenException;
-import api.exception.NotFoundException;
+import api.buyhood.exception.ForbiddenException;
+import api.buyhood.exception.NotFoundException;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -23,11 +23,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static api.errorcode.OrderErrorCode.NOT_FOUND_ORDER;
-import static api.errorcode.OrderErrorCode.NOT_OWNER_OF_STORE;
-import static api.errorcode.SellerErrorCode.SELLER_NOT_FOUND;
-import static api.errorcode.StoreErrorCode.STORE_NOT_FOUND;
-import static api.errorcode.UserErrorCode.USER_NOT_FOUND;
+import static api.buyhood.errorcode.OrderErrorCode.NOT_FOUND_ORDER;
+import static api.buyhood.errorcode.OrderErrorCode.NOT_OWNER_OF_STORE;
+import static api.buyhood.errorcode.SellerErrorCode.SELLER_NOT_FOUND;
+import static api.buyhood.errorcode.StoreErrorCode.STORE_NOT_FOUND;
+import static api.buyhood.errorcode.UserErrorCode.USER_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -84,7 +84,7 @@ public class OrderHistoryService {
 			.orElseThrow(() -> new NotFoundException(STORE_NOT_FOUND));
 
 		Seller seller = sellerRepository.findById(userId)
-				.orElseThrow(() -> new NotFoundException(SELLER_NOT_FOUND));
+			.orElseThrow(() -> new NotFoundException(SELLER_NOT_FOUND));
 
 		if (!store.getSeller().getId().equals(seller.getId())) {
 			throw new ForbiddenException(NOT_OWNER_OF_STORE);

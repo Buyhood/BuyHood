@@ -1,15 +1,20 @@
 package api.buyhood.domain.product.entity;
 
 import api.buyhood.domain.store.entity.Store;
-import api.entity.BaseTimeEntity;
-import api.exception.InvalidRequestException;
-import jakarta.persistence.*;
+import api.buyhood.entity.BaseTimeEntity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import static api.errorcode.ProductErrorCode.OUT_OF_STOCK;
 
 @Entity
 @Getter
@@ -50,14 +55,13 @@ public class Product extends BaseTimeEntity {
 		this.store = store;
 	}
 
-	//재고 감소
 	public void decreaseStock(int quantity) {
-
-		if (stock < quantity) {
-			throw new InvalidRequestException(OUT_OF_STOCK);
-		}
-
 		this.stock -= quantity;
+	}
+
+	//재고 롤백
+	public void rollBackStock(int quantity) {
+		this.stock += quantity;
 	}
 
 	public void patchName(String productName) {

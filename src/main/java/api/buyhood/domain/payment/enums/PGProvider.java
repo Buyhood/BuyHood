@@ -5,7 +5,9 @@ public enum PGProvider {
     NICE("nice"),
     KCP("kcp"),
     DANAL("danal"),
-    KG("html5_inicis");
+    KG("html5_inicis"),
+    ZERO_PAY("zero_pay")
+    ;
 
     private final String name;
 
