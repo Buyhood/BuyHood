@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -30,14 +29,14 @@ public class StoreCategoryController {
 
 	private final StoreCategoryService storeCategoryService;
 
-	@Secured("ROLE_ADMIN")
+	//	@Secured("ROLE_ADMIN")
 	@PostMapping("/v1/store-categories")
 	public Response<CreateStoreCategoryRes> createStoreCategory(@Valid @RequestBody CreateStoreCategoryReq request) {
 		CreateStoreCategoryRes response = storeCategoryService.createStoreCategory(request.getName());
 		return Response.ok(response);
 	}
 
-	@Secured("ROLE_ADMIN")
+	//	@Secured("ROLE_ADMIN")
 	@PatchMapping("/v1/store-categories/{storeCategoryId}")
 	public void patchStoreCategory(
 		@PathVariable Long storeCategoryId,
@@ -46,7 +45,7 @@ public class StoreCategoryController {
 		storeCategoryService.patchStoreCategoryName(storeCategoryId, request.getName());
 	}
 
-	@Secured("ROLE_ADMIN")
+	//	@Secured("ROLE_ADMIN")
 	@DeleteMapping("/v1/store-categories/{storeCategoryId}")
 	public void deleteStoreCategory(@PathVariable Long storeCategoryId) {
 		storeCategoryService.deleteStoreCategory(storeCategoryId);
