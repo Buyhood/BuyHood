@@ -7,7 +7,7 @@ import api.buyhood.domain.product.repository.ProductRepository;
 import api.buyhood.domain.seller.repository.SellerRepository;
 import api.buyhood.domain.store.repository.StoreRepository;
 import api.buyhood.domain.user.repository.UserRepository;
-import api.exception.NotFoundException;
+import api.buyhood.exception.NotFoundException;
 import jakarta.persistence.OptimisticLockException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +21,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static api.buyhood.concurrency.OrderWithoutLockTest.*;
-import static api.errorcode.ProductErrorCode.PRODUCT_NOT_FOUND;
+import static api.buyhood.errorcode.ProductErrorCode.PRODUCT_NOT_FOUND;
+
 
 @SpringBootTest
 public class OrderWithOptimisticLockTest {

@@ -13,9 +13,9 @@ import api.buyhood.domain.store.entity.Store;
 import api.buyhood.domain.store.repository.StoreRepository;
 import api.buyhood.domain.user.entity.User;
 import api.buyhood.domain.user.repository.UserRepository;
-import api.enums.UserRole;
-import api.exception.NotFoundException;
-import api.security.AuthUser;
+import api.buyhood.enums.UserRole;
+import api.buyhood.exception.NotFoundException;
+import api.buyhood.security.AuthUser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +29,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static api.buyhood.domain.order.enums.PaymentMethod.CARD;
-import static api.errorcode.ProductErrorCode.PRODUCT_NOT_FOUND;
+import static api.buyhood.errorcode.ProductErrorCode.PRODUCT_NOT_FOUND;
 
 @SpringBootTest
 public class OrderWithoutLockTest {
