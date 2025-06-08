@@ -51,12 +51,14 @@ public class OrderWithoutLockTest {
     @Autowired
     private ProductRepository productRepository;
 
-    //authUser
-    public static final Long TEST_AUTH_USER_ID = 1L;
-    public static final AuthUser TEST_AUTH_USER = new AuthUser(TEST_AUTH_USER_ID,"user@test.com", UserRole.USER);
-
     //user
-    public static final User TEST_USER = new User("유저", "test@test.com", "12341234", "주소", "전화번호");
+    public static final String TEST_USER_EMAIL = "user@test.com";
+    public static final User TEST_USER = new User("유저", TEST_USER_EMAIL, "12341234", "주소", "전화번호");
+
+    //authUser
+    public static final Long TEST_AUTH_USER_ID = TEST_USER.getId();
+    public static final AuthUser TEST_AUTH_USER = new AuthUser(TEST_AUTH_USER_ID,TEST_USER_EMAIL, UserRole.USER);
+
 
     //seller
     public static final Seller TEST_SELLER = new Seller("seller", "seller@seller.com", "password", "사업자 번호", "전화번호");

@@ -55,7 +55,7 @@ public class OrderWithOptimisticLockTest {
     }
 
     @Test
-    void 동시에_100개의_주문_요청_낙관락_적용() throws InterruptedException {
+    void 동시에_100개의_주문_요청_후_재고_감소_낙관락_적용() throws InterruptedException {
         //given
         int testCount = 100;
         ExecutorService executorService = Executors.newFixedThreadPool(10); // 10개의 스레드
@@ -76,7 +76,7 @@ public class OrderWithOptimisticLockTest {
                 try {
                     cartRepository.add(TEST_AUTH_USER_ID, TEST_CART);
                     orderService.applyOrder(TEST_APPLY_REQ, TEST_AUTH_USER);
-                    successfulOrder.incrementAndGet(); // 성공한 예매 횟수 증가
+                    successfulOrder.incrementAndGet();
                 } catch (ObjectOptimisticLockingFailureException | OptimisticLockException e) {
                     failedOrderOptimistic.incrementAndGet();
                 } catch (Exception e) {
