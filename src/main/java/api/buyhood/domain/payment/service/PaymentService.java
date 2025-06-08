@@ -178,7 +178,7 @@ public class PaymentService {
             throw new InvalidRequestException(NOT_MATCH_MERCHANT_UID);
         }
 
-        if (payment.getTotalPrice().compareTo(BigDecimal.valueOf(zPayValidationReq.getTotalPrice())) != 0) {
+        if (payment.getTotalPrice().compareTo(zPayValidationReq.getTotalPrice()) != 0) {
             payment.failPayment();
 
             throw new InvalidRequestException(NOT_MATCH_ACCOUNT);
