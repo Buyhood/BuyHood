@@ -4,8 +4,8 @@ import api.buyhood.domain.cart.entity.Cart;
 import api.buyhood.domain.cart.entity.CartItem;
 import api.buyhood.domain.product.entity.Product;
 import api.buyhood.domain.product.repository.ProductRepository;
-import api.buyhood.global.common.exception.InvalidRequestException;
-import api.buyhood.global.common.exception.NotFoundException;
+import api.buyhood.exception.InvalidRequestException;
+import api.buyhood.exception.NotFoundException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
@@ -14,9 +14,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
-import static api.buyhood.global.common.exception.enums.CommonErrorCode.JSON_PARSING_FAILED;
-import static api.buyhood.global.common.exception.enums.CommonErrorCode.REDIS_SERIALIZE_FAILED;
-import static api.buyhood.global.common.exception.enums.StoreErrorCode.STORE_NOT_FOUND;
+import static api.buyhood.errorcode.CommonErrorCode.JSON_PARSING_FAILED;
+import static api.buyhood.errorcode.CommonErrorCode.REDIS_SERIALIZE_FAILED;
+import static api.buyhood.errorcode.StoreErrorCode.STORE_NOT_FOUND;
 
 @Repository
 @RequiredArgsConstructor
@@ -64,7 +64,7 @@ public class CartRepository {
 			CartItem cartItem = cart.getCart().stream().iterator().next();
 
 			Product product = productRepository.findById(cartItem.getProductId())
-					.orElseThrow(() -> new NotFoundException(STORE_NOT_FOUND));
+				.orElseThrow(() -> new NotFoundException(STORE_NOT_FOUND));
 
 			return product.getStore().getId();
 

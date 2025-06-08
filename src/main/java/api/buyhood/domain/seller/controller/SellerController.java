@@ -1,11 +1,11 @@
 package api.buyhood.domain.seller.controller;
 
-import api.buyhood.domain.auth.entity.AuthUser;
 import api.buyhood.domain.seller.dto.req.ChangeSellerPasswordReq;
 import api.buyhood.domain.seller.dto.req.DeleteSellerReq;
 import api.buyhood.domain.seller.dto.res.GetSellerRes;
 import api.buyhood.domain.seller.service.SellerService;
-import api.buyhood.global.common.dto.Response;
+import api.buyhood.dto.Response;
+import api.buyhood.security.AuthUser;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

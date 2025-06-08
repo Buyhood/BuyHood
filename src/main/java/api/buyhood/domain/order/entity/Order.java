@@ -4,7 +4,7 @@ import api.buyhood.domain.order.enums.OrderStatus;
 import api.buyhood.domain.order.enums.PaymentMethod;
 import api.buyhood.domain.store.entity.Store;
 import api.buyhood.domain.user.entity.User;
-import api.buyhood.global.common.entity.BaseTimeEntity;
+import api.buyhood.entity.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -16,7 +16,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-
 import java.math.BigDecimal;
 import java.time.LocalTime;
 import lombok.AccessLevel;
@@ -65,7 +64,8 @@ public class Order extends BaseTimeEntity {
 	private LocalTime readyAt;
 
 	@Builder
-	public Order(Store store, User user,String name, String requestMessage, PaymentMethod paymentMethod, BigDecimal totalPrice,
+	public Order(Store store, User user, String name, String requestMessage, PaymentMethod paymentMethod,
+		BigDecimal totalPrice,
 		OrderStatus status,
 		LocalTime readyAt) {
 		this.store = store;

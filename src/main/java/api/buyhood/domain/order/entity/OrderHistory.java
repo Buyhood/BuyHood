@@ -1,7 +1,7 @@
 package api.buyhood.domain.order.entity;
 
 import api.buyhood.domain.product.entity.Product;
-import api.buyhood.global.common.entity.BaseTimeEntity;
+import api.buyhood.entity.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

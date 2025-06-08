@@ -2,39 +2,29 @@ package api.buyhood.domain.payment.dto.response;
 
 import api.buyhood.domain.payment.enums.PGProvider;
 import api.buyhood.domain.payment.enums.PayStatus;
-import lombok.Builder;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 import java.math.BigDecimal;
 
 @Getter
-
+@RequiredArgsConstructor
 public class PaymentRes {
-    private Long paymentId;
-    private Long orderId;
-    private PGProvider pg;
-    private String buyerEmail;
-    private BigDecimal totalPrice;
-    private PayStatus payStatus;
-
-    @Builder
-    public PaymentRes(Long paymentId, Long orderId, PGProvider pg, String buyerEmail, BigDecimal totalPrice, PayStatus payStatus) {
-        this.paymentId = paymentId;
-        this.orderId = orderId;
-        this.pg = pg;
-        this.buyerEmail = buyerEmail;
-        this.totalPrice = totalPrice;
-        this.payStatus = payStatus;
-    }
+    private final Long paymentId;
+    private final Long orderId;
+    private final PGProvider pg;
+    private final String buyerEmail;
+    private final BigDecimal totalPrice;
+    private final PayStatus payStatus;
 
     public static PaymentRes of(Long paymentId, Long orderId, PGProvider pg, String buyerEmail, BigDecimal totalPrice, PayStatus payStatus) {
-        return PaymentRes.builder()
-                .paymentId(paymentId)
-                .orderId(orderId)
-                .pg(pg)
-                .buyerEmail(buyerEmail)
-                .totalPrice(totalPrice)
-                .payStatus(payStatus)
-                .build();
+        return new PaymentRes (
+                paymentId,
+                orderId,
+                pg,
+                buyerEmail,
+                totalPrice,
+                payStatus
+        );
     }
 }

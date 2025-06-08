@@ -12,21 +12,21 @@ import api.buyhood.domain.seller.entity.Seller;
 import api.buyhood.domain.seller.repository.SellerRepository;
 import api.buyhood.domain.user.entity.User;
 import api.buyhood.domain.user.repository.UserRepository;
-import api.buyhood.global.common.exception.ConflictException;
-import api.buyhood.global.common.exception.InvalidRequestException;
-import api.buyhood.global.common.exception.NotFoundException;
-import api.buyhood.global.common.util.JwtUtil;
+import api.buyhood.exception.ConflictException;
+import api.buyhood.exception.InvalidRequestException;
+import api.buyhood.exception.NotFoundException;
+import api.buyhood.security.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static api.buyhood.global.common.exception.enums.AuthErrorCode.SELLER_EMAIL_DUPLICATED;
-import static api.buyhood.global.common.exception.enums.AuthErrorCode.USER_EMAIL_DUPLICATED;
-import static api.buyhood.global.common.exception.enums.SellerErrorCode.SELLER_INVALID_PASSWORD;
-import static api.buyhood.global.common.exception.enums.SellerErrorCode.SELLER_NOT_FOUND;
-import static api.buyhood.global.common.exception.enums.UserErrorCode.USER_INVALID_PASSWORD;
-import static api.buyhood.global.common.exception.enums.UserErrorCode.USER_NOT_FOUND;
+import static api.buyhood.errorcode.AuthErrorCode.SELLER_EMAIL_DUPLICATED;
+import static api.buyhood.errorcode.AuthErrorCode.USER_EMAIL_DUPLICATED;
+import static api.buyhood.errorcode.SellerErrorCode.SELLER_INVALID_PASSWORD;
+import static api.buyhood.errorcode.SellerErrorCode.SELLER_NOT_FOUND;
+import static api.buyhood.errorcode.UserErrorCode.USER_INVALID_PASSWORD;
+import static api.buyhood.errorcode.UserErrorCode.USER_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -35,9 +35,8 @@ public class AuthService {
 	private final UserRepository userRepository;
 	private final SellerRepository sellerRepository;
 	private final PasswordEncoder passwordEncoder;
-	private final JwtUtil jwtUtil;
+	private final JwtProvider jwtProvider;
 
-	//유저회원가입
 	@Transactional
 	public SignupUserRes signUpUser(
 		SignupUserReq signupUserReq
@@ -58,7 +57,7 @@ public class AuthService {
 
 		User savedUser = userRepository.save(newUser);
 
-		String accessToken = jwtUtil.createToken(
+		String accessToken = jwtProvider.createToken(
 			savedUser.getId(),
 			savedUser.getEmail(),
 			savedUser.getRole());
@@ -77,7 +76,7 @@ public class AuthService {
 			throw new InvalidRequestException(USER_INVALID_PASSWORD);
 		}
 
-		String accessToken = jwtUtil.createToken(
+		String accessToken = jwtProvider.createToken(
 			user.getId(),
 			user.getEmail(),
 			user.getRole());
@@ -105,7 +104,7 @@ public class AuthService {
 
 		Seller savedSeller = sellerRepository.save(newSeller);
 
-		String accessToken = jwtUtil.createToken(
+		String accessToken = jwtProvider.createToken(
 			savedSeller.getId(),
 			savedSeller.getEmail(),
 			savedSeller.getRole());
@@ -124,7 +123,7 @@ public class AuthService {
 			throw new InvalidRequestException(SELLER_INVALID_PASSWORD);
 		}
 
-		String accessToken = jwtUtil.createToken(
+		String accessToken = jwtProvider.createToken(
 			seller.getId(),
 			seller.getEmail(),
 			seller.getRole());

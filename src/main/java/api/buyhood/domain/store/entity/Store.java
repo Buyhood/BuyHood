@@ -1,7 +1,7 @@
 package api.buyhood.domain.store.entity;
 
 import api.buyhood.domain.seller.entity.Seller;
-import api.buyhood.global.common.entity.BaseTimeEntity;
+import api.buyhood.entity.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -49,7 +49,6 @@ public class Store extends BaseTimeEntity {
 
 	@Column
 	private LocalTime closedAt;
-
 
 	@Builder
 	public Store(

@@ -1,7 +1,7 @@
 package api.buyhood.domain.seller.dto.res;
 
 import api.buyhood.domain.seller.entity.Seller;
-import api.buyhood.domain.user.enums.UserRole;
+import api.buyhood.enums.UserRole;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
