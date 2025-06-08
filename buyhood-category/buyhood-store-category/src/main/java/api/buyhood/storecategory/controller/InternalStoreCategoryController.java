@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -32,7 +33,7 @@ public class InternalStoreCategoryController {
 	}
 
 	@GetMapping("/v1/store-categories")
-	public List<StoreCategoryFeignDto> getListStoreCategoryResByIds(List<Long> storeCategoryIds) {
+	public List<StoreCategoryFeignDto> getListStoreCategoryResByIds(@RequestParam List<Long> storeCategoryIds) {
 		return internalStoreCategoryService.getListStoreCategoryResByIds(storeCategoryIds);
 	}
 
