@@ -99,7 +99,7 @@ public class StoreService {
 		}
 
 		if (StringUtils.hasText(address)) {
-			if (getStore.getName().equalsIgnoreCase(address)) {
+			if (getStore.getAddress().equalsIgnoreCase(address)) {
 				throw new InvalidRequestException(StoreErrorCode.STORE_NAME_SAME_AS_OLD);
 			}
 			getStore.patchAddress(address);
