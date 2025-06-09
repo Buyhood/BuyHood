@@ -3,6 +3,7 @@ package api.buyhood.domain.order.controller;
 import api.buyhood.domain.order.dto.request.AcceptOrderReq;
 import api.buyhood.domain.order.dto.request.ApplyOrderReq;
 import api.buyhood.domain.order.dto.request.RefundPaymentReq;
+import api.buyhood.domain.order.dto.request.ZPRefundPaymentReq;
 import api.buyhood.domain.order.dto.response.AcceptOrderRes;
 import api.buyhood.domain.order.dto.response.ApplyOrderRes;
 import api.buyhood.domain.order.dto.response.RejectOrderRes;
@@ -49,6 +50,18 @@ public class OrderController {
 		@Valid @RequestBody RefundPaymentReq refundPaymentReq
 	) throws IamportResponseException, IOException {
 		orderService.deleteOrder(authUser, orderId, refundPaymentReq);
+		return Response.ok("주문 취소 성공");
+	}
+
+	//주문 취소 - zeropay
+	@Secured("ROLE_USER")
+	@DeleteMapping("/v1/orders/{orderId}/zeropay")
+	public Response<String> deleteOrderWithZeroPay(
+			@AuthenticationPrincipal AuthUser authUser,
+			@PathVariable Long orderId,
+			@Valid @RequestBody ZPRefundPaymentReq zpRefundPaymentReq
+	){
+		orderService.deleteOrderWithZeroPay(authUser, orderId, zpRefundPaymentReq);
 		return Response.ok("주문 취소 성공");
 	}
 
