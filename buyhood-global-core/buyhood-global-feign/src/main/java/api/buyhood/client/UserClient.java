@@ -10,8 +10,9 @@ public interface UserClient {
 	Boolean existsById(@PathVariable Long userId);
 
 	@GetMapping("/internal/v1/sellers/{sellerId}")
-	UserFeignDto getSellerResOrElseThrow(@PathVariable Long sellerId);
+	UserFeignDto getRoleSellerOrElseThrow(@PathVariable Long sellerId);
 
 	@GetMapping("/internal/v1/users/{userId}")
-	UserFeignDto getUserResOrElseThrow(@PathVariable Long userId);
+	UserFeignDto getRoleUserOrElseThrow(@PathVariable Long userId);
+	
 }
