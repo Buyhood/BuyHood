@@ -3,7 +3,9 @@ package api.buyhood.domain.user;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {
+	"api.buyhood"
+})
 public class BuyhoodDomainUserApplication {
 
 	public static void main(String[] args) {

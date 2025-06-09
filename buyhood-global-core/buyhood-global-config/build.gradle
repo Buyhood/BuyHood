@@ -1,46 +1,46 @@
 plugins {
-    id 'java'
+	id 'java'
 }
 
 group = 'api'
 version = '0.0.1-SNAPSHOT'
 
 repositories {
-    mavenCentral()
-    maven { url 'https://jitpack.io' }
+	mavenCentral()
+	maven { url 'https://jitpack.io' }
 }
 
 // 빌드 시 현재 모듈의 .jar 생성
 tasks.named("jar") {
-    enabled = true
+	enabled = true
 }
 
 tasks.named("bootJar") {
-    enabled = false
+	enabled = false
 }
 
 dependencies {
-    api project(':buyhood-global-core:buyhood-global-common')
-    
-    // spring data jpa
-    api 'org.springframework.boot:spring-boot-starter-data-jpa'
-    
-    // spring data redis
-    api 'org.springframework.boot:spring-boot-starter-data-redis'
-    
-    // spring security
-    api 'org.springframework.boot:spring-boot-starter-security'
-    
-    // jjwt
-    api 'io.jsonwebtoken:jjwt-api:0.12.6'
-    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
-    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
-
-    //portone
-    implementation 'com.github.iamport:iamport-rest-client-java:0.2.23'
-    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	api project(':buyhood-global-core:buyhood-global-common')
+	
+	// spring data jpa
+	api 'org.springframework.boot:spring-boot-starter-data-jpa'
+	
+	// spring data redis
+	api 'org.springframework.boot:spring-boot-starter-data-redis'
+	
+	// spring security
+	api 'org.springframework.boot:spring-boot-starter-security'
+	
+	// jjwt
+	api 'io.jsonwebtoken:jjwt-api:0.12.6'
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
+	
+	//portone
+	implementation 'com.github.iamport:iamport-rest-client-java:0.2.23'
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 }
 
 test {
-    useJUnitPlatform()
+	useJUnitPlatform()
 }
