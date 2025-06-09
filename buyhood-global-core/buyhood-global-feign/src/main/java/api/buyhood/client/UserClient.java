@@ -12,6 +12,6 @@ public interface UserClient {
 	@GetMapping("/internal/v1/sellers/{sellerId}")
 	UserFeignDto getSellerResOrElseThrow(@PathVariable Long sellerId);
 
-	@GetMapping("/internal/users/{userId}")
+	@GetMapping("/internal/v1/users/{userId}")
 	UserFeignDto getUserResOrElseThrow(@PathVariable Long userId);
 }
