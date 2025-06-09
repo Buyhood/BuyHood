@@ -18,4 +18,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	@Query("SELECT u FROM User u WHERE u.deletedAt IS NULL ")
 	Page<User> findAllActiveUsers(Pageable pageable);
 
+	boolean existsByBusinessNumber(String businessNumber);
 }
