@@ -14,8 +14,8 @@ public interface StoreCategoryClient {
 	@GetMapping("/internal/v1/store-categories/{storeCategoryId}")
 	StoreCategoryFeignDto getStoreCategoryResByIdOrElseThrow(@PathVariable Long storeCategoryId);
 
-	@GetMapping("/internal/v1/store-categories/{storeCategoryName}")
-	StoreCategoryFeignDto getStoreCategoryResByNameOrElseThrow(@PathVariable String storeCategoryName);
+	@GetMapping("/internal/v1/store-categories/search")
+	StoreCategoryFeignDto getStoreCategoryResByNameOrElseThrow(@RequestParam("category") String storeCategoryName);
 
 	@GetMapping("/internal/v1/store-categories")
 	List<StoreCategoryFeignDto> getListStoreCategoryResByIds(@RequestParam List<Long> storeCategoryIds);

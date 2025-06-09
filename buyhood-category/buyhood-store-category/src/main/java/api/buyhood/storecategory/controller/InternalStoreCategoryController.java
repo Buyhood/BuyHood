@@ -27,8 +27,10 @@ public class InternalStoreCategoryController {
 		return internalStoreCategoryService.getStoreCategoryResByIdOrElseThrow(storeCategoryId);
 	}
 
-	@GetMapping("/v1/store-categories/{storeCategoryName}")
-	public StoreCategoryFeignDto getStoreCategoryResByNameOrElseThrow(@PathVariable String storeCategoryName) {
+	@GetMapping("/v1/store-categories/search")
+	public StoreCategoryFeignDto getStoreCategoryResByNameOrElseThrow(
+		@RequestParam("category") String storeCategoryName
+	) {
 		return internalStoreCategoryService.getStoreCategoryResByNameOrElseThrow(storeCategoryName);
 	}
 
