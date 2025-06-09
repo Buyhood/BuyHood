@@ -31,7 +31,6 @@ import com.siot.IamportRestClient.response.IamportResponse;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -47,15 +46,7 @@ import static api.buyhood.domain.order.enums.PaymentMethod.ZERO_PAY;
 import static api.buyhood.errorcode.OrderErrorCode.NOT_FOUND_ORDER;
 import static api.buyhood.errorcode.OrderErrorCode.NOT_OWNER_OF_ORDER;
 import static api.buyhood.errorcode.OrderErrorCode.NOT_PENDING;
-import static api.buyhood.errorcode.PaymentErrorCode.ALREADY_PAID;
-import static api.buyhood.errorcode.PaymentErrorCode.CANNOT_REQUEST_PAYMENT;
-import static api.buyhood.errorcode.PaymentErrorCode.FAILED_CREATE_QR;
-import static api.buyhood.errorcode.PaymentErrorCode.FAILED_PAID;
-import static api.buyhood.errorcode.PaymentErrorCode.INVALID_PAYMENT_METHOD_FOR_ZERO_PAY;
-import static api.buyhood.errorcode.PaymentErrorCode.NOT_FOUND_PAYMENT;
-import static api.buyhood.errorcode.PaymentErrorCode.NOT_MATCH_ACCOUNT;
-import static api.buyhood.errorcode.PaymentErrorCode.NOT_MATCH_MERCHANT_UID;
-import static api.buyhood.errorcode.PaymentErrorCode.NOT_SUPPORTED_ZERO_PAY;
+import static api.buyhood.errorcode.PaymentErrorCode.*;
 import static api.buyhood.errorcode.UserErrorCode.USER_NOT_FOUND;
 
 @Slf4j

@@ -18,7 +18,7 @@ public enum PaymentErrorCode implements ErrorCode {
 	FAILED_CANCEL(3016, "결체 취소에 실패하였습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
 	FAILED_CREATE_QR(3017, "QR 생성에 실패하였습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
 	INVALID_PAYMENT_METHOD_FOR_ZERO_PAY(3205, "요청한 결제 방식은 제로페이에서 지원되지 않습니다.", HttpStatus.BAD_REQUEST),
-	
+	NOT_OWNER_OF_PAYMENT(3019, "자신의 결제가 아닙니다.", HttpStatus.BAD_REQUEST)
 	;
 
 	private final int code;
