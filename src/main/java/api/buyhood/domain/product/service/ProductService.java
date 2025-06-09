@@ -1,6 +1,6 @@
 package api.buyhood.domain.product.service;
 
-//import api.buyhood.category.entity.Category;
+import api.buyhood.category.entity.Category;
 import api.buyhood.domain.cart.entity.Cart;
 import api.buyhood.domain.cart.entity.CartItem;
 import api.buyhood.domain.order.entity.OrderHistory;
@@ -8,7 +8,6 @@ import api.buyhood.domain.product.dto.response.GetProductRes;
 import api.buyhood.domain.product.dto.response.PageProductRes;
 import api.buyhood.domain.product.dto.response.RegisterProductRes;
 import api.buyhood.domain.product.entity.Product;
-//import api.buyhood.domain.product.repository.ProductCategoryRepository;
 import api.buyhood.domain.product.repository.ProductRepository;
 import api.buyhood.domain.store.entity.Store;
 import api.buyhood.domain.store.repository.StoreRepository;
@@ -19,15 +18,9 @@ import api.buyhood.exception.ConflictException;
 import api.buyhood.exception.ForbiddenException;
 import api.buyhood.exception.InvalidRequestException;
 import api.buyhood.exception.NotFoundException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-//import api.buyhood.productcategory.repository.ProductCategoryRepository;
+import api.buyhood.productcategory.repository.ProductCategoryRepository;
 import jakarta.persistence.OptimisticLockException;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.BadRequestException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -40,6 +33,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import static api.buyhood.errorcode.ProductErrorCode.OUT_OF_STOCK;
 
 @Service
@@ -47,7 +45,7 @@ import static api.buyhood.errorcode.ProductErrorCode.OUT_OF_STOCK;
 public class ProductService {
 
 	private final ProductRepository productRepository;
-//	private final ProductCategoryRepository productCategoryRepository;
+	private final ProductCategoryRepository productCategoryRepository;
 	private final StoreRepository storeRepository;
 
 	/**
@@ -98,11 +96,10 @@ public class ProductService {
 			linkCategoriesToProduct(categoryIdList, product);
 		}
 
-//		List<String> categoryNameList = productCategoryRepository.findCategoryNamesByCategoryIds(categoryIdList);
-//
-//		return RegisterProductRes.of(product, categoryNameList);
+		List<String> categoryNameList = productCategoryRepository.findCategoryNamesByCategoryIds(categoryIdList);
 
-		return null;
+		return RegisterProductRes.of(product, categoryNameList);
+
 	}
 
 	/**
@@ -123,12 +120,12 @@ public class ProductService {
 			.orElseThrow(() -> new NotFoundException(ProductErrorCode.PRODUCT_NOT_FOUND));
 
 		// 중간 엔티티에서 카테고리 id 목록 조회
-//		List<Long> categoryIds = productCategoryRepository.findCategoryIdsByProductId(productId);
+		List<Long> categoryIds = productCategoryRepository.findCategoryIdsByProductId(productId);
 
 		// 카테고리 이름 목록 조회
-//		List<String> categoryNames = productCategoryRepository.findCategoryNamesByCategoryIds(categoryIds);
-//
-//		return GetProductRes.of(product, categoryNames);
+		List<String> categoryNames = productCategoryRepository.findCategoryNamesByCategoryIds(categoryIds);
+
+		return GetProductRes.of(product, categoryNames);
 
 		return null;
 	}
@@ -276,9 +273,9 @@ public class ProductService {
 			.orElseThrow(() -> new NotFoundException(ProductErrorCode.PRODUCT_NOT_FOUND));
 
 		// 삭제하려는 상품과 연결된 카테고리가 있을 경우 연결 해제 (매핑 테이블에서 내용 삭제)
-//		if (productCategoryRepository.existsByProductId(productId)) {
-//			productCategoryRepository.deleteByProductId(productId);
-//		}
+		if (productCategoryRepository.existsByProductId(productId)) {
+			productCategoryRepository.deleteByProductId(productId);
+		}
 
 		getProduct.markDeleted();
 	}
@@ -349,34 +346,34 @@ public class ProductService {
 
 	private void linkCategoriesToProduct(List<Long> categoryIdList, Product product) {
 		// 새로 등록할 카테고리 조회
-//		List<Category> categoryList = productCategoryRepository.findAllById(categoryIdList);
-//
-//		// 조회된 내용과 요청한 내용의 크기가 다르면 요청 내용 중 카테고리가 없는 항목이 존재한다는 의미
-//		if (categoryIdList.size() != categoryList.size()) {
-//			throw new NotFoundException(CategoryErrorCode.CATEGORY_NOT_FOUND);
-//		}
-//
-//		// 새로 연결한 카테고리 저장
-//		for (Category category : categoryList) {
-//			productCategoryRepository.save(
-//				Category.builder()
-//					.category(category)
-//					.product(product)
-//					.build()
-//			);
-//		}
+		List<Category> categoryList = productCategoryRepository.findAllById(categoryIdList);
+
+		// 조회된 내용과 요청한 내용의 크기가 다르면 요청 내용 중 카테고리가 없는 항목이 존재한다는 의미
+		if (categoryIdList.size() != categoryList.size()) {
+			throw new NotFoundException(CategoryErrorCode.CATEGORY_NOT_FOUND);
+		}
+
+		// 새로 연결한 카테고리 저장
+		for (Category category : categoryList) {
+			productCategoryRepository.save(
+				Category.builder()
+					.category(category)
+					.product(product)
+					.build()
+			);
+		}
 	}
 
 
 	private Map<Long, List<String>> getProductCategoryNameMap(List<Long> productIds) {
-//		List<Object[]> results = productCategoryRepository.findCategoryNamesByProductIds(productIds);
+		List<Object[]> results = productCategoryRepository.findCategoryNamesByProductIds(productIds);
 		Map<Long, List<String>> categoryNameMap = new HashMap<>();
 
-//		for (Object[] row : results) {
-//			Long productId = (Long) row[0];
-//			String categoryName = (String) row[1];
-//			categoryNameMap.computeIfAbsent(productId, k -> new ArrayList<>()).add(categoryName);
-//		}
+		for (Object[] row : results) {
+			Long productId = (Long) row[0];
+			String categoryName = (String) row[1];
+			categoryNameMap.computeIfAbsent(productId, k -> new ArrayList<>()).add(categoryName);
+		}
 
 		return categoryNameMap;
 	}
