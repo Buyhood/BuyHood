@@ -4,12 +4,16 @@ import api.buyhood.cart.dto.response.CartRes;
 import api.buyhood.cart.entity.Cart;
 import api.buyhood.cart.entity.CartItem;
 import api.buyhood.cart.repository.CartRepository;
-import api.buyhood.domain.user.entity.User;
-import api.buyhood.domain.user.repository.UserRepository;
+import api.buyhood.dto.payment.response.PaymentFeignDto;
+import api.buyhood.dto.store.StoreFeignDto;
+import api.buyhood.dto.user.UserFeignDto;
 import api.buyhood.errorcode.PaymentErrorCode;
 import api.buyhood.exception.ForbiddenException;
 import api.buyhood.exception.InvalidRequestException;
 import api.buyhood.exception.NotFoundException;
+import api.buyhood.order.client.PaymentFeignClient;
+import api.buyhood.order.client.StoreFeignClient;
+import api.buyhood.order.client.UserFeignClient;
 import api.buyhood.order.dto.request.AcceptOrderReq;
 import api.buyhood.order.dto.request.ApplyOrderReq;
 import api.buyhood.order.dto.request.RefundPaymentReq;
@@ -22,19 +26,14 @@ import api.buyhood.order.entity.OrderHistory;
 import api.buyhood.order.enums.OrderStatus;
 import api.buyhood.order.repository.OrderHistoryRepository;
 import api.buyhood.order.repository.OrderRepository;
-import api.buyhood.payment.enums.PayStatus;
-import api.buyhood.payment.repository.PaymentRepository;
 import api.buyhood.product.entity.Product;
 import api.buyhood.product.repository.ProductRepository;
 import api.buyhood.product.service.ProductService;
 import api.buyhood.security.AuthUser;
-import api.buyhood.store.entity.Store;
-import api.buyhood.store.repository.StoreRepository;
 import com.siot.IamportRestClient.IamportClient;
 import com.siot.IamportRestClient.exception.IamportResponseException;
 import com.siot.IamportRestClient.request.CancelData;
 import com.siot.IamportRestClient.response.IamportResponse;
-import api.buyhood.payment.entity.Payment;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,12 +48,10 @@ import java.util.stream.Collectors;
 import static api.buyhood.enums.UserRole.SELLER;
 import static api.buyhood.errorcode.CartErrorCode.NOT_FOUND_CART;
 import static api.buyhood.errorcode.OrderErrorCode.*;
-import static api.buyhood.errorcode.PaymentErrorCode.*;
-import static api.buyhood.errorcode.ProductErrorCode.OUT_OF_STOCK;
+import static api.buyhood.errorcode.PaymentErrorCode.FAILED_CANCEL;
+import static api.buyhood.errorcode.PaymentErrorCode.NOT_OWNER_OF_PAYMENT;
 import static api.buyhood.errorcode.ProductErrorCode.PRODUCT_NOT_FOUND;
-import static api.buyhood.errorcode.StoreErrorCode.STORE_NOT_FOUND;
 import static api.buyhood.errorcode.UserErrorCode.ROLE_MISMATCH;
-import static api.buyhood.errorcode.UserErrorCode.USER_NOT_FOUND;
 import static api.buyhood.order.enums.OrderStatus.ACCEPTED;
 
 @Service
@@ -66,27 +63,24 @@ public class OrderService {
     private final CartRepository cartRepository;
     private final ProductRepository productRepository;
     private final ProductService productService;
-    private final StoreRepository storeRepository;
-    private final UserRepository userRepository;
-    private final PaymentRepository paymentRepository;
     private final IamportClient iamportClient;
     private final OrderHistoryRepository orderHistoryRepository;
+    private final StoreFeignClient storeFeignClient;
+    private final UserFeignClient userFeignClient;
+    private final PaymentFeignClient paymentFeignClient;
 
     //주문 요청
     @Transactional
     public ApplyOrderRes applyOrder(ApplyOrderReq req, AuthUser authUser) {
 
-        Store store = storeRepository.findActiveStoreById(req.getStoreId())
-                .orElseThrow(() -> new NotFoundException(STORE_NOT_FOUND));
+        StoreFeignDto store = storeFeignClient.getStoreOrElseThrow(req.getStoreId());
+        UserFeignDto user = userFeignClient.getRoleUserOrElseThrow(authUser.getId());
 
-        User user = userRepository.findById(authUser.getId())
-                .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
-
-        if (!cartRepository.existsCart(user.getId())) {
+        if (!cartRepository.existsCart(user.getUserId())) {
             throw new NotFoundException(NOT_FOUND_CART);
         }
 
-        Cart cart = cartRepository.findCart(user.getId());
+        Cart cart = cartRepository.findCart(user.getUserId());
 
         List<Long> productIdList = cart.getCart().stream()
                 .map(CartItem::getProductId)
@@ -102,8 +96,8 @@ public class OrderService {
         String orderName = creatOrderName(productMap);
 
         Order order = Order.builder()
-                .store(store)
-                .user(user)
+                .storeId(store.getStoreId())
+                .userId(user.getUserId())
                 .name(orderName)
                 .paymentMethod(req.getPaymentMethod())
                 .requestMessage(req.getRequestMessage())
@@ -112,11 +106,11 @@ public class OrderService {
                 .build();
         orderRepository.save(order);
         orderHistoryService.saveOrderHistory(order, cart, productMap);
-        cartRepository.clearCart(user.getId());
+        cartRepository.clearCart(user.getUserId());
 
         productService.decreaseStock(productIdList, quantityList,productMap);
 
-        return ApplyOrderRes.of(order.getStore().getId(), CartRes.of(cart), order.getPaymentMethod(),
+        return ApplyOrderRes.of(order.getStoreId(), CartRes.of(cart), order.getPaymentMethod(),
                 order.getTotalPrice(), order.getStatus(), order.getCreatedAt(), order.getRequestMessage());
     }
 
@@ -125,8 +119,7 @@ public class OrderService {
     @Transactional
     public AcceptOrderRes acceptOrder(AcceptOrderReq req, Long orderId, AuthUser authUser) {
 
-        User user = userRepository.findById(authUser.getId())
-                .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
+        UserFeignDto user = userFeignClient.getRoleUserOrElseThrow(authUser.getId());
 
         if (!SELLER.equals(user.getRole())) {
             throw new ForbiddenException(ROLE_MISMATCH);
@@ -135,17 +128,17 @@ public class OrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_ORDER));
 
-        Payment payment = paymentRepository.findNotDeletedByOrderId(orderId)
-                .orElseThrow(() -> new NotFoundException(NOT_FOUND_PAYMENT));
+        PaymentFeignDto payment = paymentFeignClient.findPayment(orderId);
 
-        if (!payment.isPaid()) {
+        if (!"PAID".equals(payment.getPayStatus())) {
             throw new InvalidRequestException(CANNOT_ACCEPT_ORDER);
         }
 
-        Long sellerIdInStore = order.getStore().getSellerId();
+        StoreFeignDto store = storeFeignClient.getStoreOrElseThrow(order.getStoreId());
+        Long sellerIdInStore = store.getSellerId();
 
         //셀러 스토어가 같은 업장인지
-        if (!sellerIdInStore.equals(user.getId())) {
+        if (!sellerIdInStore.equals(user.getUserId())) {
             throw new ForbiddenException(NOT_OWNER_OF_STORE);
         }
 
@@ -158,8 +151,7 @@ public class OrderService {
     @Transactional
     public RejectOrderRes rejectOrder(Long orderId, AuthUser authUser) {
 
-        User user = userRepository.findById(authUser.getId())
-                .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
+        UserFeignDto user = userFeignClient.getRoleUserOrElseThrow(authUser.getId());
 
         if (!SELLER.equals(user.getRole())) {
             throw new ForbiddenException(ROLE_MISMATCH);
@@ -168,10 +160,11 @@ public class OrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_ORDER));
 
-        Long sellerIdInStore = order.getStore().getSellerId();
+        StoreFeignDto store = storeFeignClient.getStoreOrElseThrow(order.getStoreId());
+        Long sellerIdInStore = store.getSellerId();
 
         //셀러 스토어가 같은 업장인지
-        if (!sellerIdInStore.equals(user.getId())) {
+        if (!sellerIdInStore.equals(user.getUserId())) {
             throw new ForbiddenException(NOT_OWNER_OF_STORE);
         }
 
@@ -183,13 +176,12 @@ public class OrderService {
     @Transactional(rollbackFor = Exception.class)
     public void deleteOrder(AuthUser authUser, Long orderId, RefundPaymentReq refundPaymentReq)
             throws IamportResponseException, IOException {
-        User user = userRepository.findByEmail(authUser.getEmail())
-                .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
+        UserFeignDto user = userFeignClient.getRoleUserOrElseThrow(authUser.getId());
 
         Order order = orderRepository.findNotDeletedById(orderId)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_ORDER));
 
-        if (!user.getId().equals(order.getUser().getId())) {
+        if (!user.getUserId().equals(order.getUserId())) {
             throw new InvalidRequestException(NOT_OWNER_OF_ORDER);
         }
 
@@ -198,16 +190,16 @@ public class OrderService {
             throw new InvalidRequestException(ALREADY_ACCEPTED);
         }
 
-        Payment payment = paymentRepository.findNotDeletedByOrderId(order.getId())
-                .orElseThrow(() -> new NotFoundException(NOT_FOUND_PAYMENT));
+        PaymentFeignDto payment = paymentFeignClient.findPayment(orderId);
 
         order.delete();
-        refundPayment(payment, refundPaymentReq.getImpUid());
+        paymentFeignClient.refundPayment(payment.getPaymentId());
+        refundPayment(refundPaymentReq.getImpUid());
 
-        Map<Product, Integer> orderHistoryMap = new HashMap<>();
+        Map<Long, Integer> orderHistoryMap = new HashMap<>();
         List<OrderHistory> orderHistories = orderHistoryRepository.findAllByOrderId(orderId);
         for (OrderHistory orderHistory : orderHistories) {
-            orderHistoryMap.put(orderHistory.getProduct(), orderHistory.getQuantity());
+            orderHistoryMap.put(orderHistory.getProductId(), orderHistory.getQuantity());
         }
 
         productService.rollBackStock(orderHistoryMap);
@@ -215,13 +207,12 @@ public class OrderService {
 
     @Transactional
     public void deleteOrderWithZeroPay(AuthUser authUser, Long orderId, ZPRefundPaymentReq zpRefundPaymentReq) {
-        User user = userRepository.findByEmail(authUser.getEmail())
-                .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
+        UserFeignDto user = userFeignClient.getRoleUserOrElseThrow(authUser.getId());
 
         Order order = orderRepository.findNotDeletedById(orderId)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_ORDER));
 
-        if (!user.getId().equals(order.getUser().getId())) {
+        if (!user.getUserId().equals(order.getUserId())) {
             throw new InvalidRequestException(NOT_OWNER_OF_ORDER);
         }
 
@@ -230,26 +221,25 @@ public class OrderService {
             throw new InvalidRequestException(ALREADY_ACCEPTED);
         }
 
-        Payment payment = paymentRepository.findNotDeletedByOrderId(order.getId())
-                .orElseThrow(() -> new NotFoundException(PaymentErrorCode.NOT_FOUND_PAYMENT));
+        PaymentFeignDto payment = paymentFeignClient.findPayment(orderId);
 
-        if (PayStatus.CANCELED.equals(payment.getPayStatus())) {
+        if ("CANCELED".equals(payment.getPayStatus())) {
             throw new InvalidRequestException(PaymentErrorCode.FAILED_CANCEL);
         }
 
         order.delete();
-        refundPaymentWithZeroPay(payment, zpRefundPaymentReq.getMerchantUid());
+        paymentFeignClient.refundPayment(payment.getPaymentId());
+        refundPaymentWithZeroPay(payment.getMerchantUid(), zpRefundPaymentReq.getMerchantUid());
 
-        Map<Product, Integer> orderHistoryMap = new HashMap<>();
+        Map<Long, Integer> orderHistoryMap = new HashMap<>();
         List<OrderHistory> orderHistories = orderHistoryRepository.findAllByOrderId(orderId);
         for (OrderHistory orderHistory : orderHistories) {
-            orderHistoryMap.put(orderHistory.getProduct(), orderHistory.getQuantity());
+            orderHistoryMap.put(orderHistory.getProductId(), orderHistory.getQuantity());
         }
         productService.rollBackStock(orderHistoryMap);
     }
 
-    private void refundPayment(Payment payment, String impUid) throws IamportResponseException, IOException {
-        payment.cancel();
+    private void refundPayment(String impUid) throws IamportResponseException, IOException {
         CancelData cancelData = new CancelData(impUid, true);
         IamportResponse<com.siot.IamportRestClient.response.Payment> cancelResponse = iamportClient.cancelPaymentByImpUid(
                 cancelData);
@@ -259,12 +249,10 @@ public class OrderService {
         }
     }
 
-    private void refundPaymentWithZeroPay(Payment payment, String merchantUid) {
-        if (!payment.getMerchantUid().equals(merchantUid)) {
+    private void refundPaymentWithZeroPay(String merchantUid, String validMerchantUid) {
+        if (!merchantUid.equals(validMerchantUid)) {
             throw new InvalidRequestException(NOT_OWNER_OF_PAYMENT);
         }
-
-        payment.cancel();
     }
 
     private BigDecimal getTotalPrice(Map<Long, Product> productMap, List<CartItem> cartItemList) {

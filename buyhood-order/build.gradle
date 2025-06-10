@@ -32,14 +32,10 @@ repositories {
 tasks.named("bootJar") {
 	enabled = true
 }
-
 dependencies {
 	implementation project(':buyhood-global-core:buyhood-global-config')
-	implementation project(':buyhood-user')
 	implementation project(':buyhood-cart')
 	implementation project(':buyhood-product')
-	implementation project(':buyhood-store')
-	implementation project(':buyhood-payment')
 
 	// spring validation
 	implementation 'org.springframework.boot:spring-boot-starter-validation'

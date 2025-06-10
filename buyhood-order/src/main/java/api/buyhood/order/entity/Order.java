@@ -1,10 +1,8 @@
 package api.buyhood.order.entity;
 
-import api.buyhood.domain.user.entity.User;
 import api.buyhood.entity.BaseTimeEntity;
 import api.buyhood.order.enums.OrderStatus;
 import api.buyhood.order.enums.PaymentMethod;
-import api.buyhood.store.entity.Store;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -26,13 +24,11 @@ public class Order extends BaseTimeEntity {
 	@Column(nullable = false)
 	private Long id;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "user_id")
-	private User user;
+	@Column(nullable = false)
+	private Long userId;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "store_id")
-	private Store store;
+	@Column(nullable = false)
+	private Long storeId;
 
 	@Column(nullable = false)
 	private String name;
@@ -55,12 +51,12 @@ public class Order extends BaseTimeEntity {
 	private LocalTime readyAt;
 
 	@Builder
-	public Order(Store store, User user, String name, String requestMessage, PaymentMethod paymentMethod,
-		BigDecimal totalPrice,
-		OrderStatus status,
-		LocalTime readyAt) {
-		this.store = store;
-		this.user = user;
+	public Order(Long userId, Long storeId, String name, String requestMessage, PaymentMethod paymentMethod,
+				 BigDecimal totalPrice,
+				 OrderStatus status,
+				 LocalTime readyAt) {
+		this.userId = userId;
+		this.storeId = storeId;
 		this.name = name;
 		this.requestMessage = requestMessage;
 		this.paymentMethod = paymentMethod;

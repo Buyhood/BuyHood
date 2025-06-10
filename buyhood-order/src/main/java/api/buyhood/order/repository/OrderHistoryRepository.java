@@ -12,18 +12,18 @@ import java.util.List;
 public interface OrderHistoryRepository extends JpaRepository<OrderHistory, Long> {
     @Query("SELECT oh FROM OrderHistory oh " +
             "JOIN FETCH oh.order " +
-            "JOIN FETCH oh.product " +
+            "JOIN FETCH oh.productId " +
             "WHERE oh.order.id = :orderId")
     List<OrderHistory> findAllByOrderId(@Param("orderId") Long orderId);
 
     @Query("SELECT oh FROM OrderHistory oh " +
-            "WHERE oh.order.user.id = :userId")
+            "WHERE oh.order.userId = :userId")
     Page<OrderHistory> findAllByUserId(@Param("userId")Long userId,
                                        Pageable of
     );
 
     @Query("SELECT oh FROM OrderHistory oh " +
-            "WHERE oh.order.store.id = :storeId "
+            "WHERE oh.order.storeId = :storeId "
     )
     Page<OrderHistory> findAllByStoreId(@Param("storeId")Long storeId,
                                         Pageable of

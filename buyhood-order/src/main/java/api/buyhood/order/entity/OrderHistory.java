@@ -23,17 +23,16 @@ public class OrderHistory extends BaseTimeEntity {
 	@JoinColumn(name = "order_id")
 	private Order order;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "product_id")
-	private Product product;
+	@Column(nullable = false)
+	private Long productId;
 
 	@Column(nullable = false)
 	private int quantity;
 
 	@Builder
-	public OrderHistory(Order order, Product product, int quantity) {
+	public OrderHistory(Order order, Long productId, int quantity) {
 		this.order = order;
-		this.product = product;
+		this.productId = productId;
 		this.quantity = quantity;
 	}
 
