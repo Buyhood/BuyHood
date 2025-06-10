@@ -19,11 +19,21 @@ repositories {
 }
 
 dependencies {
+	implementation project(':buyhood-global-core:buyhood-global-common')
 	implementation project(':buyhood-global-core:buyhood-global-config')
+	
 	implementation project(':buyhood-user')
-    implementation project(':buyhood-product')
+    //implementation project(':buyhood-product')
+	//implementation project(':buyhood-category:buyhood-product-
+	
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+	implementation 'org.springframework.cloud:spring-cloud-starter-config'
+	
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }

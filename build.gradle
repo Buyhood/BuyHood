@@ -28,6 +28,7 @@ dependencies {
 	implementation project(':buyhood-global-core:buyhood-global-config')
 	implementation project(':buyhood-category:buyhood-product-category')
 	implementation project(':buyhood-category:buyhood-store-category')
+	implementation project(':buyhood-cart')
 
 	// spring validation
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
