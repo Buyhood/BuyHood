@@ -1,6 +1,5 @@
 package api.buyhood.payment.controller;
 
-import api.buyhood.dto.payment.request.RefundPaymentReq;
 import api.buyhood.dto.payment.PaymentFeignDto;
 import api.buyhood.payment.service.InternalPaymentService;
 import lombok.RequiredArgsConstructor;
