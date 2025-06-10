@@ -38,6 +38,7 @@ dependencies {
 	implementation project(':buyhood-global-core:buyhood-global-config')
 	implementation project(':buyhood-category:buyhood-product-category')
 	implementation project(':buyhood-category:buyhood-store-category')
+	implementation project(':buyhood-order')
 
 	// spring validation
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
@@ -66,7 +67,7 @@ dependencies {
 	
 	// QR Code - zxing
 	implementation group: 'com.google.zxing', name: 'javase', version: '3.5.0'
-	implementation group: 'com.google.zxing', name: 'core', version: '3.5.0
+	implementation group: 'com.google.zxing', name: 'core', version: '3.5.0'
 
 	// retry
 	implementation 'org.springframework.retry:spring-retry'

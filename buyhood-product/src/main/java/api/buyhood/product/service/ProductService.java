@@ -21,13 +21,22 @@ import api.buyhood.product.entity.ProductCategoryMapping;
 import api.buyhood.product.repository.ProductCategoryMappingRepository;
 import api.buyhood.product.repository.ProductRepository;
 import feign.FeignException;
+import jakarta.persistence.OptimisticLockException;
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+
+import static api.buyhood.errorcode.ProductErrorCode.OUT_OF_STOCK;
 
 @Slf4j
 @Service
@@ -188,6 +197,68 @@ public class ProductService {
 				productCategoryMappingRepository.deleteByProductIdAndCategoryId(productId, categoryId);
 			}
 		}
+	}
+
+	@Retryable(
+			retryFor = {
+					OptimisticLockException.class,
+					ObjectOptimisticLockingFailureException.class
+			},
+			backoff = @Backoff(delay = 100)
+	)
+	@Transactional
+	public void decreaseStock(List<Long> productIdList, List<Integer> quantityList, Map<Long, Product> productMap) {
+
+		for (int i = 0; i < productIdList.size(); i++) {
+			Long productId = productIdList.get(i);
+			Integer quantity = quantityList.get(i);
+
+			Product product = productMap.get(productId);
+
+			if (product.getStock() < quantity) {
+				throw new InvalidRequestException(OUT_OF_STOCK);
+			}
+
+			product.decreaseStock(quantity);
+		}
+	}
+
+	@Retryable(
+			retryFor = {
+					OptimisticLockException.class,
+					ObjectOptimisticLockingFailureException.class
+			},
+			backoff = @Backoff(delay = 100)
+	)
+	@Transactional
+	public void rollBackStock(Map<Product, Integer> orderHistories) {
+		for (Product product : orderHistories.keySet()) {
+			for (Integer quantity : orderHistories.values()) {
+				product.rollBackStock(quantity);
+			}
+		}
+	}
+
+	/* 주문 요청 후 재고 감소에 대한 recover */
+	@Recover
+	public void recover(OptimisticLockException e, List<Long> productIdList, List<Integer> quantityList, Map<Long, Product> productMap) {
+		throw new InvalidRequestException(ProductErrorCode.STOCK_UPDATE_CONFLICT);
+	}
+
+	@Recover
+	public void recover(ObjectOptimisticLockingFailureException e, List<Long> productIdList, List<Integer> quantityList, Map<Long, Product> productMap) {
+		throw new InvalidRequestException(ProductErrorCode.STOCK_UPDATE_CONFLICT);
+	}
+
+	/* 주문 취소 후 재고 롤백에 대한 recover*/
+	@Recover
+	public void recover(OptimisticLockException e, Map<Product, Integer> orderHistories) {
+		throw new InvalidRequestException(ProductErrorCode.STOCK_UPDATE_CONFLICT);
+	}
+
+	@Recover
+	public void recover(ObjectOptimisticLockingFailureException e, Map<Product, Integer> orderHistories) {
+		throw new InvalidRequestException(ProductErrorCode.STOCK_UPDATE_CONFLICT);
 	}
 
 
