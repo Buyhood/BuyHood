@@ -1,4 +1,4 @@
-package api.buyhood.domain.payment.dto.response;
+package api.buyhood.payment.dto.response;
 
 import lombok.Builder;
 import lombok.Getter;

@@ -1,4 +1,4 @@
-package api.buyhood.domain.payment.dto.request;
+package api.buyhood.payment.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;

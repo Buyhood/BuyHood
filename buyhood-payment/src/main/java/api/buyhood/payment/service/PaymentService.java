@@ -1,21 +1,20 @@
-package api.buyhood.domain.payment.service;
+package api.buyhood.payment.service;
 
-import api.buyhood.domain.order.entity.Order;
-import api.buyhood.domain.order.enums.PaymentMethod;
-import api.buyhood.domain.order.repository.OrderRepository;
-import api.buyhood.domain.payment.dto.request.PaymentReq;
-import api.buyhood.domain.payment.dto.request.ValidPaymentReq;
-import api.buyhood.domain.payment.dto.request.ZPayValidationReq;
-import api.buyhood.domain.payment.dto.response.ApplyPaymentRes;
-import api.buyhood.domain.payment.dto.response.PaymentRes;
-import api.buyhood.domain.payment.entity.Payment;
-import api.buyhood.domain.payment.enums.PGProvider;
-import api.buyhood.domain.payment.enums.PayStatus;
-import api.buyhood.domain.payment.repository.PaymentRepository;
 import api.buyhood.domain.user.entity.User;
 import api.buyhood.domain.user.repository.UserRepository;
 import api.buyhood.exception.InvalidRequestException;
 import api.buyhood.exception.NotFoundException;
+import api.buyhood.order.entity.Order;
+import api.buyhood.order.repository.OrderRepository;
+import api.buyhood.payment.dto.request.PaymentReq;
+import api.buyhood.payment.dto.request.ValidPaymentReq;
+import api.buyhood.payment.dto.request.ZPayValidationReq;
+import api.buyhood.payment.dto.response.ApplyPaymentRes;
+import api.buyhood.payment.dto.response.PaymentRes;
+import api.buyhood.payment.entity.Payment;
+import api.buyhood.payment.enums.PGProvider;
+import api.buyhood.payment.enums.PayStatus;
+import api.buyhood.payment.repository.PaymentRepository;
 import api.buyhood.security.AuthUser;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
@@ -27,27 +26,24 @@ import com.siot.IamportRestClient.exception.IamportResponseException;
 import com.siot.IamportRestClient.request.CancelData;
 import com.siot.IamportRestClient.request.PrepareData;
 import com.siot.IamportRestClient.response.IamportResponse;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import javax.imageio.ImageIO;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import static api.buyhood.domain.order.enums.OrderStatus.PENDING;
-import static api.buyhood.domain.order.enums.PaymentMethod.ZERO_PAY;
-import static api.buyhood.errorcode.OrderErrorCode.NOT_FOUND_ORDER;
-import static api.buyhood.errorcode.OrderErrorCode.NOT_OWNER_OF_ORDER;
-import static api.buyhood.errorcode.OrderErrorCode.NOT_PENDING;
+import static api.buyhood.errorcode.OrderErrorCode.*;
 import static api.buyhood.errorcode.PaymentErrorCode.*;
 import static api.buyhood.errorcode.UserErrorCode.USER_NOT_FOUND;
+import static api.buyhood.order.enums.OrderStatus.PENDING;
+import static api.buyhood.order.enums.PaymentMethod.ZERO_PAY;
 
 @Slf4j
 @Service
@@ -68,7 +64,7 @@ public class PaymentService {
         Order order = orderRepository.findNotDeletedById(orderId)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_ORDER));
 
-        if (!order.getUser().getId().equals(user.getId())) {
+        if (!order.getUserId().equals(user.getId())) {
             throw new InvalidRequestException(NOT_OWNER_OF_ORDER);
         }
 
@@ -247,13 +243,13 @@ public class PaymentService {
 
     private void validateZeroPayConsistency(PaymentReq paymentReq, Order order) {
         // 요청이 제로페이인 경우 기존 주문도 제로페이인지 확인
-        if (!PGProvider.ZERO_PAY.equals(paymentReq.getPg()) && PaymentMethod.ZERO_PAY.equals(
+        if (!PGProvider.ZERO_PAY.equals(paymentReq.getPg()) && ZERO_PAY.equals(
                 order.getPaymentMethod())) {
             throw new InvalidRequestException(NOT_SUPPORTED_ZERO_PAY);
         }
 
         // 요청이 PG사인 경우 기존 주문도 PG사가 제공하는 결제 방식인지 확인
-        if (PGProvider.ZERO_PAY.equals(paymentReq.getPg()) && !PaymentMethod.ZERO_PAY.equals(
+        if (PGProvider.ZERO_PAY.equals(paymentReq.getPg()) && !ZERO_PAY.equals(
                 order.getPaymentMethod())) {
             throw new InvalidRequestException(INVALID_PAYMENT_METHOD_FOR_ZERO_PAY);
         }

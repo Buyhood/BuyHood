@@ -4,7 +4,7 @@ import api.buyhood.cart.dto.response.CartRes;
 import api.buyhood.cart.entity.Cart;
 import api.buyhood.cart.entity.CartItem;
 import api.buyhood.cart.repository.CartRepository;
-import api.buyhood.dto.payment.response.PaymentFeignDto;
+import api.buyhood.dto.payment.PaymentFeignDto;
 import api.buyhood.dto.store.StoreFeignDto;
 import api.buyhood.dto.user.UserFeignDto;
 import api.buyhood.errorcode.PaymentErrorCode;

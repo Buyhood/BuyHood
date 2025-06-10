@@ -1,7 +1,7 @@
-package api.buyhood.domain.payment.dto.response;
+package api.buyhood.payment.dto.response;
 
-import api.buyhood.domain.payment.enums.PGProvider;
-import api.buyhood.domain.payment.enums.PayStatus;
+import api.buyhood.payment.enums.PGProvider;
+import api.buyhood.payment.enums.PayStatus;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 

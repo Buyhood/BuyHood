@@ -1,4 +1,4 @@
-package api.buyhood.domain.payment.enums;
+package api.buyhood.payment.enums;
 
 public enum PGProvider {
     TOSS("uplus"),

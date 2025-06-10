@@ -1,6 +1,6 @@
-package api.buyhood.domain.payment.repository;
+package api.buyhood.payment.repository;
 
-import api.buyhood.domain.payment.entity.Payment;
+import api.buyhood.payment.entity.Payment;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,8 +14,4 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
             "AND p.deletedAt is NULL")
     Optional<Payment> findNotDeletedById(@Param("paymentId") Long paymentId);
 
-    @Query("SELECT p FROM Payment p " +
-            "WHERE p.order.id = :orderId " +
-            "AND p.deletedAt is NULL")
-    Optional<Payment> findNotDeletedByOrderId(@Param("orderId") Long orderId);
 }
