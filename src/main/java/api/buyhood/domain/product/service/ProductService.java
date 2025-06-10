@@ -8,7 +8,6 @@ import api.buyhood.domain.product.dto.response.GetProductRes;
 import api.buyhood.domain.product.dto.response.PageProductRes;
 import api.buyhood.domain.product.dto.response.RegisterProductRes;
 import api.buyhood.domain.product.entity.Product;
-import api.buyhood.domain.product.repository.ProductCategoryRepository;
 import api.buyhood.domain.product.repository.ProductRepository;
 import api.buyhood.domain.store.entity.Store;
 import api.buyhood.domain.store.repository.StoreRepository;
@@ -19,18 +18,27 @@ import api.buyhood.exception.ConflictException;
 import api.buyhood.exception.ForbiddenException;
 import api.buyhood.exception.InvalidRequestException;
 import api.buyhood.exception.NotFoundException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import api.buyhood.productcategory.repository.ProductCategoryRepository;
+import jakarta.persistence.OptimisticLockException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static api.buyhood.errorcode.ProductErrorCode.OUT_OF_STOCK;
 
 @Service
 @RequiredArgsConstructor
@@ -91,6 +99,7 @@ public class ProductService {
 		List<String> categoryNameList = productCategoryRepository.findCategoryNamesByCategoryIds(categoryIdList);
 
 		return RegisterProductRes.of(product, categoryNameList);
+
 	}
 
 	/**
@@ -117,6 +126,8 @@ public class ProductService {
 		List<String> categoryNames = productCategoryRepository.findCategoryNamesByCategoryIds(categoryIds);
 
 		return GetProductRes.of(product, categoryNames);
+
+		return null;
 	}
 
 	/**
@@ -235,7 +246,7 @@ public class ProductService {
 		}
 
 		// 상품에 연결된 모든 카테고리 연결 해제
-		productCategoryRepository.deleteByProductId(productId);
+//		productCategoryRepository.deleteByProductId(productId);
 
 		if (categoryIdList != null && !categoryIdList.isEmpty()) {
 			linkCategoriesToProduct(categoryIdList, getProduct);
@@ -269,14 +280,33 @@ public class ProductService {
 		getProduct.markDeleted();
 	}
 
+	@Retryable(
+			retryFor = {
+					OptimisticLockException.class,
+					ObjectOptimisticLockingFailureException.class
+			},
+			backoff = @Backoff(delay = 100)
+	)
 	@Transactional
 	public void decreaseStock(Cart cart, Map<Long, Product> productMap) {
 		for (CartItem cartItem : cart.getCart()) {
 			Product product = productMap.get(cartItem.getProductId());
+
+			if (product.getStock() < cartItem.getQuantity()) {
+				throw new InvalidRequestException(OUT_OF_STOCK);
+			}
+
 			product.decreaseStock(cartItem.getQuantity());
 		}
 	}
 
+	@Retryable(
+			retryFor = {
+					OptimisticLockException.class,
+					ObjectOptimisticLockingFailureException.class
+			},
+			backoff = @Backoff(delay = 100)
+	)
 	@Transactional
 	public void rollBackStock(List<OrderHistory> orderHistories) {
 		for (OrderHistory orderHistory : orderHistories) {
@@ -285,6 +315,28 @@ public class ProductService {
 
 			product.rollBackStock(quantity);
 		}
+	}
+
+	/* 주문 요청 후 재고 감소에 대한 recover */
+	@Recover
+	public void recover(OptimisticLockException e, Cart cart, Map<Long, Product> productMap) {
+		throw new InvalidRequestException(ProductErrorCode.STOCK_UPDATE_CONFLICT);
+	}
+
+	@Recover
+	public void recover(ObjectOptimisticLockingFailureException e, Cart cart, Map<Long, Product> productMap) {
+		throw new InvalidRequestException(ProductErrorCode.STOCK_UPDATE_CONFLICT);
+	}
+
+	/* 주문 취소 후 재고 롤백에 대한 recover*/
+	@Recover
+	public void recover(OptimisticLockException e, List<OrderHistory> orderHistories) {
+		throw new InvalidRequestException(ProductErrorCode.STOCK_UPDATE_CONFLICT);
+	}
+
+	@Recover
+	public void recover(ObjectOptimisticLockingFailureException e, List<OrderHistory> orderHistories) {
+		throw new InvalidRequestException(ProductErrorCode.STOCK_UPDATE_CONFLICT);
 	}
 
 	private Store getStoreOrElseThrow(Long storeId) {

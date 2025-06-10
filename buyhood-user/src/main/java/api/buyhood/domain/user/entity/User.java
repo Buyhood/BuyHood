@@ -1,6 +1,5 @@
 package api.buyhood.domain.user.entity;
 
-
 import api.buyhood.entity.BaseTimeEntity;
 import api.buyhood.enums.UserRole;
 import jakarta.persistence.Column;
@@ -46,6 +45,9 @@ public class User extends BaseTimeEntity {
 	@Column(nullable = false)
 	private String address;
 
+	@Column(unique = true)
+	private String businessNumber;
+
 	@Builder
 	public User(String username, String email, String password, String address, String phoneNumber) {
 		this.username = username;
@@ -71,5 +73,13 @@ public class User extends BaseTimeEntity {
 		if (address != null) {
 			this.address = address;
 		}
+	}
+
+	public void changeRole(UserRole newRole) {
+		this.role = newRole;
+	}
+
+	public void registerBusinessNumber(String businessNumber) {
+		this.businessNumber = businessNumber;
 	}
 }
