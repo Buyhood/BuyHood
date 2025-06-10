@@ -18,7 +18,7 @@ public class InternalUserService {
 	private final InternalUserRepository internalUserRepository;
 
 	@Transactional(readOnly = true)
-	public UserFeignDto getUserInternal(Long userId) {
+	public UserFeignDto getRoleUserOrElseThrow(Long userId) {
 		User getUser = internalUserRepository.findActiveUserById(userId)
 			.orElseThrow(() -> new NotFoundException(UserErrorCode.USER_NOT_FOUND));
 
@@ -31,7 +31,7 @@ public class InternalUserService {
 	}
 
 	@Transactional(readOnly = true)
-	public UserFeignDto getSellerInternal(Long userId) {
+	public UserFeignDto getRoleSellerOrElseThrow(Long userId) {
 		User getUser = internalUserRepository.findActiveUserById(userId)
 			.orElseThrow(() -> new NotFoundException(UserErrorCode.USER_NOT_FOUND));
 
