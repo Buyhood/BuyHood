@@ -6,6 +6,7 @@ import api.buyhood.dto.ValidationExceptionDto;
 import api.buyhood.errorcode.ErrorCode;
 import api.buyhood.errorcode.ServerErrorCode;
 import api.buyhood.exception.BaseException;
+import api.buyhood.exception.FilterAuthenticationException;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
@@ -119,5 +120,20 @@ public class GlobalExceptionHandler {
 		ErrorCode errorCode = ServerErrorCode.INTERNAL_SERVER_ERROR;
 		response.setStatus(errorCode.getStatus().value());
 		return Response.error(new CustomExceptionDto(errorCode.getCode(), errorCode.getMessage()));
+	}
+
+	// 핸들러에 예외 처리 추가
+	@ExceptionHandler(FilterAuthenticationException.class)
+	public Response<CustomExceptionDto> handleFilterAuthException(
+		FilterAuthenticationException e,
+		HttpServletResponse response
+	) {
+		response.setStatus(e.getErrorCode().getStatus().value());
+		return Response.error(
+			new CustomExceptionDto(
+				e.getErrorCode().getCode(),
+				e.getErrorCode().getMessage()
+			)
+		);
 	}
 }
