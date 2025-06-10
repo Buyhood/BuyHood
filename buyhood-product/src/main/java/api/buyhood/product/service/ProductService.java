@@ -113,7 +113,7 @@ public class ProductService {
 		UserFeignDto getUserDto = fetchUser(currentUserId);
 		StoreFeignDto getStoreDto = fetchStore(storeId);
 
-		if (!getUserDto.getUserId().equals(getStoreDto.getStoreId())) {
+		if (!getUserDto.getUserId().equals(getStoreDto.getSellerId())) {
 			throw new InvalidRequestException(StoreErrorCode.NOT_STORE_OWNER);
 		}
 
