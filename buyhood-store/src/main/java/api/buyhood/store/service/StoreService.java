@@ -137,7 +137,7 @@ public class StoreService {
 	public GetStoreRes getActiveStore(Long storeId) {
 		Store getStore = getActiveStoreOrElseThrow(storeId);
 
-		UserFeignDto getSellerRes = userFeignClient.getSellerResOrElseThrow(getStore.getSellerId());
+		UserFeignDto getSellerRes = userFeignClient.getRoleSellerOrElseThrow(getStore.getSellerId());
 
 		StoreCategoryFeignDto getStoreCategoryRes =
 			storeCategoryFeignClient.getStoreCategoryResByIdOrElseThrow(getStore.getStoreCategoryId());
