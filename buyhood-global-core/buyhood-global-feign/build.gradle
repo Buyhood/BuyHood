@@ -1,0 +1,26 @@
+plugins {
+	id 'java'
+}
+
+group = 'api'
+version = '0.0.1-SNAPSHOT'
+
+repositories {
+	mavenCentral()
+}
+
+tasks.named("jar") {
+	enabled = true
+}
+
+tasks.named("bootJar") {
+	enabled = false
+}
+
+dependencies {
+	implementation project(':buyhood-global-core:buyhood-global-common')
+}
+
+test {
+	useJUnitPlatform()
+}

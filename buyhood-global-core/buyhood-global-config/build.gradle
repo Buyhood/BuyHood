@@ -5,6 +5,16 @@ plugins {
 group = 'api'
 version = '0.0.1-SNAPSHOT'
 
+ext {
+	springCloudVersion = "2025.0.0"
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:$springCloudVersion"
+	}
+}
+
 repositories {
 	mavenCentral()
 	maven { url 'https://jitpack.io' }
@@ -21,6 +31,9 @@ tasks.named("bootJar") {
 
 dependencies {
 	api project(':buyhood-global-core:buyhood-global-common')
+
+	api project(':buyhood-global-core:buyhood-global-feign')
+
 	
 	// spring data jpa
 	api 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -30,6 +43,10 @@ dependencies {
 	
 	// spring security
 	api 'org.springframework.boot:spring-boot-starter-security'
+	
+
+	// open feign
+	api 'org.springframework.cloud:spring-cloud-starter-openfeign'
 	
 	// jjwt
 	api 'io.jsonwebtoken:jjwt-api:0.12.6'
