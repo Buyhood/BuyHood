@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface InternalPaymentRepository extends JpaRepository<Payment, Long> {
     @Query("SELECT p FROM Payment p " +
-            "WHERE p.order.id = :orderId " +
+            "WHERE p.orderId = :orderId " +
             "AND p.deletedAt is NULL")
     Optional<Payment> findNotDeletedByOrderId(@Param("orderId") Long orderId);
 

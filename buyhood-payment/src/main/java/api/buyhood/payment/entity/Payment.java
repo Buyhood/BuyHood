@@ -1,7 +1,6 @@
 package api.buyhood.payment.entity;
 
 import api.buyhood.entity.BaseTimeEntity;
-import api.buyhood.order.entity.Order;
 import api.buyhood.payment.enums.PGProvider;
 import api.buyhood.payment.enums.PayStatus;
 import jakarta.persistence.*;
@@ -26,9 +25,8 @@ public class Payment extends BaseTimeEntity {
 	@Column(nullable = false)
 	private Long id;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "order_id")
-	private Order order;
+	@Column(nullable = false)
+	private Long orderId;
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "pg", columnDefinition = "VARCHAR(50)")
@@ -48,8 +46,8 @@ public class Payment extends BaseTimeEntity {
 	private String merchantUid;
 
 	@Builder
-	public Payment(Order order, PGProvider pg, String buyerEmail, BigDecimal totalPrice, String merchantUid) {
-		this.order = order;
+	public Payment(Long orderId, PGProvider pg, String buyerEmail, BigDecimal totalPrice, String merchantUid) {
+		this.orderId = orderId;
 		this.pg = pg;
 		this.buyerEmail = buyerEmail;
 		this.totalPrice = totalPrice;
@@ -57,9 +55,9 @@ public class Payment extends BaseTimeEntity {
 		this.payStatus = PayStatus.READY;
 	}
 
-	public static Payment of(Order order, PGProvider pg, String buyerEmail, BigDecimal totalPrice, String merchantUid) {
+	public static Payment of(Long orderId, PGProvider pg, String buyerEmail, BigDecimal totalPrice, String merchantUid) {
 		return Payment.builder()
-			.order(order)
+			.orderId(orderId)
 			.pg(pg)
 			.buyerEmail(buyerEmail)
 			.totalPrice(totalPrice)
