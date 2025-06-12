@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Import;
 
 @EnableFeignClients(basePackages = "api.buyhood.payment.client")
 @SpringBootApplication(scanBasePackages = {
-        "api.buyhood.payment",
         "api.buyhood.config",
         "api.buyhood.security",
         "api.buyhood.filter"

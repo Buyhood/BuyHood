@@ -23,7 +23,8 @@ public class PaymentRestController {
 
     private final PaymentService paymentService;
 
-    /* 결제 준비 (사전 검증) */
+    /* 결제 사전 검증 (portone)*/
+    @Secured("ROLE_USER")
     @PostMapping("/v1/orders/{orderId}/prepare")
     public Response<PaymentRes> preparePayment(
             @AuthenticationPrincipal AuthUser authUser,
@@ -33,7 +34,7 @@ public class PaymentRestController {
         return Response.ok(paymentService.preparePayment(authUser, orderId, paymentReq));
     }
 
-    /* 결제 후 검증 (portone)*/
+    /* 결제 후 검증 (portone) */
     @Secured("ROLE_USER")
     @PostMapping("/v1/payments/{paymentId}")
     public Response<String> validPayment(
@@ -44,7 +45,7 @@ public class PaymentRestController {
         return Response.ok("결제가 완료되었습니다.");
     }
 
-    /* 결제 후 검증 (zeropay)*/
+    /* 결제 후 검증 (zeropay) */
     @Secured("ROLE_USER")
     @PostMapping("/v1/payments/{paymentId}/zeropay")
     public Response<String> validPaymentWithZeroPay(

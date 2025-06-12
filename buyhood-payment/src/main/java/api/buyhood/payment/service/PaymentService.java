@@ -39,7 +39,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static api.buyhood.errorcode.OrderErrorCode.*;
+import static api.buyhood.errorcode.OrderErrorCode.NOT_OWNER_OF_ORDER;
+import static api.buyhood.errorcode.OrderErrorCode.NOT_PENDING;
 import static api.buyhood.errorcode.PaymentErrorCode.*;
 
 @Slf4j
@@ -56,7 +57,6 @@ public class PaymentService {
     public PaymentRes preparePayment(AuthUser authUser, Long orderId, PaymentReq paymentReq)
             throws IamportResponseException, IOException {
         UserFeignDto user = userFeignClient.getRoleUserOrElseThrow(authUser.getId());
-
         OrderFeignDto order = orderFeignClient.findOrder(orderId);
 
         if (!order.getUserId().equals(user.getUserId())) {
@@ -77,7 +77,6 @@ public class PaymentService {
 
         //PG사 결제일 경우
         if (paymentReq.getPg() != PGProvider.ZERO_PAY) {
-            //사전 검증 요청 객체
             PrepareData prepareData = new PrepareData(payment.getMerchantUid(), payment.getTotalPrice());
             iamportClient.postPrepare(prepareData);
         }
@@ -143,7 +142,7 @@ public class PaymentService {
         payment.successPayment();
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = InvalidRequestException.class)
     public void validPaymentWithZeroPay(Long paymentId, ZPayValidationReq zPayValidationReq) {
         Payment payment = paymentRepository.findNotDeletedById(paymentId)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_PAYMENT));
@@ -240,13 +239,13 @@ public class PaymentService {
     }
 
     private void validateZeroPayConsistency(PaymentReq paymentReq, String paymentMethod) {
-        // 요청이 제로페이인 경우 기존 주문도 제로페이인지 확인
+        // 요청이 제로페이인 경우: 기존 주문도 제로페이인지 확인
         if (!PGProvider.ZERO_PAY.equals(paymentReq.getPg()) && "ZERO_PAY".equals(
                 paymentMethod)) {
             throw new InvalidRequestException(NOT_SUPPORTED_ZERO_PAY);
         }
 
-        // 요청이 PG사인 경우 기존 주문도 PG사가 제공하는 결제 방식인지 확인
+        // 요청이 PG사인 경우: 기존 주문도 PG사가 제공하는 결제 방식인지 확인
         if (PGProvider.ZERO_PAY.equals(paymentReq.getPg()) && !"ZERO_PAY".equals(
                 paymentMethod)) {
             throw new InvalidRequestException(INVALID_PAYMENT_METHOD_FOR_ZERO_PAY);
