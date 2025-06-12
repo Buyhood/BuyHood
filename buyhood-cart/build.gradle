@@ -33,6 +33,9 @@ dependencies {
 	implementation project(':buyhood-global-core:buyhood-global-config')
 	
 	implementation project(':buyhood-user')
+	//implementation project(':global-config')
+	//implementation project(':global-feign')
+	//implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
     //implementation project(':buyhood-product')
 	//implementation project(':buyhood-category:buyhood-product-
 	
