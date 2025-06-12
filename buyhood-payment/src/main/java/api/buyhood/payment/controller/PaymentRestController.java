@@ -23,7 +23,7 @@ public class PaymentRestController {
 
     private final PaymentService paymentService;
 
-    /* 결제 사전 검증 (portone)*/
+    /* 결제 사전 검증 */
     @Secured("ROLE_USER")
     @PostMapping("/v1/orders/{orderId}/prepare")
     public Response<PaymentRes> preparePayment(
