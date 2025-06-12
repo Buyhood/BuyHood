@@ -5,7 +5,9 @@ import api.buyhood.product.dto.request.AddCategoryIdsReq;
 import api.buyhood.product.dto.request.PatchProductReq;
 import api.buyhood.product.dto.request.RegisterProductReq;
 import api.buyhood.product.dto.request.RemoveCategoryIdsReq;
+import api.buyhood.product.dto.response.GetProductRes;
 import api.buyhood.product.dto.response.RegisterProductRes;
+import api.buyhood.product.service.ProductQueryService;
 import api.buyhood.product.service.ProductService;
 import api.buyhood.security.AuthUser;
 import jakarta.validation.Valid;
@@ -13,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ProductController {
 
 	private final ProductService productService;
+	private final ProductQueryService productQueryService;
 
 	@Secured("ROLE_SELLER")
 	@PostMapping("/v1/stores/{storeId}/products")
@@ -46,20 +50,22 @@ public class ProductController {
 		return Response.ok(response);
 	}
 
-//	@Secured("ROLE_SELLER")
-//	@GetMapping("/v1/stores/{storeId}/products/{productId}")
-//	public Response<GetProductRes> getProduct(@PathVariable Long storeId, @PathVariable Long productId) {
-//		GetProductRes response = productService.getProduct(storeId, productId);
-//		return Response.ok(response);
-//	}
-//
+	@Secured("ROLE_SELLER")
+	@GetMapping("/v1/stores/{storeId}/products/{productId}")
+	public Response<GetProductRes> getProduct(
+		@AuthenticationPrincipal AuthUser currentUser,
+		@PathVariable Long storeId, @PathVariable Long productId) {
+		GetProductRes response = productQueryService.getProduct(currentUser.getId(), storeId, productId);
+		return Response.ok(response);
+	}
+
 //	@Secured("ROLE_SELLER")
 //	@GetMapping("/v1/stores/{storeId}/products")
 //	public Response<Page<PageProductRes>> getAllProduct(
 //		@PathVariable Long storeId,
 //		@PageableDefault Pageable pageable
 //	) {
-//		Page<PageProductRes> response = productService.getAllProducts(storeId, pageable);
+//		Page<PageProductRes> response = productQueryService.getAllProducts(storeId, pageable);
 //		return Response.ok(response);
 //	}
 //
