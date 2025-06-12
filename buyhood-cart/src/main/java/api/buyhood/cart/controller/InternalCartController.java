@@ -1,6 +1,6 @@
-package api.buyhood.product.controller;
+package api.buyhood.cart.controller;
 
-import api.buyhood.product.service.InternalProductService;
+import api.buyhood.cart.service.InternalCartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -8,8 +8,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/internal")
-public class InternalProductController {
-
-    private final InternalProductService internalProductService;
-
+public class InternalCartController {
+    private final InternalCartService internalCartService;
 }
