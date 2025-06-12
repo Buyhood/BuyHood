@@ -1,11 +1,11 @@
 package api.buyhood.payment.service;
 
-import api.buyhood.domain.user.entity.User;
-import api.buyhood.domain.user.repository.UserRepository;
+import api.buyhood.dto.order.OrderFeignDto;
+import api.buyhood.dto.user.UserFeignDto;
 import api.buyhood.exception.InvalidRequestException;
 import api.buyhood.exception.NotFoundException;
-import api.buyhood.order.entity.Order;
-import api.buyhood.order.repository.OrderRepository;
+import api.buyhood.payment.client.OrderFeignClient;
+import api.buyhood.payment.client.UserFeignClient;
 import api.buyhood.payment.dto.request.PaymentReq;
 import api.buyhood.payment.dto.request.ValidPaymentReq;
 import api.buyhood.payment.dto.request.ZPayValidationReq;
@@ -41,42 +41,37 @@ import java.util.UUID;
 
 import static api.buyhood.errorcode.OrderErrorCode.*;
 import static api.buyhood.errorcode.PaymentErrorCode.*;
-import static api.buyhood.errorcode.UserErrorCode.USER_NOT_FOUND;
-import static api.buyhood.order.enums.OrderStatus.PENDING;
-import static api.buyhood.order.enums.PaymentMethod.ZERO_PAY;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class PaymentService {
 
-    private final UserRepository userRepository;
-    private final OrderRepository orderRepository;
+    private final UserFeignClient userFeignClient;
+    private final OrderFeignClient orderFeignClient;
     private final PaymentRepository paymentRepository;
     private final IamportClient iamportClient;
 
     @Transactional(rollbackFor = Exception.class)
     public PaymentRes preparePayment(AuthUser authUser, Long orderId, PaymentReq paymentReq)
             throws IamportResponseException, IOException {
-        User user = userRepository.findByEmail(authUser.getEmail())
-                .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
+        UserFeignDto user = userFeignClient.getRoleUserOrElseThrow(authUser.getId());
 
-        Order order = orderRepository.findNotDeletedById(orderId)
-                .orElseThrow(() -> new NotFoundException(NOT_FOUND_ORDER));
+        OrderFeignDto order = orderFeignClient.findOrder(orderId);
 
-        if (!order.getUserId().equals(user.getId())) {
+        if (!order.getUserId().equals(user.getUserId())) {
             throw new InvalidRequestException(NOT_OWNER_OF_ORDER);
         }
 
-        if (!PENDING.equals(order.getStatus())) {
+        if (!"PENDING".equals(order.getOrderState())) {
             throw new InvalidRequestException(NOT_PENDING);
         }
 
         //결제 고유번호
         String merchantUid = String.valueOf(UUID.randomUUID());
-        validateZeroPayConsistency(paymentReq, order);
+        validateZeroPayConsistency(paymentReq, order.getPaymentMethod());
 
-        Payment payment = Payment.of(order, paymentReq.getPg(), authUser.getEmail(), order.getTotalPrice(),
+        Payment payment = Payment.of(order.getOrderId(), paymentReq.getPg(), authUser.getEmail(), order.getTotalPrice(),
                 merchantUid);
         paymentRepository.save(payment);
 
@@ -96,14 +91,16 @@ public class PaymentService {
         Payment payment = paymentRepository.findNotDeletedById(paymentId)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_PAYMENT));
 
+        OrderFeignDto order = orderFeignClient.findOrderForApplyPayment(payment.getOrderId());
+
         if (!PayStatus.READY.equals(payment.getPayStatus())) {
             throw new InvalidRequestException(CANNOT_REQUEST_PAYMENT);
         }
 
         return ApplyPaymentRes.of(
                 payment.getPg().getName(),
-                payment.getOrder().getName(),
-                String.valueOf(payment.getOrder().getPaymentMethod()),
+                order.getName(),
+                order.getPaymentMethod(),
                 payment.getMerchantUid(),
                 payment.getTotalPrice(),
                 payment.getBuyerEmail());
@@ -180,11 +177,13 @@ public class PaymentService {
         Payment payment = paymentRepository.findNotDeletedById(paymentId)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_PAYMENT));
 
+        OrderFeignDto order = orderFeignClient.findOrderForApplyPayment(payment.getOrderId());
+
         if (payment.isPaid()) {
             throw new InvalidRequestException(ALREADY_PAID);
         }
 
-        if (!ZERO_PAY.equals(payment.getOrder().getPaymentMethod())) {
+        if (!"ZERO_PAY".equals(order.getPaymentMethod())) {
             throw new InvalidRequestException(INVALID_PAYMENT_METHOD_FOR_ZERO_PAY);
         }
 
@@ -197,7 +196,7 @@ public class PaymentService {
             hintMap.put(EncodeHintType.CHARACTER_SET, "UTF-8");
 
             // QR 코드 생성
-            String link = String.format("http://localhost:8080/api/v1/payments/%d", paymentId);
+            String link = String.format("http://localhost:8088/api/v1/payments/%d", paymentId);
             QRCodeWriter qrCodeWriter = new QRCodeWriter();
             BitMatrix bitMatrix = qrCodeWriter.encode(link, BarcodeFormat.QR_CODE, width, height, hintMap);
 
@@ -224,8 +223,7 @@ public class PaymentService {
         Payment payment = paymentRepository.findNotDeletedById(paymentId)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_PAYMENT));
 
-        Order order = orderRepository.findNotDeletedById(payment.getOrder().getId())
-                .orElseThrow(() -> new NotFoundException(NOT_FOUND_ORDER));
+        OrderFeignDto order = orderFeignClient.findOrderForApplyPayment(payment.getOrderId());
 
         return ApplyPaymentRes.of(
                 String.valueOf(payment.getPg()),
@@ -241,16 +239,16 @@ public class PaymentService {
         iamportClient.cancelPaymentByImpUid(cancelData);
     }
 
-    private void validateZeroPayConsistency(PaymentReq paymentReq, Order order) {
+    private void validateZeroPayConsistency(PaymentReq paymentReq, String paymentMethod) {
         // 요청이 제로페이인 경우 기존 주문도 제로페이인지 확인
-        if (!PGProvider.ZERO_PAY.equals(paymentReq.getPg()) && ZERO_PAY.equals(
-                order.getPaymentMethod())) {
+        if (!PGProvider.ZERO_PAY.equals(paymentReq.getPg()) && "ZERO_PAY".equals(
+                paymentMethod)) {
             throw new InvalidRequestException(NOT_SUPPORTED_ZERO_PAY);
         }
 
         // 요청이 PG사인 경우 기존 주문도 PG사가 제공하는 결제 방식인지 확인
-        if (PGProvider.ZERO_PAY.equals(paymentReq.getPg()) && !ZERO_PAY.equals(
-                order.getPaymentMethod())) {
+        if (PGProvider.ZERO_PAY.equals(paymentReq.getPg()) && !"ZERO_PAY".equals(
+                paymentMethod)) {
             throw new InvalidRequestException(INVALID_PAYMENT_METHOD_FOR_ZERO_PAY);
         }
     }

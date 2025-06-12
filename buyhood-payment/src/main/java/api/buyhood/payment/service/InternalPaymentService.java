@@ -23,7 +23,7 @@ public class InternalPaymentService {
 
         return new PaymentFeignDto(
                 payment.getId(),
-                payment.getOrder().getId(),
+                payment.getOrderId(),
                 String.valueOf(payment.getPg()),
                 payment.getBuyerEmail(),
                 payment.getTotalPrice(),
