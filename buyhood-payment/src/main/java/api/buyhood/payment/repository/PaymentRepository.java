@@ -14,4 +14,10 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
             "AND p.deletedAt is NULL")
     Optional<Payment> findNotDeletedById(@Param("paymentId") Long paymentId);
 
+    @Query("SELECT p FROM Payment p " +
+            "WHERE p.orderId = :orderId " +
+            "AND p.deletedAt is NULL")
+    Optional<Payment> findNotDeletedByOrderId(Long orderId);
+
+    boolean existsByOrderId(Long orderId);
 }

@@ -3,7 +3,6 @@ package api.buyhood.payment.controller;
 import api.buyhood.payment.dto.response.ApplyPaymentRes;
 import api.buyhood.payment.service.PaymentService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,7 +19,6 @@ public class PaymentController {
     private final PaymentService paymentService;
 
     /* 결제 요청 (portone) */
-    @Secured("ROLE_USER")
     @GetMapping("/v1/payments/{paymentId}/portone")
     public String applyPayment(@PathVariable Long paymentId, Model model) {
         ApplyPaymentRes applyPaymentRes = paymentService.applyPayment(paymentId);
@@ -29,7 +27,6 @@ public class PaymentController {
     }
 
     /* 결제를 위한 QR 요청*/
-    @Secured("ROLE_USER")
     @GetMapping("/v1/payments/{paymentId}/qr")
     public String createQR(@PathVariable Long paymentId, Model model) {
         byte[] qrImage = paymentService.createQR(paymentId);
@@ -42,7 +39,6 @@ public class PaymentController {
      *
      * qr코드 링크를 통해 호출되는 api입니다.
      *  */
-    @Secured("ROLE_USER")
     @GetMapping("/v1/payments/{paymentId}")
     public String applyPaymentWithZeroPay(@PathVariable Long paymentId, Model model) {
         ApplyPaymentRes applyPaymentRes = paymentService.applyPaymentWithZeroPay(paymentId);

@@ -6,14 +6,15 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @EnableFeignClients(basePackages = "api.buyhood.payment.client")
 @SpringBootApplication(scanBasePackages = {
+        "api.buyhood.payment",
         "api.buyhood.config",
         "api.buyhood.security",
         "api.buyhood.filter"
 })
-public class BuyhoodPaymentApplication {
+public class BuyHoodPaymentApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(BuyhoodPaymentApplication.class, args);
+        SpringApplication.run(BuyHoodPaymentApplication.class, args);
     }
 
 }

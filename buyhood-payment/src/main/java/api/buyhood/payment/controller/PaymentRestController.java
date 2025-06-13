@@ -7,14 +7,11 @@ import api.buyhood.payment.dto.request.ZPayValidationReq;
 import api.buyhood.payment.dto.response.PaymentRes;
 import api.buyhood.payment.service.PaymentService;
 import api.buyhood.security.AuthUser;
-import com.siot.IamportRestClient.exception.IamportResponseException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.io.IOException;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,7 +27,7 @@ public class PaymentRestController {
             @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long orderId,
             @Valid @RequestBody PaymentReq paymentReq
-    ) throws IamportResponseException, IOException {
+    ) {
         return Response.ok(paymentService.preparePayment(authUser, orderId, paymentReq));
     }
 
@@ -40,7 +37,7 @@ public class PaymentRestController {
     public Response<String> validPayment(
             @PathVariable Long paymentId,
             @Valid @RequestBody ValidPaymentReq validPaymentReq
-    ) throws IamportResponseException, IOException {
+    ) {
         paymentService.validPayment(paymentId, validPaymentReq);
         return Response.ok("결제가 완료되었습니다.");
     }

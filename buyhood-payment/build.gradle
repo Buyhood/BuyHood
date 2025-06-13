@@ -28,6 +28,16 @@ repositories {
     maven { url 'https://jitpack.io' }
 }
 
+tasks.named("jar") {
+    enabled = false
+
+}
+
+tasks.named("bootJar") {
+    enabled = true
+
+}
+
 dependencies {
     implementation project(':buyhood-global-core:buyhood-global-config')
 
@@ -51,7 +61,4 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
-}
-
-tasks.register("prepareKotlinBuildScriptModel") {
 }
