@@ -58,7 +58,7 @@ public class PaymentService {
         UserFeignDto user = userFeignClient.getRoleUserOrElseThrow(authUser.getId());
         OrderFeignDto order = orderFeignClient.findOrder(orderId);
 
-        if (!order.getUserId().equals(user.getUserId())) {
+        if (!order.getUserId().equals(user.getId())) {
             throw new InvalidRequestException(NOT_OWNER_OF_ORDER);
         }
 
