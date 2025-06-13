@@ -39,7 +39,7 @@ dependencies {
 	implementation project(':buyhood-category:buyhood-product-category')
 	implementation project(':buyhood-category:buyhood-store-category')
 	implementation project(':buyhood-order')
-
+	
 	// spring validation
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	
@@ -71,7 +71,7 @@ dependencies {
 
 	// retry
 	implementation 'org.springframework.retry:spring-retry'
-
+	
 }
 
 subprojects {

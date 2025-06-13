@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @EnableFeignClients(basePackages = {"api.buyhood.product.client"})
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"api.buyhood"})
 public class BuyHoodProductApplication {
 
 	public static void main(String[] args) {

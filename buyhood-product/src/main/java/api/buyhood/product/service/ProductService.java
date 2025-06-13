@@ -28,6 +28,9 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import static api.buyhood.errorcode.ProductErrorCode.PRODUCT_NOT_FOUND;
+import static api.buyhood.errorcode.StoreErrorCode.NOT_STORE_OWNER;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +51,7 @@ public class ProductService {
 
 	@Transactional
 	public RegisterProductRes registerProduct(
+		Long currentUserId,
 		Long storeId,
 		String productName,
 		Long price,
@@ -55,14 +59,11 @@ public class ProductService {
 		List<Long> categoryIds,
 		String description
 	) {
-		StoreFeignDto getStoreDto = null;
+		StoreFeignDto getStoreDto = fetchStore(storeId);
+		UserFeignDto getUserDto = fetchUser(currentUserId);
 
-		try {
-			getStoreDto = storeFeignClient.getStoreOrElseThrow(storeId);
-		} catch (FeignException e) {
-			log.error("[FeignException]: 가게가 실제로 존재하지 않음. request: {}, contentUTF8: {}\n",
-				e.request(), e.contentUTF8(), e);
-			throw new NotFoundException(StoreErrorCode.STORE_NOT_FOUND);
+		if (!getUserDto.getId().equals(getStoreDto.getSellerId())) {
+			throw new InvalidRequestException(NOT_STORE_OWNER);
 		}
 
 		List<Product> getProducts = productRepository.findActiveProductsByStoreId(getStoreDto.getStoreId());
@@ -73,6 +74,7 @@ public class ProductService {
 			.price(price)
 			.stock(stock)
 			.description(description)
+			.storeId(storeId)
 			.build();
 
 		productRepository.save(newProduct);
@@ -116,11 +118,12 @@ public class ProductService {
 		List<Long> categoryIds,
 		String description
 	) {
+
 		UserFeignDto getUserDto = fetchUser(currentUserId);
 		StoreFeignDto getStoreDto = fetchStore(storeId);
 
-		if (!getUserDto.getUserId().equals(getStoreDto.getSellerId())) {
-			throw new InvalidRequestException(StoreErrorCode.NOT_STORE_OWNER);
+		if (!getUserDto.getId().equals(getStoreDto.getSellerId())) {
+			throw new InvalidRequestException(NOT_STORE_OWNER);
 		}
 
 		Product product = getProductOrElseThrow(productId);
@@ -165,7 +168,7 @@ public class ProductService {
 	@Transactional
 	public void addCategoriesToProduct(Long productId, List<Long> categoryIds) {
 		if (!productRepository.existsActiveProductById(productId)) {
-			throw new NotFoundException(ProductErrorCode.PRODUCT_NOT_FOUND);
+			throw new NotFoundException(PRODUCT_NOT_FOUND);
 		}
 
 		for (Long categoryId : categoryIds) {
@@ -185,7 +188,7 @@ public class ProductService {
 	@Transactional
 	public void removeCategoriesFromProduct(Long productId, List<Long> categoryIds) {
 		if (!productRepository.existsActiveProductById(productId)) {
-			throw new NotFoundException(ProductErrorCode.PRODUCT_NOT_FOUND);
+			throw new NotFoundException(PRODUCT_NOT_FOUND);
 		}
 
 		for (Long categoryId : categoryIds) {
@@ -265,7 +268,7 @@ public class ProductService {
 
 	private Product getProductOrElseThrow(Long productId) {
 		return productRepository.findActiveProductByProductId(productId)
-			.orElseThrow(() -> new NotFoundException(ProductErrorCode.PRODUCT_NOT_FOUND));
+			.orElseThrow(() -> new NotFoundException(PRODUCT_NOT_FOUND));
 	}
 
 	private void checkForDuplicateInStore(String productName, List<Product> products) {
@@ -307,5 +310,20 @@ public class ProductService {
 			}
 			throw new ServerException(CommonErrorCode.NOT_DEFINED_FEIGN_EXCEPTION);
 		}
+	}
+
+	//혹시나 충돌이슈있을까봐 밑에 추가합니다
+	@Transactional
+	public void deleteProduct(Long currentUserId, Long storeId, Long productId) {
+		StoreFeignDto getStoreDto = fetchStore(storeId);
+		UserFeignDto getUserDto = fetchUser(currentUserId);
+		//제품을 삭제할 유저가 가게 주인장인지?
+		if (!getStoreDto.getSellerId().equals(getUserDto.getId())) {
+			throw new InvalidRequestException(NOT_STORE_OWNER);
+		}
+		//제품이 active 상태인지?
+		Product getProduct = getProductOrElseThrow(productId);
+
+		getProduct.markDeleted();
 	}
 }
