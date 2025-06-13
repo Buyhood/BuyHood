@@ -67,7 +67,7 @@ public class PaymentService {
         }
 
         if (paymentRepository.existsByOrderId(order.getOrderId())) {
-            throw new InvalidRequestException(ALREADY_PAID);
+            throw new InvalidRequestException(ALREADY_VALID_PAYMENT);
         }
 
         //결제 고유번호

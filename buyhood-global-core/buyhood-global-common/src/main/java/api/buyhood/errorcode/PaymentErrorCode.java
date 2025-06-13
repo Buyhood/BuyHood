@@ -18,6 +18,7 @@ public enum PaymentErrorCode implements ErrorCode {
 	ALREADY_PAID(3314, "이미 처리된 결제입니다.", HttpStatus.BAD_REQUEST),
 	INVALID_PAYMENT_METHOD_FOR_ZERO_PAY(3315, "요청한 결제 방식은 제로페이에서 지원되지 않습니다.", HttpStatus.BAD_REQUEST),
 	NOT_OWNER_OF_PAYMENT(3316, "자신의 결제가 아닙니다.", HttpStatus.BAD_REQUEST),
+	ALREADY_VALID_PAYMENT(3317, "이미 사전 검증된 결제입니다.", HttpStatus.BAD_REQUEST),
 
 	//UNAUTHORIZED
 	NOT_MATCH_MERCHANT_UID(3320, "MerchantUid가 일치하지 않습니다.", HttpStatus.UNAUTHORIZED),
