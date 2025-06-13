@@ -17,12 +17,12 @@ public class InternalUserController {
 
 	@GetMapping("/v1/users/{id}")
 	public UserFeignDto getUserInternal(@PathVariable Long id) {
-		return internalUserService.getUserInternal(id);
+		return internalUserService.getRoleUserOrElseThrow(id);
 	}
 
 	@GetMapping("/v1/sellers/{id}")
 	public UserFeignDto getSellerInternal(@PathVariable Long id) {
-		return internalUserService.getSellerInternal(id);
+		return internalUserService.getRoleSellerOrElseThrow(id);
 	}
 
 	@GetMapping("/v1/users/{id}/exists")

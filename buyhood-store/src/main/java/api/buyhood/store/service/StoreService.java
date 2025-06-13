@@ -15,6 +15,7 @@ import api.buyhood.store.dto.response.PageStoreRes;
 import api.buyhood.store.dto.response.RegisterStoreRes;
 import api.buyhood.store.entity.Store;
 import api.buyhood.store.repository.StoreRepository;
+import feign.FeignException;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -98,7 +99,7 @@ public class StoreService {
 		}
 
 		if (StringUtils.hasText(address)) {
-			if (getStore.getName().equalsIgnoreCase(address)) {
+			if (getStore.getAddress().equalsIgnoreCase(address)) {
 				throw new InvalidRequestException(StoreErrorCode.STORE_NAME_SAME_AS_OLD);
 			}
 			getStore.patchAddress(address);
@@ -136,7 +137,7 @@ public class StoreService {
 	public GetStoreRes getActiveStore(Long storeId) {
 		Store getStore = getActiveStoreOrElseThrow(storeId);
 
-		UserFeignDto getSellerRes = userFeignClient.getSellerResOrElseThrow(getStore.getSellerId());
+		UserFeignDto getSellerRes = userFeignClient.getRoleSellerOrElseThrow(getStore.getSellerId());
 
 		StoreCategoryFeignDto getStoreCategoryRes =
 			storeCategoryFeignClient.getStoreCategoryResByIdOrElseThrow(getStore.getStoreCategoryId());
@@ -171,11 +172,22 @@ public class StoreService {
 		PageRequest pageRequest =
 			PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Direction.ASC, "name");
 
-		StoreCategoryFeignDto getStoreCategoryRes =
-			storeCategoryFeignClient.getStoreCategoryResByNameOrElseThrow(storeCategoryName);
+		Page<Store> getActiveStorePage = Page.empty();
 
-		Page<Store> getActiveStorePage =
-			storeRepository.findActiveStoresByStoreCategoryId(getStoreCategoryRes.getCategoryId(), pageRequest);
+		try {
+			StoreCategoryFeignDto getStoreCategoryRes =
+				storeCategoryFeignClient.getStoreCategoryResByNameOrElseThrow(storeCategoryName);
+
+			getActiveStorePage =
+				storeRepository.findActiveStoresByStoreCategoryId(getStoreCategoryRes.getCategoryId(), pageRequest);
+		} catch (FeignException e) {
+			if (e.status() == 404) {
+				log.warn("[FeignException]: 카테고리 '{}' 를 찾을 수 없어 빈 페이지 반환", storeCategoryName);
+			} else {
+				log.error("[FeignException]: Feign 오류 발생: {}", e.contentUTF8(), e);
+				throw e;
+			}
+		}
 
 		return PageStoreRes.fromPageWithCategoryName(getActiveStorePage, storeCategoryName);
 	}

@@ -28,10 +28,6 @@ repositories {
 	maven { url 'https://jitpack.io' }
 }
 
-tasks.named("jar") {
-	enabled = false
-}
-
 tasks.named("bootJar") {
 	enabled = true
 }
@@ -47,6 +43,9 @@ dependencies {
 	
 	// mysql driver
 	runtimeOnly 'com.mysql:mysql-connector-j'
+
+	// retry
+	implementation 'org.springframework.retry:spring-retry'
 }
 
 tasks.named('test') {

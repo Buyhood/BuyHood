@@ -37,9 +37,12 @@ public class SecurityConfig {
 			.authorizeHttpRequests(auth -> auth
 				.requestMatchers("/api/v1/auth/**", "/error", "/internal/**").permitAll()
 				.requestMatchers(HttpMethod.GET, "api/v1/stores").permitAll()
+				.requestMatchers("/api/v1/auth/**", "/error", "/internal/**").permitAll()
+				.requestMatchers(HttpMethod.GET, "/api/v1/stores").permitAll()
 				.requestMatchers(HttpMethod.GET, "/api/v1/payments/**").permitAll()
 				.requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
-				.anyRequest().authenticated()
+				.requestMatchers(HttpMethod.GET, "/internal/v1/order/*/apply").permitAll()
+					.anyRequest().authenticated()
 			)
 			.formLogin(AbstractHttpConfigurer::disable)
 			.anonymous(AbstractHttpConfigurer::disable)

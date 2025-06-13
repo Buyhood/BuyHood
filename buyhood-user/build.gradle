@@ -26,18 +26,19 @@ java {
 repositories {
 	mavenCentral()
 	maven { url 'https://jitpack.io' }
-}
 
-tasks.named("jar") {
-	enabled = false
 }
 
 tasks.named("bootJar") {
 	enabled = true
+
 }
 
 dependencies {
 	implementation project(':buyhood-global-core:buyhood-global-config')
+	
+	// spring validation
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	
 	// h2 database
 	runtimeOnly 'com.h2database:h2'

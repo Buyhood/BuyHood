@@ -2,6 +2,7 @@ package api.buyhood.domain.user.service;
 
 import api.buyhood.domain.user.entity.User;
 import api.buyhood.domain.user.repository.InternalUserRepository;
+import api.buyhood.domain.user.repository.UserRepository;
 import api.buyhood.dto.user.UserFeignDto;
 import api.buyhood.enums.UserRole;
 import api.buyhood.errorcode.UserErrorCode;
@@ -16,10 +17,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class InternalUserService {
 
 	private final InternalUserRepository internalUserRepository;
+	private final UserRepository userRepository;
 
 	@Transactional(readOnly = true)
-	public UserFeignDto getUserInternal(Long userId) {
-		User getUser = internalUserRepository.findActiveUserById(userId)
+	public UserFeignDto getRoleUserOrElseThrow(Long userId) {
+		User getUser = userRepository.findActiveUserById(userId)
 			.orElseThrow(() -> new NotFoundException(UserErrorCode.USER_NOT_FOUND));
 
 		if (getUser.getRole() != UserRole.USER) {
@@ -31,8 +33,8 @@ public class InternalUserService {
 	}
 
 	@Transactional(readOnly = true)
-	public UserFeignDto getSellerInternal(Long userId) {
-		User getUser = internalUserRepository.findActiveUserById(userId)
+	public UserFeignDto getRoleSellerOrElseThrow(Long userId) {
+		User getUser = userRepository.findActiveUserById(userId)
 			.orElseThrow(() -> new NotFoundException(UserErrorCode.USER_NOT_FOUND));
 
 		if (getUser.getRole() != UserRole.SELLER) {
@@ -45,7 +47,7 @@ public class InternalUserService {
 
 	@Transactional(readOnly = true)
 	public Boolean existsById(Long userId) {
-		return internalUserRepository.existsById(userId);
+		return userRepository.existsById(userId);
 	}
 
 }
