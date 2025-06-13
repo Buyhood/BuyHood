@@ -13,14 +13,22 @@ import api.buyhood.product.client.ProductCategoryFeignClient;
 import api.buyhood.product.client.StoreFeignClient;
 import api.buyhood.product.client.UserFeignClient;
 import api.buyhood.product.dto.response.GetProductRes;
+import api.buyhood.product.dto.response.PageProductRes;
 import api.buyhood.product.entity.Product;
 import api.buyhood.product.entity.ProductCategoryMapping;
 import api.buyhood.product.repository.ProductCategoryMappingRepository;
 import api.buyhood.product.repository.ProductRepository;
 import feign.FeignException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -69,33 +77,31 @@ public class ProductQueryService {
 
 	}
 
-//	/**
-//	 * 상품 전체 페이징 조회
-//	 *
-//	 * @param storeId  가게 ID (필수)
-//	 * @param pageable
-//	 * @author dereck-jun
-//	 */
-//	@Transactional(readOnly = true)
-//	public Page<PageProductRes> getAllProducts(Long storeId, Pageable pageable) {
-//		if (!storeRepository.existsActiveStoreById(storeId)) {
-//			throw new NotFoundException(StoreErrorCode.STORE_NOT_FOUND);
-//		}
-//
-//		PageRequest pageRequest =
-//			PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Direction.ASC, "name");
-//
-//		Page<Product> productPage = productRepository.findActiveProductsByStoreId(storeId, pageRequest);
-//
-//		List<Long> productIds = productPage.getContent()
-//			.stream()
-//			.map(Product::getId)
-//			.toList();
-//
-//		Map<Long, List<String>> productCategoryNameMap = getProductCategoryNameMap(productIds);
-//
-//		return PageProductRes.of(productPage, productCategoryNameMap);
-//	}
+	/**
+	 * 상품 전체 페이징 조회
+	 *
+	 * @param storeId  가게 ID (필수)
+	 * @param pageable
+	 * @author dereck-jun
+	 */
+	@Transactional(readOnly = true)
+	public Page<PageProductRes> getAllProducts(Long storeId, Pageable pageable) {
+		StoreFeignDto getStoreDto = fetchStore(storeId);
+
+		PageRequest pageRequest =
+			PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Direction.ASC, "name");
+
+		Page<Product> productPage = productRepository.findActiveProductsByStoreIdWithPaging(storeId, pageRequest);
+
+		List<Long> productIds = productPage.getContent()
+			.stream()
+			.map(Product::getId)
+			.toList();
+
+		Map<Long, List<String>> productCategoryNameMap = getProductCategoryNameMap(productIds);
+
+		return PageProductRes.of(productPage, productCategoryNameMap);
+	}
 //
 //	/**
 //	 * 상품 키워드 조회
@@ -158,5 +164,36 @@ public class ProductQueryService {
 			}
 			throw new ServerException(CommonErrorCode.NOT_DEFINED_FEIGN_EXCEPTION);
 		}
+	}
+
+	private Map<Long, List<String>> getProductCategoryNameMap(List<Long> productIds) {
+		// 1. 상품-카테고리 매핑 한 번에 조회
+		List<ProductCategoryMapping> mappings = productCategoryMappingRepository.findByProductIdIn(productIds);
+
+		// 2. 상품별로 카테고리 ID 그룹화
+		Map<Long, List<Long>> productCategoryIdsMap = mappings.stream()
+			.collect(Collectors.groupingBy(
+				ProductCategoryMapping::getProductId,
+				Collectors.mapping(ProductCategoryMapping::getCategoryId, Collectors.toList())
+			));
+
+		// 3. 모든 카테고리 ID에 대해 이름 조회 (FeignClient 등)
+		Map<Long, String> categoryIdToName = productCategoryIdsMap.values().stream()
+			.flatMap(List::stream)
+			.distinct()
+			.collect(Collectors.toMap(
+				id -> id,
+				id -> productCategoryFeignClient.getCategoryOrElseThrow(id).getCategoryName()
+			));
+
+		// 4. 상품별로 카테고리명 리스트 매핑
+		Map<Long, List<String>> result = new HashMap<>();
+		for (Map.Entry<Long, List<Long>> entry : productCategoryIdsMap.entrySet()) {
+			List<String> categoryNames = entry.getValue().stream()
+				.map(categoryIdToName::get)
+				.toList();
+			result.put(entry.getKey(), categoryNames);
+		}
+		return result;
 	}
 }

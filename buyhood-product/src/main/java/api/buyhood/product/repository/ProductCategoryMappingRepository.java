@@ -14,4 +14,6 @@ public interface ProductCategoryMappingRepository extends JpaRepository<ProductC
 	void deleteByProductIdAndCategoryId(@Param("productId") Long productId, @Param("categoryId") Long categoryId);
 
 	List<ProductCategoryMapping> findByProductId(Long productId);
+
+	List<ProductCategoryMapping> findByProductIdIn(List<Long> productIds);
 }

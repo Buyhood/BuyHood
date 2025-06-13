@@ -6,12 +6,16 @@ import api.buyhood.product.dto.request.PatchProductReq;
 import api.buyhood.product.dto.request.RegisterProductReq;
 import api.buyhood.product.dto.request.RemoveCategoryIdsReq;
 import api.buyhood.product.dto.response.GetProductRes;
+import api.buyhood.product.dto.response.PageProductRes;
 import api.buyhood.product.dto.response.RegisterProductRes;
 import api.buyhood.product.service.ProductQueryService;
 import api.buyhood.product.service.ProductService;
 import api.buyhood.security.AuthUser;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -59,16 +63,16 @@ public class ProductController {
 		return Response.ok(response);
 	}
 
-//	@Secured("ROLE_SELLER")
-//	@GetMapping("/v1/stores/{storeId}/products")
-//	public Response<Page<PageProductRes>> getAllProduct(
-//		@PathVariable Long storeId,
-//		@PageableDefault Pageable pageable
-//	) {
-//		Page<PageProductRes> response = productQueryService.getAllProducts(storeId, pageable);
-//		return Response.ok(response);
-//	}
-//
+	@Secured("ROLE_SELLER")
+	@GetMapping("/v1/stores/{storeId}/products")
+	public Response<Page<PageProductRes>> getAllProduct(
+		@PathVariable Long storeId,
+		@PageableDefault Pageable pageable
+	) {
+		Page<PageProductRes> response = productQueryService.getAllProducts(storeId, pageable);
+		return Response.ok(response);
+	}
+
 //	@Secured("ROLE_SELLER")
 //	@GetMapping("/v1/stores/{storeId}/products/keyword")
 //	public Response<Page<PageProductRes>> getProductByKeyword(
@@ -102,7 +106,7 @@ public class ProductController {
 	}
 
 	//가게에 카테고리는 관리자만 가능
-//	@Secured("ROLE_ADMIN")
+	@Secured("ROLE_ADMIN")
 	@PostMapping("/v1/products/{productId}/categories")
 	public Response<String> addCategoriesToProduct(
 		@PathVariable Long productId,
@@ -114,7 +118,7 @@ public class ProductController {
 	}
 
 	//가게에 카테고리는 관리자만 가능
-//	@Secured("ROLE_ADMIN")
+	@Secured("ROLE_ADMIN")
 	@DeleteMapping("/v1/products/{productId}/categories")
 	public Response<String> removeCategoriesFromProduct(
 		@PathVariable Long productId,
