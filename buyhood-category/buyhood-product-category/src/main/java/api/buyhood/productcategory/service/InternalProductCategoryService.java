@@ -1,7 +1,6 @@
 package api.buyhood.productcategory.service;
 
 import api.buyhood.dto.productcategory.ProductCategoryFeignDto;
-import api.buyhood.errorcode.CategoryErrorCode;
 import api.buyhood.exception.InvalidRequestException;
 import api.buyhood.exception.NotFoundException;
 import api.buyhood.productcategory.entity.ProductCategory;
@@ -12,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static api.buyhood.errorcode.CategoryErrorCode.CATEGORY_NOT_FOUND;
+
 @Service
 @RequiredArgsConstructor
 public class InternalProductCategoryService {
@@ -21,7 +22,7 @@ public class InternalProductCategoryService {
 	@Transactional(readOnly = true)
 	public ProductCategoryFeignDto getCategoryOrElseThrow(Long categoryProductId) {
 		ProductCategory getProductCategory = internalProductCategoryRepository.findById(categoryProductId)
-			.orElseThrow(() -> new NotFoundException(CategoryErrorCode.CATEGORY_NOT_FOUND));
+			.orElseThrow(() -> new NotFoundException(CATEGORY_NOT_FOUND));
 
 		Long parentId = null;
 		List<Long> childrenIds = new ArrayList<>();
@@ -52,18 +53,11 @@ public class InternalProductCategoryService {
 
 	@Transactional(readOnly = true)
 	public Boolean existsByIds(List<Long> categoryProductIds) {
-		boolean existsFlag = true;
-
 		for (Long categoryProductId : categoryProductIds) {
 			if (!internalProductCategoryRepository.existsById(categoryProductId)) {
-				existsFlag = false;
+				throw new InvalidRequestException(CATEGORY_NOT_FOUND);
 			}
 		}
-
-		if (existsFlag) {
-			throw new InvalidRequestException(CategoryErrorCode.CATEGORY_NOT_FOUND);
-		}
-
-		return existsFlag;
+		return true;
 	}
 }

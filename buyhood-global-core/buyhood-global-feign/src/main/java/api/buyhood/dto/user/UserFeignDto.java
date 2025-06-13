@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UserFeignDto {
 
-	private Long userId;
+	private Long id;
 	private String username;
 	private String email;
 	private UserRole role;

@@ -19,4 +19,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	Page<User> findAllActiveUsers(Pageable pageable);
 
 	boolean existsByBusinessNumber(String businessNumber);
+
+	@Query("select u from User u where u.id = :userId and u.deletedAt is null")
+	Optional<User> findActiveUserById(Long userId);
 }
