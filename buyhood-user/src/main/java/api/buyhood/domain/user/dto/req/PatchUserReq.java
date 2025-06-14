@@ -12,4 +12,3 @@ public class PatchUserReq {
 	private String username;
 	private String address;
 }
-

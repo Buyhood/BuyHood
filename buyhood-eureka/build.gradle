@@ -7,8 +7,18 @@ plugins {
 group = 'api'
 version = '0.0.1-SNAPSHOT'
 
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+}
+
 ext {
 	set('springCloudVersion', "2025.0.0")
+}
+
+repositories {
+	mavenCentral()
 }
 
 dependencyManagement {
@@ -17,25 +27,9 @@ dependencyManagement {
 	}
 }
 
-java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
-	}
-}
-
-repositories {
-	mavenCentral()
-	maven { url 'https://jitpack.io' }
-}
-
 dependencies {
-	implementation project(':buyhood-global-core:buyhood-global-config')
-	implementation project(':buyhood-user')
-	// spring validation
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	// eureka client
-	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-server'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
