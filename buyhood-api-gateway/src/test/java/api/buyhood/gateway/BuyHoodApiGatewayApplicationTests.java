@@ -1,10 +1,10 @@
-package api.buyhood.eureka;
+package api.buyhood.gateway;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class BuyhoodEurekaApplicationTests {
+class BuyHoodApiGatewayApplicationTests {
 
 	@Test
 	void contextLoads() {

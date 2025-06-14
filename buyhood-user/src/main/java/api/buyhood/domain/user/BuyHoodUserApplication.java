@@ -1,4 +1,4 @@
-package api.buyhood.auth;
+package api.buyhood.domain.user;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -6,10 +6,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication(scanBasePackages = {
 	"api.buyhood"
 })
-public class BuyhoodDomainAuthApplication {
+public class BuyHoodUserApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(BuyhoodDomainAuthApplication.class, args);
+		SpringApplication.run(BuyHoodUserApplication.class, args);
 	}
 
 }

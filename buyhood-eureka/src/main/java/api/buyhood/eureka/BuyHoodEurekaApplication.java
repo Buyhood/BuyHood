@@ -6,10 +6,10 @@ import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
 
 @SpringBootApplication
 @EnableEurekaServer
-public class BuyhoodEurekaApplication {
+public class BuyHoodEurekaApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(BuyhoodEurekaApplication.class, args);
+		SpringApplication.run(BuyHoodEurekaApplication.class, args);
 	}
 
 }
