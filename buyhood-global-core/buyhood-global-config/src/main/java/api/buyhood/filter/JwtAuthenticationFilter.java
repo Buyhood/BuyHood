@@ -1,7 +1,7 @@
 package api.buyhood.filter;
 
 import api.buyhood.enums.UserRole;
-import api.buyhood.exception.FilterAuthenticationException;
+import api.buyhood.exception.AuthenticationException;
 import api.buyhood.security.AuthUser;
 import api.buyhood.security.JwtProvider;
 import io.jsonwebtoken.Claims;
@@ -60,16 +60,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 				}
 			} catch (ExpiredJwtException e) {
 				log.error("Expired JWT token, 만료된 JWT 토큰입니다.", e);
-				throw new FilterAuthenticationException(INVALID_TOKEN);
+				throw new AuthenticationException(INVALID_TOKEN);
 			} catch (SecurityException | MalformedJwtException e) {
 				log.error("Invalid JWT signature, 유효하지 않은 JWT 서명입니다.", e);
-				throw new FilterAuthenticationException(INVALID_SIGNATURE_TOKEN);
+				throw new AuthenticationException(INVALID_SIGNATURE_TOKEN);
 			} catch (UnsupportedJwtException e) {
 				log.error("Unsupported JWT token, 지원되지 않는 JWT 토큰 입니다.", e);
-				throw new FilterAuthenticationException(UNSUPPORTED_TOKEN);
+				throw new AuthenticationException(UNSUPPORTED_TOKEN);
 			} catch (Exception e) {
 				log.error("Internal server error", e);
-				throw new FilterAuthenticationException(INTERNAL_SERVER_ERROR);
+				throw new AuthenticationException(INTERNAL_SERVER_ERROR);
 			}
 		}
 		filterChain.doFilter(request, response);

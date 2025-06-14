@@ -6,7 +6,6 @@ import api.buyhood.dto.ValidationExceptionDto;
 import api.buyhood.errorcode.ErrorCode;
 import api.buyhood.errorcode.ServerErrorCode;
 import api.buyhood.exception.BaseException;
-import api.buyhood.exception.FilterAuthenticationException;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
