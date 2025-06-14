@@ -4,12 +4,11 @@ import api.buyhood.dto.CustomExceptionDto;
 import api.buyhood.dto.Response;
 import api.buyhood.dto.ValidationExceptionDto;
 import api.buyhood.errorcode.ErrorCode;
+import api.buyhood.errorcode.PaymentErrorCode;
 import api.buyhood.errorcode.ServerErrorCode;
 import api.buyhood.exception.BaseException;
+import com.siot.IamportRestClient.exception.IamportResponseException;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.validation.FieldError;
@@ -18,6 +17,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestControllerAdvice
@@ -43,6 +46,18 @@ public class GlobalExceptionHandler {
 	) {
 		log.error("[{}] cause: ", ie.getClass().getSimpleName(), ie);
 		ErrorCode errorCode = ServerErrorCode.INTERNAL_SERVER_ERROR;
+		response.setStatus(errorCode.getStatus().value());
+		return Response.error(new CustomExceptionDto(errorCode.getCode(), errorCode.getMessage()));
+	}
+
+	// 결제 관련 iamport 에러 처리: portone 관련 오류 발생 시
+	@ExceptionHandler(value = IamportResponseException.class)
+	public Response<CustomExceptionDto> IamportResponseException(
+			IamportResponseException ire,
+			HttpServletResponse response
+	) {
+		log.error("[{}] cause: ", ire.getClass().getSimpleName(), ire);
+		ErrorCode errorCode = PaymentErrorCode.INTERNAL_IAM_PORT_ERROR;
 		response.setStatus(errorCode.getStatus().value());
 		return Response.error(new CustomExceptionDto(errorCode.getCode(), errorCode.getMessage()));
 	}

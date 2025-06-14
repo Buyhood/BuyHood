@@ -4,5 +4,5 @@ public enum PayStatus {
     READY,
     PAID,
     FAILED,
-    CANCELED, CANCELLED
+    CANCELED
 }

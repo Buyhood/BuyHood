@@ -39,7 +39,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static api.buyhood.errorcode.OrderErrorCode.*;
+import static api.buyhood.errorcode.OrderErrorCode.NOT_OWNER_OF_ORDER;
+import static api.buyhood.errorcode.OrderErrorCode.NOT_PENDING;
 import static api.buyhood.errorcode.PaymentErrorCode.*;
 
 @Slf4j
@@ -52,19 +53,21 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final IamportClient iamportClient;
 
-    @Transactional(rollbackFor = Exception.class)
-    public PaymentRes preparePayment(AuthUser authUser, Long orderId, PaymentReq paymentReq)
-            throws IamportResponseException, IOException {
+    @Transactional
+    public PaymentRes preparePayment(AuthUser authUser, Long orderId, PaymentReq paymentReq) {
         UserFeignDto user = userFeignClient.getRoleUserOrElseThrow(authUser.getId());
-
         OrderFeignDto order = orderFeignClient.findOrder(orderId);
 
-        if (!order.getUserId().equals(user.getUserId())) {
+        if (!order.getUserId().equals(user.getId())) {
             throw new InvalidRequestException(NOT_OWNER_OF_ORDER);
         }
 
         if (!"PENDING".equals(order.getOrderState())) {
             throw new InvalidRequestException(NOT_PENDING);
+        }
+
+        if (paymentRepository.existsByOrderId(order.getOrderId())) {
+            throw new InvalidRequestException(ALREADY_VALID_PAYMENT);
         }
 
         //결제 고유번호
@@ -77,9 +80,14 @@ public class PaymentService {
 
         //PG사 결제일 경우
         if (paymentReq.getPg() != PGProvider.ZERO_PAY) {
-            //사전 검증 요청 객체
-            PrepareData prepareData = new PrepareData(payment.getMerchantUid(), payment.getTotalPrice());
-            iamportClient.postPrepare(prepareData);
+            try {
+                PrepareData prepareData = new PrepareData(payment.getMerchantUid(), payment.getTotalPrice());
+                iamportClient.postPrepare(prepareData);
+
+            } catch (IamportResponseException | IOException e) {
+                log.info("Failed postPrepare", e);
+                throw new InvalidRequestException(INTERNAL_IAM_PORT_ERROR);
+            }
         }
 
         return PaymentRes.of(payment.getId(), orderId, payment.getPg(), payment.getBuyerEmail(),
@@ -93,7 +101,7 @@ public class PaymentService {
 
         OrderFeignDto order = orderFeignClient.findOrderForApplyPayment(payment.getOrderId());
 
-        if (!PayStatus.READY.equals(payment.getPayStatus())) {
+        if (PayStatus.PAID.equals(payment.getPayStatus())) {
             throw new InvalidRequestException(CANNOT_REQUEST_PAYMENT);
         }
 
@@ -106,44 +114,49 @@ public class PaymentService {
                 payment.getBuyerEmail());
     }
 
-    @Transactional(rollbackFor = Exception.class, noRollbackFor = InvalidRequestException.class)
-    public void validPayment(Long paymentId, ValidPaymentReq validPaymentReq)
-            throws IamportResponseException, IOException {
+    @Transactional(noRollbackFor = InvalidRequestException.class)
+    public void validPayment(Long paymentId, ValidPaymentReq validPaymentReq) {
         Payment payment = paymentRepository.findNotDeletedById(paymentId)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_PAYMENT));
-
-        //IamportRestClient 관련 Payment 도메인
-        IamportResponse<com.siot.IamportRestClient.response.Payment> response = iamportClient.paymentByImpUid(
-                validPaymentReq.getImpUid());
-        com.siot.IamportRestClient.response.Payment iamportPayment = response.getResponse();
 
         if (payment.isPaid()) {
             throw new InvalidRequestException(ALREADY_PAID);
         }
 
-        if (!"paid".equals(iamportPayment.getStatus())) {
-            payment.failPayment();
-            throw new InvalidRequestException(FAILED_PAID);
-        }
+        //IamportRestClient 관련 Payment 도메인
+        try {
+            IamportResponse<com.siot.IamportRestClient.response.Payment> response = iamportClient.paymentByImpUid(
+                    validPaymentReq.getImpUid());
+            com.siot.IamportRestClient.response.Payment iamportPayment = response.getResponse();
 
-        if (!payment.getMerchantUid().equals(iamportPayment.getMerchantUid())) {
-            payment.failPayment();
+            if (!"paid".equals(iamportPayment.getStatus())) {
+                payment.failPayment();
+                throw new InvalidRequestException(FAILED_PAID);
+            }
 
-            refund(validPaymentReq);
-            throw new InvalidRequestException(NOT_MATCH_MERCHANT_UID);
-        }
+            if (!payment.getMerchantUid().equals(iamportPayment.getMerchantUid())) {
+                payment.failPayment();
 
-        if (payment.getTotalPrice().compareTo(iamportPayment.getAmount()) != 0) {
-            payment.failPayment();
+                refund(validPaymentReq);
+                throw new InvalidRequestException(NOT_MATCH_MERCHANT_UID);
+            }
 
-            refund(validPaymentReq);
-            throw new InvalidRequestException(NOT_MATCH_ACCOUNT);
+            if (payment.getTotalPrice().compareTo(iamportPayment.getAmount()) != 0) {
+                payment.failPayment();
+
+                refund(validPaymentReq);
+                throw new InvalidRequestException(NOT_MATCH_ACCOUNT);
+            }
+
+        } catch (IamportResponseException | IOException e) {
+            log.info("Failed postPrepare", e);
+            throw new InvalidRequestException(INTERNAL_IAM_PORT_ERROR);
         }
 
         payment.successPayment();
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = InvalidRequestException.class)
     public void validPaymentWithZeroPay(Long paymentId, ZPayValidationReq zPayValidationReq) {
         Payment payment = paymentRepository.findNotDeletedById(paymentId)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_PAYMENT));
@@ -171,7 +184,7 @@ public class PaymentService {
         payment.successPayment();
     }
 
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional
     public byte[] createQR(Long paymentId) {
 
         Payment payment = paymentRepository.findNotDeletedById(paymentId)
@@ -214,7 +227,7 @@ public class PaymentService {
             return qrCodeBytes;
 
         } catch (Exception e) {
-            log.info("QRCode Error");
+            log.info("QRCode Error", e);
             throw new InvalidRequestException(FAILED_CREATE_QR);
         }
     }
@@ -234,19 +247,25 @@ public class PaymentService {
                 payment.getBuyerEmail());
     }
 
-    private void refund(ValidPaymentReq validPaymentReq) throws IamportResponseException, IOException {
-        CancelData cancelData = new CancelData(validPaymentReq.getImpUid(), true);
-        iamportClient.cancelPaymentByImpUid(cancelData);
+    private void refund(ValidPaymentReq validPaymentReq) {
+
+        try {
+            CancelData cancelData = new CancelData(validPaymentReq.getImpUid(), true);
+            iamportClient.cancelPaymentByImpUid(cancelData);
+        } catch (InvalidRequestException | IOException | IamportResponseException e) {
+            log.info("Failed cancelPayment", e);
+            throw new InvalidRequestException(INTERNAL_IAM_PORT_ERROR);
+        }
     }
 
     private void validateZeroPayConsistency(PaymentReq paymentReq, String paymentMethod) {
-        // 요청이 제로페이인 경우 기존 주문도 제로페이인지 확인
+        // 요청이 제로페이인 경우: 기존 주문도 제로페이인지 확인
         if (!PGProvider.ZERO_PAY.equals(paymentReq.getPg()) && "ZERO_PAY".equals(
                 paymentMethod)) {
             throw new InvalidRequestException(NOT_SUPPORTED_ZERO_PAY);
         }
 
-        // 요청이 PG사인 경우 기존 주문도 PG사가 제공하는 결제 방식인지 확인
+        // 요청이 PG사인 경우: 기존 주문도 PG사가 제공하는 결제 방식인지 확인
         if (PGProvider.ZERO_PAY.equals(paymentReq.getPg()) && !"ZERO_PAY".equals(
                 paymentMethod)) {
             throw new InvalidRequestException(INVALID_PAYMENT_METHOD_FOR_ZERO_PAY);

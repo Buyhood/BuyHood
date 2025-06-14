@@ -12,12 +12,12 @@ public class InternalPaymentController {
 
     private final InternalPaymentService internalPaymentService;
 
-    @GetMapping("/internal/v1/payment")
-    PaymentFeignDto findPaymentByOrderId(@RequestParam("payment") Long paymentId) {
-        return internalPaymentService.findPaymentByOrderId(paymentId);
+    @GetMapping("/v1/payment")
+    PaymentFeignDto findPaymentByOrderId(@RequestParam("order") Long orderId) {
+        return internalPaymentService.findPaymentByOrderId(orderId);
     }
 
-    @PatchMapping("/internal/v1/payment/{paymentId}")
+    @PatchMapping("/v1/payment/{paymentId}")
     void refundPayment(@PathVariable("paymentId") Long paymentId) {
         internalPaymentService.refundPayment(paymentId);
     }
