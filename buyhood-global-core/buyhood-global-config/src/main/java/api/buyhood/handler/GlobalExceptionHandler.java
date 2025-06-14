@@ -121,18 +121,4 @@ public class GlobalExceptionHandler {
 		return Response.error(new CustomExceptionDto(errorCode.getCode(), errorCode.getMessage()));
 	}
 
-	// 핸들러에 예외 처리 추가
-	@ExceptionHandler(FilterAuthenticationException.class)
-	public Response<CustomExceptionDto> handleFilterAuthException(
-		FilterAuthenticationException e,
-		HttpServletResponse response
-	) {
-		response.setStatus(e.getErrorCode().getStatus().value());
-		return Response.error(
-			new CustomExceptionDto(
-				e.getErrorCode().getCode(),
-				e.getErrorCode().getMessage()
-			)
-		);
-	}
 }
