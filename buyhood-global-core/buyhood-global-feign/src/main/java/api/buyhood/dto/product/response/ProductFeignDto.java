@@ -1,4 +1,4 @@
-package api.buyhood.dto.product;
+package api.buyhood.dto.product.response;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -15,4 +15,5 @@ public class ProductFeignDto {
 	private Long price;
 	private String description;
 	private Long stock;
+	private Long storeId;
 }
