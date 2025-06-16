@@ -3,7 +3,11 @@ package api.buyhood.product.service;
 import api.buyhood.dto.productcategory.ProductCategoryFeignDto;
 import api.buyhood.dto.store.StoreFeignDto;
 import api.buyhood.dto.user.UserFeignDto;
-import api.buyhood.errorcode.*;
+import api.buyhood.errorcode.CategoryErrorCode;
+import api.buyhood.errorcode.CommonErrorCode;
+import api.buyhood.errorcode.ProductErrorCode;
+import api.buyhood.errorcode.StoreErrorCode;
+import api.buyhood.errorcode.UserErrorCode;
 import api.buyhood.exception.ConflictException;
 import api.buyhood.exception.InvalidRequestException;
 import api.buyhood.exception.NotFoundException;
@@ -11,6 +15,8 @@ import api.buyhood.exception.ServerException;
 import api.buyhood.product.client.ProductCategoryFeignClient;
 import api.buyhood.product.client.StoreFeignClient;
 import api.buyhood.product.client.UserFeignClient;
+import api.buyhood.product.dto.response.GetProductRes;
+import api.buyhood.product.dto.response.PageProductRes;
 import api.buyhood.product.dto.response.RegisterProductRes;
 import api.buyhood.product.entity.Product;
 import api.buyhood.product.entity.ProductCategoryMapping;
@@ -18,25 +24,28 @@ import api.buyhood.product.repository.ProductCategoryMappingRepository;
 import api.buyhood.product.repository.ProductRepository;
 import feign.FeignException;
 import jakarta.persistence.OptimisticLockException;
-import jakarta.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-
-import static api.buyhood.errorcode.ProductErrorCode.PRODUCT_NOT_FOUND;
-import static api.buyhood.errorcode.StoreErrorCode.NOT_STORE_OWNER;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 import static api.buyhood.errorcode.ProductErrorCode.OUT_OF_STOCK;
 import static api.buyhood.errorcode.ProductErrorCode.PRODUCT_NOT_FOUND;
+import static api.buyhood.errorcode.StoreErrorCode.NOT_STORE_OWNER;
 
 @Slf4j
 @Service
@@ -199,12 +208,105 @@ public class ProductService {
 		}
 	}
 
+	// 단건 조회
+	public GetProductRes getProduct(Long userId, Long storeId, Long productId) {
+		//가게가 존재하는지 조회
+		StoreFeignDto getStoreDto = fetchStore(storeId);
+		UserFeignDto getUserDto = fetchUser(userId);
+
+		//본인 가게만 조회할 수 있음.
+		if (!getUserDto.getId().equals(getStoreDto.getSellerId())) {
+			throw new InvalidRequestException(NOT_STORE_OWNER);
+		}
+
+		// 상품 존재 여부 조회
+		Product product = productRepository.findActiveProductByProductId(productId)
+			.orElseThrow(() -> new NotFoundException(PRODUCT_NOT_FOUND));
+
+		// 카테고리 매핑 조회
+		List<ProductCategoryMapping> mappings = productCategoryMappingRepository.findByProductId(productId);
+
+		List<Long> categoryIds = mappings.stream()
+			.map(ProductCategoryMapping::getCategoryId)
+			.toList();
+
+		List<String> categoryNames = categoryIds.stream()
+			.map(id -> productCategoryFeignClient.getCategoryOrElseThrow(id).getCategoryName())
+			.toList();
+
+		return GetProductRes.of(product, categoryNames);
+
+	}
+
+	@Transactional(readOnly = true)
+	public Page<PageProductRes> getAllProducts(Long storeId, Pageable pageable) {
+		StoreFeignDto getStoreDto = fetchStore(storeId);
+
+		PageRequest pageRequest =
+			PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Direction.ASC, "name");
+
+		Page<Product> productPage = productRepository.findActiveProductsByStoreIdWithPaging(storeId, pageRequest);
+
+		List<Long> productIds = productPage.getContent()
+			.stream()
+			.map(Product::getId)
+			.toList();
+
+		Map<Long, List<String>> productCategoryNameMap = getProductCategoryNameMap(productIds);
+
+		return PageProductRes.of(productPage, productCategoryNameMap);
+	}
+
+	@Transactional(readOnly = true)
+	public Page<PageProductRes> getProductByKeyword(
+		Long currentUserId,
+		Long storeId,
+		String keyword,
+		Pageable pageable
+	) {
+		UserFeignDto getUserDto = fetchUser(currentUserId);
+		StoreFeignDto getStoreDto = fetchStore(storeId);
+
+		if (!getUserDto.getId().equals(getStoreDto.getSellerId())) {
+			throw new InvalidRequestException(NOT_STORE_OWNER);
+		}
+
+		PageRequest pageRequest =
+			PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Direction.ASC, "name");
+
+		Page<Product> productPage =
+			productRepository.findActiveProductByStoreIdAndKeyword(storeId, keyword, pageRequest);
+
+		List<Long> productIds = productPage.getContent()
+			.stream()
+			.map(Product::getId)
+			.toList();
+
+		Map<Long, List<String>> productCategoryNameMap = getProductCategoryNameMap(productIds);
+
+		return PageProductRes.of(productPage, productCategoryNameMap);
+	}
+
+	@Transactional
+	public void deleteProduct(Long currentUserId, Long storeId, Long productId) {
+		StoreFeignDto getStoreDto = fetchStore(storeId);
+		UserFeignDto getUserDto = fetchUser(currentUserId);
+		//제품을 삭제할 유저가 가게 주인장인지?
+		if (!getStoreDto.getSellerId().equals(getUserDto.getId())) {
+			throw new InvalidRequestException(NOT_STORE_OWNER);
+		}
+		//제품이 active 상태인지?
+		Product getProduct = getProductOrElseThrow(productId);
+
+		getProduct.markDeleted();
+	}
+
 	@Retryable(
-			retryFor = {
-					OptimisticLockException.class,
-					ObjectOptimisticLockingFailureException.class
-			},
-			backoff = @Backoff(delay = 100)
+		retryFor = {
+			OptimisticLockException.class,
+			ObjectOptimisticLockingFailureException.class
+		},
+		backoff = @Backoff(delay = 100)
 	)
 	@Transactional
 	public void decreaseStock(List<Long> productIdList, List<Integer> quantityList, Map<Long, Product> productMap) {
@@ -224,11 +326,11 @@ public class ProductService {
 	}
 
 	@Retryable(
-			retryFor = {
-					OptimisticLockException.class,
-					ObjectOptimisticLockingFailureException.class
-			},
-			backoff = @Backoff(delay = 100)
+		retryFor = {
+			OptimisticLockException.class,
+			ObjectOptimisticLockingFailureException.class
+		},
+		backoff = @Backoff(delay = 100)
 	)
 	@Transactional
 	public void rollBackStock(Map<Long, Integer> orderHistories) {
@@ -237,7 +339,7 @@ public class ProductService {
 			Integer quantity = entry.getValue();
 
 			Product product = productRepository.findById(productId)
-					.orElseThrow(() -> new NotFoundException(PRODUCT_NOT_FOUND));
+				.orElseThrow(() -> new NotFoundException(PRODUCT_NOT_FOUND));
 
 			product.rollBackStock(quantity);
 		}
@@ -245,12 +347,14 @@ public class ProductService {
 
 	/* 주문 요청 후 재고 감소에 대한 recover */
 	@Recover
-	public void recover(OptimisticLockException e, List<Long> productIdList, List<Integer> quantityList, Map<Long, Product> productMap) {
+	public void recover(OptimisticLockException e, List<Long> productIdList, List<Integer> quantityList,
+		Map<Long, Product> productMap) {
 		throw new InvalidRequestException(ProductErrorCode.STOCK_UPDATE_CONFLICT);
 	}
 
 	@Recover
-	public void recover(ObjectOptimisticLockingFailureException e, List<Long> productIdList, List<Integer> quantityList, Map<Long, Product> productMap) {
+	public void recover(ObjectOptimisticLockingFailureException e, List<Long> productIdList, List<Integer> quantityList,
+		Map<Long, Product> productMap) {
 		throw new InvalidRequestException(ProductErrorCode.STOCK_UPDATE_CONFLICT);
 	}
 
@@ -312,18 +416,34 @@ public class ProductService {
 		}
 	}
 
-	//혹시나 충돌이슈있을까봐 밑에 추가합니다
-	@Transactional
-	public void deleteProduct(Long currentUserId, Long storeId, Long productId) {
-		StoreFeignDto getStoreDto = fetchStore(storeId);
-		UserFeignDto getUserDto = fetchUser(currentUserId);
-		//제품을 삭제할 유저가 가게 주인장인지?
-		if (!getStoreDto.getSellerId().equals(getUserDto.getId())) {
-			throw new InvalidRequestException(NOT_STORE_OWNER);
-		}
-		//제품이 active 상태인지?
-		Product getProduct = getProductOrElseThrow(productId);
+	private Map<Long, List<String>> getProductCategoryNameMap(List<Long> productIds) {
+		// 1. 상품-카테고리 매핑 한 번에 조회
+		List<ProductCategoryMapping> mappings = productCategoryMappingRepository.findByProductIdIn(productIds);
 
-		getProduct.markDeleted();
+		// 2. 상품별로 카테고리 ID 그룹화
+		Map<Long, List<Long>> productCategoryIdsMap = mappings.stream()
+			.collect(Collectors.groupingBy(
+				ProductCategoryMapping::getProductId,
+				Collectors.mapping(ProductCategoryMapping::getCategoryId, Collectors.toList())
+			));
+
+		// 3. 모든 카테고리 ID에 대해 이름 조회 (FeignClient 등)
+		Map<Long, String> categoryIdToName = productCategoryIdsMap.values().stream()
+			.flatMap(List::stream)
+			.distinct()
+			.collect(Collectors.toMap(
+				id -> id,
+				id -> productCategoryFeignClient.getCategoryOrElseThrow(id).getCategoryName()
+			));
+
+		// 4. 상품별로 카테고리명 리스트 매핑
+		Map<Long, List<String>> result = new HashMap<>();
+		for (Map.Entry<Long, List<Long>> entry : productCategoryIdsMap.entrySet()) {
+			List<String> categoryNames = entry.getValue().stream()
+				.map(categoryIdToName::get)
+				.toList();
+			result.put(entry.getKey(), categoryNames);
+		}
+		return result;
 	}
 }
