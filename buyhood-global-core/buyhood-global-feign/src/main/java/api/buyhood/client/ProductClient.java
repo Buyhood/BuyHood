@@ -1,6 +1,8 @@
 package api.buyhood.client;
 
+import api.buyhood.dto.product.request.DecreaseStockProductReq;
 import api.buyhood.dto.product.request.GetProductReq;
+import api.buyhood.dto.product.request.RollbackStockProductReq;
 import api.buyhood.dto.product.response.ProductFeignDto;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +18,12 @@ public interface ProductClient {
 
 	@PostMapping("/internal/v1/products")
 	List<ProductFeignDto> getProductsOrElseThrow(@RequestBody GetProductReq getProductReq);
+
+	@PostMapping("/internal/v1/products/decrease")
+	void decreaseStock(@RequestBody DecreaseStockProductReq decreaseStockProductReq);
+
+	@PostMapping("/internal/v1/products/rollback")
+	void rollbackStock(@RequestBody RollbackStockProductReq rollbackStockProductReq);
 
 	@GetMapping("/internal/v1/products/{id}/exists")
 	Boolean existsById(@PathVariable Long id);

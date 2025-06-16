@@ -1,7 +1,8 @@
 package api.buyhood.order.service;
 
-import api.buyhood.cart.entity.Cart;
-import api.buyhood.cart.entity.CartItem;
+import api.buyhood.dto.cart.CartDto;
+import api.buyhood.dto.cart.CartItemDto;
+import api.buyhood.dto.product.response.ProductFeignDto;
 import api.buyhood.dto.store.StoreFeignDto;
 import api.buyhood.dto.user.UserFeignDto;
 import api.buyhood.exception.ForbiddenException;
@@ -12,7 +13,6 @@ import api.buyhood.order.dto.response.GetOrderRes;
 import api.buyhood.order.entity.Order;
 import api.buyhood.order.entity.OrderHistory;
 import api.buyhood.order.repository.OrderHistoryRepository;
-import api.buyhood.product.entity.Product;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -60,7 +60,7 @@ public class OrderHistoryService {
 	public Page<GetOrderRes> getOrdersByUser(int pageNum, int pageSize, Long userId) {
 		UserFeignDto user = userFeignClient.getRoleUserOrElseThrow(userId);
 
-		Page<OrderHistory> orderHistories = orderHistoryRepository.findAllByUserId(user.getUserId(),
+		Page<OrderHistory> orderHistories = orderHistoryRepository.findAllByUserId(user.getId(),
 			PageRequest.of(pageNum, pageSize));
 
 		return orderHistories.map(orderHistory ->
@@ -83,7 +83,7 @@ public class OrderHistoryService {
 			throw new ForbiddenException(ROLE_MISMATCH);
 		}
 
-		if (!store.getSellerId().equals(user.getUserId())) {
+		if (!store.getSellerId().equals(user.getId())) {
 			throw new ForbiddenException(NOT_OWNER_OF_STORE);
 		}
 
@@ -116,13 +116,13 @@ public class OrderHistoryService {
 
 	}
 
-	public void saveOrderHistory(Order order, Cart cart, Map<Long, Product> productMap) {
+	public void saveOrderHistory(Order order, CartDto cart, Map<Long, ProductFeignDto> productMap) {
 
-		for (CartItem item : cart.getCart()) {
-			Product product = productMap.get(item.getProductId());
+		for (CartItemDto item : cart.getCartList()) {
+			ProductFeignDto product = productMap.get(item.getProductId());
 			OrderHistory orderHistory = OrderHistory.builder()
 				.order(order)
-				.productId(product.getId())
+				.productId(product.getProductId())
 				.quantity(item.getQuantity())
 				.build();
 

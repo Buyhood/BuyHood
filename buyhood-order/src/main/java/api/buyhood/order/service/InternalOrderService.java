@@ -6,6 +6,7 @@ import api.buyhood.order.entity.Order;
 import api.buyhood.order.repository.InternalOrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import static api.buyhood.errorcode.OrderErrorCode.NOT_FOUND_ORDER;
 
@@ -14,6 +15,7 @@ import static api.buyhood.errorcode.OrderErrorCode.NOT_FOUND_ORDER;
 public class InternalOrderService {
     private final InternalOrderRepository internalOrderRepository;
 
+    @Transactional(readOnly = true)
     public OrderFeignDto findOrder(Long orderId) {
         Order order = internalOrderRepository.findNotDeletedById(orderId)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_ORDER));

@@ -1,7 +1,6 @@
 package api.buyhood.order.entity;
 
 import api.buyhood.entity.BaseTimeEntity;
-import api.buyhood.product.entity.Product;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;

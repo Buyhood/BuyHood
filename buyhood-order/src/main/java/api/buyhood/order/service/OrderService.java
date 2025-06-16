@@ -1,19 +1,20 @@
 package api.buyhood.order.service;
 
-import api.buyhood.cart.dto.response.CartRes;
-import api.buyhood.cart.entity.Cart;
-import api.buyhood.cart.entity.CartItem;
-import api.buyhood.cart.repository.CartRepository;
+import api.buyhood.dto.cart.CartDto;
+import api.buyhood.dto.cart.CartItemDto;
+import api.buyhood.dto.cart.ExistsCartDto;
 import api.buyhood.dto.payment.PaymentFeignDto;
+import api.buyhood.dto.product.request.DecreaseStockProductReq;
+import api.buyhood.dto.product.request.GetProductReq;
+import api.buyhood.dto.product.request.RollbackStockProductReq;
+import api.buyhood.dto.product.response.ProductFeignDto;
 import api.buyhood.dto.store.StoreFeignDto;
 import api.buyhood.dto.user.UserFeignDto;
 import api.buyhood.errorcode.PaymentErrorCode;
 import api.buyhood.exception.ForbiddenException;
 import api.buyhood.exception.InvalidRequestException;
 import api.buyhood.exception.NotFoundException;
-import api.buyhood.order.client.PaymentFeignClient;
-import api.buyhood.order.client.StoreFeignClient;
-import api.buyhood.order.client.UserFeignClient;
+import api.buyhood.order.client.*;
 import api.buyhood.order.dto.request.AcceptOrderReq;
 import api.buyhood.order.dto.request.ApplyOrderReq;
 import api.buyhood.order.dto.request.RefundPaymentReq;
@@ -26,9 +27,6 @@ import api.buyhood.order.entity.OrderHistory;
 import api.buyhood.order.enums.OrderStatus;
 import api.buyhood.order.repository.OrderHistoryRepository;
 import api.buyhood.order.repository.OrderRepository;
-import api.buyhood.product.entity.Product;
-import api.buyhood.product.repository.ProductRepository;
-import api.buyhood.product.service.ProductService;
 import api.buyhood.security.AuthUser;
 import com.siot.IamportRestClient.IamportClient;
 import com.siot.IamportRestClient.exception.IamportResponseException;
@@ -60,14 +58,13 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final OrderHistoryService orderHistoryService;
-    private final CartRepository cartRepository;
-    private final ProductRepository productRepository;
-    private final ProductService productService;
     private final IamportClient iamportClient;
     private final OrderHistoryRepository orderHistoryRepository;
     private final StoreFeignClient storeFeignClient;
     private final UserFeignClient userFeignClient;
     private final PaymentFeignClient paymentFeignClient;
+    private final ProductFeignClient productFeignClient;
+    private final CartFeignClient cartFeignClient;
 
     //주문 요청
     @Transactional
@@ -75,42 +72,43 @@ public class OrderService {
 
         StoreFeignDto store = storeFeignClient.getStoreOrElseThrow(req.getStoreId());
         UserFeignDto user = userFeignClient.getRoleUserOrElseThrow(authUser.getId());
+        ExistsCartDto existsCartDto = cartFeignClient.existsCart(user.getId());
 
-        if (!cartRepository.existsCart(user.getUserId())) {
+        if (!existsCartDto.isExists()) {
             throw new NotFoundException(NOT_FOUND_CART);
         }
 
-        Cart cart = cartRepository.findCart(user.getUserId());
+        CartDto cart = cartFeignClient.findCart(user.getId());
 
-        List<Long> productIdList = cart.getCart().stream()
-                .map(CartItem::getProductId)
+        List<Long> productIdList = cart.getCartList().stream()
+                .map(CartItemDto::getProductId)
                 .toList();
 
-        List<Integer> quantityList = cart.getCart().stream()
-                .map(CartItem::getQuantity)
+        List<Integer> quantityList = cart.getCartList().stream()
+                .map(CartItemDto::getQuantity)
                 .toList();
 
-        Map<Long, Product> productMap = productRepository.findAllById(productIdList).stream()
-                .collect(Collectors.toMap(Product::getId, p -> p));
+        Map<Long, ProductFeignDto> productMap = productFeignClient.getProductsOrElseThrow(new GetProductReq(productIdList)).stream()
+                .collect(Collectors.toMap(ProductFeignDto::getProductId, productFeignDto -> productFeignDto));
 
         String orderName = creatOrderName(productMap);
 
         Order order = Order.builder()
                 .storeId(store.getStoreId())
-                .userId(user.getUserId())
+                .userId(user.getId())
                 .name(orderName)
                 .paymentMethod(req.getPaymentMethod())
                 .requestMessage(req.getRequestMessage())
                 .status(OrderStatus.PENDING)
-                .totalPrice(getTotalPrice(productMap, cart.getCart()))
+                .totalPrice(getTotalPrice(productMap, cart.getCartList()))
                 .build();
         orderRepository.save(order);
         orderHistoryService.saveOrderHistory(order, cart, productMap);
-        cartRepository.clearCart(user.getUserId());
+        cartFeignClient.clearCart(user.getId());
 
-        productService.decreaseStock(productIdList, quantityList,productMap);
+        productFeignClient.decreaseStock(new DecreaseStockProductReq(productIdList, quantityList, productMap));
 
-        return ApplyOrderRes.of(order.getStoreId(), CartRes.of(cart), order.getPaymentMethod(),
+        return ApplyOrderRes.of(order.getStoreId(), cart, order.getPaymentMethod(),
                 order.getTotalPrice(), order.getStatus(), order.getCreatedAt(), order.getRequestMessage());
     }
 
@@ -138,7 +136,7 @@ public class OrderService {
         Long sellerIdInStore = store.getSellerId();
 
         //셀러 스토어가 같은 업장인지
-        if (!sellerIdInStore.equals(user.getUserId())) {
+        if (!sellerIdInStore.equals(user.getId())) {
             throw new ForbiddenException(NOT_OWNER_OF_STORE);
         }
 
@@ -164,7 +162,7 @@ public class OrderService {
         Long sellerIdInStore = store.getSellerId();
 
         //셀러 스토어가 같은 업장인지
-        if (!sellerIdInStore.equals(user.getUserId())) {
+        if (!sellerIdInStore.equals(user.getId())) {
             throw new ForbiddenException(NOT_OWNER_OF_STORE);
         }
 
@@ -181,7 +179,7 @@ public class OrderService {
         Order order = orderRepository.findNotDeletedById(orderId)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_ORDER));
 
-        if (!user.getUserId().equals(order.getUserId())) {
+        if (!user.getId().equals(order.getUserId())) {
             throw new InvalidRequestException(NOT_OWNER_OF_ORDER);
         }
 
@@ -202,7 +200,7 @@ public class OrderService {
             orderHistoryMap.put(orderHistory.getProductId(), orderHistory.getQuantity());
         }
 
-        productService.rollBackStock(orderHistoryMap);
+        productFeignClient.rollbackStock(new RollbackStockProductReq(orderHistoryMap));
     }
 
     @Transactional
@@ -212,7 +210,7 @@ public class OrderService {
         Order order = orderRepository.findNotDeletedById(orderId)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_ORDER));
 
-        if (!user.getUserId().equals(order.getUserId())) {
+        if (!user.getId().equals(order.getUserId())) {
             throw new InvalidRequestException(NOT_OWNER_OF_ORDER);
         }
 
@@ -236,7 +234,7 @@ public class OrderService {
         for (OrderHistory orderHistory : orderHistories) {
             orderHistoryMap.put(orderHistory.getProductId(), orderHistory.getQuantity());
         }
-        productService.rollBackStock(orderHistoryMap);
+        productFeignClient.rollbackStock(new RollbackStockProductReq(orderHistoryMap));
     }
 
     private void refundPayment(String impUid) throws IamportResponseException, IOException {
@@ -255,11 +253,11 @@ public class OrderService {
         }
     }
 
-    private BigDecimal getTotalPrice(Map<Long, Product> productMap, List<CartItem> cartItemList) {
+    private BigDecimal getTotalPrice(Map<Long, ProductFeignDto> productMap, List<CartItemDto> cartItemList) {
         BigDecimal totalPrice = BigDecimal.ZERO;
 
-        for (CartItem item : cartItemList) {
-            Product product = productMap.get(item.getProductId());
+        for (CartItemDto item : cartItemList) {
+            ProductFeignDto product = productMap.get(item.getProductId());
             if (product == null) {
                 throw new NotFoundException(PRODUCT_NOT_FOUND);
             }
@@ -271,14 +269,14 @@ public class OrderService {
         return totalPrice;
     }
 
-    private String creatOrderName(Map<Long, Product> productMap) {
+    private String creatOrderName(Map<Long, ProductFeignDto> productMap) {
         int size = productMap.size();
-        Product product = productMap.values().iterator().next();
+        ProductFeignDto product = productMap.values().iterator().next();
 
         if (size == 1) {
-            return String.format("%s", product.getName());
+            return String.format("%s", product.getProductName());
         }
 
-        return String.format("%s 외 %d", product.getName(), size - 1);
+        return String.format("%s 외 %d", product.getProductName(), size - 1);
     }
 }

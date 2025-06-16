@@ -12,7 +12,6 @@ import java.util.List;
 public interface OrderHistoryRepository extends JpaRepository<OrderHistory, Long> {
     @Query("SELECT oh FROM OrderHistory oh " +
             "JOIN FETCH oh.order " +
-            "JOIN FETCH oh.productId " +
             "WHERE oh.order.id = :orderId")
     List<OrderHistory> findAllByOrderId(@Param("orderId") Long orderId);
 

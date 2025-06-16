@@ -17,7 +17,7 @@ public class InternalPaymentController {
         return internalPaymentService.findPaymentByOrderId(orderId);
     }
 
-    @PatchMapping("/v1/payment/{paymentId}")
+    @PutMapping("/v1/payment/{paymentId}")
     void refundPayment(@PathVariable("paymentId") Long paymentId) {
         internalPaymentService.refundPayment(paymentId);
     }
