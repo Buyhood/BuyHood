@@ -195,7 +195,7 @@ public class OrderService {
         refundPayment(refundPaymentReq.getImpUid());
 
         Map<Long, Integer> orderHistoryMap = new HashMap<>();
-        List<OrderHistory> orderHistories = orderHistoryRepository.findAllByOrderId(orderId);
+        List<OrderHistory> orderHistories = orderHistoryRepository.findAllByOrderIdAndUserId(orderId, user.getId());
         for (OrderHistory orderHistory : orderHistories) {
             orderHistoryMap.put(orderHistory.getProductId(), orderHistory.getQuantity());
         }
@@ -230,7 +230,7 @@ public class OrderService {
         refundPaymentWithZeroPay(payment.getMerchantUid(), zpRefundPaymentReq.getMerchantUid());
 
         Map<Long, Integer> orderHistoryMap = new HashMap<>();
-        List<OrderHistory> orderHistories = orderHistoryRepository.findAllByOrderId(orderId);
+        List<OrderHistory> orderHistories = orderHistoryRepository.findAllByOrderIdAndUserId(orderId, user.getId());
         for (OrderHistory orderHistory : orderHistories) {
             orderHistoryMap.put(orderHistory.getProductId(), orderHistory.getQuantity());
         }

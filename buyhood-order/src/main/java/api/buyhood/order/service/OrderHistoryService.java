@@ -22,10 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
 
-import static api.buyhood.enums.UserRole.SELLER;
 import static api.buyhood.errorcode.OrderErrorCode.NOT_FOUND_ORDER;
 import static api.buyhood.errorcode.OrderErrorCode.NOT_OWNER_OF_STORE;
-import static api.buyhood.errorcode.UserErrorCode.ROLE_MISMATCH;
 
 @Service
 @RequiredArgsConstructor
@@ -36,9 +34,9 @@ public class OrderHistoryService {
 	private final StoreFeignClient storeFeignClient;
 
 	@Transactional(readOnly = true)
-	public List<GetOrderRes> findOrder(Long orderId) {
+	public List<GetOrderRes> findOrder(Long orderId, Long userId) {
 
-		List<OrderHistory> orderHistories = orderHistoryRepository.findAllByOrderId(orderId);
+		List<OrderHistory> orderHistories = orderHistoryRepository.findAllByOrderIdAndUserId(orderId, userId);
 
 		if (orderHistories.isEmpty()) {
 			throw new NotFoundException(NOT_FOUND_ORDER);
@@ -76,12 +74,7 @@ public class OrderHistoryService {
 	@Transactional(readOnly = true)
 	public Page<GetOrderRes> getOrdersBySeller(int pageNum, int pageSize, Long storeId, Long userId) {
 		StoreFeignDto store = storeFeignClient.getStoreOrElseThrow(storeId);
-
 		UserFeignDto user = userFeignClient.getRoleSellerOrElseThrow(userId);
-
-		if (!SELLER.equals(user.getRole())) {
-			throw new ForbiddenException(ROLE_MISMATCH);
-		}
 
 		if (!store.getSellerId().equals(user.getId())) {
 			throw new ForbiddenException(NOT_OWNER_OF_STORE);
@@ -101,8 +94,9 @@ public class OrderHistoryService {
 	}
 
 	@Transactional(readOnly = true)
-	public Page<GetOrderRes> getOrders(int pageNum, int pageSize) {
-		//todo: 로그인한 유저가 관리자인지 확인
+	public Page<GetOrderRes> getOrders(int pageNum, int pageSize, Long userId) {
+
+		userFeignClient.getRoleAdminOrElseThrow(userId);
 		Page<OrderHistory> orderHistories = orderHistoryRepository.findAll(PageRequest.of(pageNum, pageSize));
 
 		return orderHistories.map(orderHistory ->

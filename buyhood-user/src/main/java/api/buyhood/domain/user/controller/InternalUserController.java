@@ -25,6 +25,11 @@ public class InternalUserController {
 		return internalUserService.getRoleSellerOrElseThrow(id);
 	}
 
+	@GetMapping("/internal/v1/users/{id}")
+	public UserFeignDto getAdminInternal(@PathVariable Long id) {
+		return internalUserService.getRoleAdminOrElseThrow(id);
+	}
+
 	@GetMapping("/v1/users/{id}/exists")
 	public Boolean existsById(@PathVariable Long id) {
 		return internalUserService.existsById(id);
