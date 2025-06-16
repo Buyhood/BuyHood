@@ -62,6 +62,7 @@ public class OrderHistoryController {
     /**
      * 주문 다건 조회 (관리자용)
      */
+    @Secured("ROLE_ADMIN")
     @GetMapping("/v1/orders/all")
     public Response<Page<GetOrderRes>> getOrders(
             @AuthenticationPrincipal AuthUser authUser,
