@@ -29,6 +29,7 @@ import static api.buyhood.errorcode.ProductErrorCode.PRODUCT_NOT_FOUND;
 public class InternalProductService {
     private final InternalProductRepository internalProductRepository;
 
+    @Transactional(readOnly = true)
     public List<ProductFeignDto> getProducts(GetProductReq getProductReq) {
         List<Product> products = internalProductRepository.findAllById(getProductReq.getProductIdList());
 
