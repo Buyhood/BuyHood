@@ -1,9 +1,12 @@
 package api.buyhood.product.controller;
 
+import api.buyhood.dto.product.request.GetProductReq;
+import api.buyhood.dto.product.response.ProductFeignDto;
 import api.buyhood.product.service.InternalProductService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -11,5 +14,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class InternalProductController {
 
     private final InternalProductService internalProductService;
+
+    @PostMapping("/v1/products")
+    List<ProductFeignDto> getProductsOrElseThrow(@RequestBody GetProductReq getProductReq) {
+        return internalProductService.getProducts(getProductReq);
+    }
 
 }

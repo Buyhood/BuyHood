@@ -41,7 +41,7 @@ public class CartService {
                 .toList();
 
         // 조회된 상품의 ID 수가 요청된 상품의 ID 수보다 적다면 존재하지않는 상품이 있다는 의미(뭐가 없는진 모름)
-        List<ProductFeignDto> products = productFeignClient.getProducts(new GetProductReq(productIdList));
+        List<ProductFeignDto> products = productFeignClient.getProductsOrElseThrow(new GetProductReq(productIdList));
 
         // 가게 중복 검증
         validateSingleStoreInCart(products);
