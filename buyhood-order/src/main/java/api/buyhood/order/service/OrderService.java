@@ -15,10 +15,7 @@ import api.buyhood.exception.ForbiddenException;
 import api.buyhood.exception.InvalidRequestException;
 import api.buyhood.exception.NotFoundException;
 import api.buyhood.order.client.*;
-import api.buyhood.order.dto.request.AcceptOrderReq;
-import api.buyhood.order.dto.request.ApplyOrderReq;
-import api.buyhood.order.dto.request.RefundPaymentReq;
-import api.buyhood.order.dto.request.ZPRefundPaymentReq;
+import api.buyhood.order.dto.request.*;
 import api.buyhood.order.dto.response.AcceptOrderRes;
 import api.buyhood.order.dto.response.ApplyOrderRes;
 import api.buyhood.order.dto.response.RejectOrderRes;
@@ -117,11 +114,7 @@ public class OrderService {
     @Transactional
     public AcceptOrderRes acceptOrder(AcceptOrderReq req, Long orderId, AuthUser authUser) {
 
-        UserFeignDto user = userFeignClient.getRoleUserOrElseThrow(authUser.getId());
-
-        if (!SELLER.equals(user.getRole())) {
-            throw new ForbiddenException(ROLE_MISMATCH);
-        }
+        UserFeignDto user = userFeignClient.getRoleSellerOrElseThrow(authUser.getId());
 
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_ORDER));
@@ -147,9 +140,9 @@ public class OrderService {
     //주문 거절
 
     @Transactional
-    public RejectOrderRes rejectOrder(Long orderId, AuthUser authUser) {
+    public RejectOrderRes rejectOrder(Long orderId, AuthUser authUser, RejectOrderReq rejectOrderReq) {
 
-        UserFeignDto user = userFeignClient.getRoleUserOrElseThrow(authUser.getId());
+        UserFeignDto user = userFeignClient.getRoleSellerOrElseThrow(authUser.getId());
 
         if (!SELLER.equals(user.getRole())) {
             throw new ForbiddenException(ROLE_MISMATCH);
@@ -157,6 +150,8 @@ public class OrderService {
 
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_ORDER));
+
+        PaymentFeignDto payment = paymentFeignClient.findPayment(orderId);
 
         StoreFeignDto store = storeFeignClient.getStoreOrElseThrow(order.getStoreId());
         Long sellerIdInStore = store.getSellerId();
@@ -167,8 +162,10 @@ public class OrderService {
         }
 
         order.reject();
+        rollbackProductStock(orderId, user);
+        paymentFeignClient.refundPayment(payment.getPaymentId());
 
-        return RejectOrderRes.of(order);
+        return RejectOrderRes.of(order, rejectOrderReq.getMessage());
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -194,13 +191,7 @@ public class OrderService {
         paymentFeignClient.refundPayment(payment.getPaymentId());
         refundPayment(refundPaymentReq.getImpUid());
 
-        Map<Long, Integer> orderHistoryMap = new HashMap<>();
-        List<OrderHistory> orderHistories = orderHistoryRepository.findAllByOrderIdAndUserId(orderId, user.getId());
-        for (OrderHistory orderHistory : orderHistories) {
-            orderHistoryMap.put(orderHistory.getProductId(), orderHistory.getQuantity());
-        }
-
-        productFeignClient.rollbackStock(new RollbackStockProductReq(orderHistoryMap));
+        rollbackProductStock(orderId, user);
     }
 
     @Transactional
@@ -229,12 +220,7 @@ public class OrderService {
         paymentFeignClient.refundPayment(payment.getPaymentId());
         refundPaymentWithZeroPay(payment.getMerchantUid(), zpRefundPaymentReq.getMerchantUid());
 
-        Map<Long, Integer> orderHistoryMap = new HashMap<>();
-        List<OrderHistory> orderHistories = orderHistoryRepository.findAllByOrderIdAndUserId(orderId, user.getId());
-        for (OrderHistory orderHistory : orderHistories) {
-            orderHistoryMap.put(orderHistory.getProductId(), orderHistory.getQuantity());
-        }
-        productFeignClient.rollbackStock(new RollbackStockProductReq(orderHistoryMap));
+        rollbackProductStock(orderId, user);
     }
 
     private void refundPayment(String impUid) throws IamportResponseException, IOException {
@@ -278,5 +264,15 @@ public class OrderService {
         }
 
         return String.format("%s 외 %d", product.getProductName(), size - 1);
+    }
+
+    private void rollbackProductStock(Long orderId, UserFeignDto user) {
+        Map<Long, Integer> orderHistoryMap = new HashMap<>();
+        List<OrderHistory> orderHistories = orderHistoryRepository.findAllByOrderIdAndUserId(orderId, user.getId());
+        for (OrderHistory orderHistory : orderHistories) {
+            orderHistoryMap.put(orderHistory.getProductId(), orderHistory.getQuantity());
+        }
+
+        productFeignClient.rollbackStock(new RollbackStockProductReq(orderHistoryMap));
     }
 }
