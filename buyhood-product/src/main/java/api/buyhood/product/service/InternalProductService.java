@@ -7,6 +7,7 @@ import api.buyhood.product.entity.Product;
 import api.buyhood.product.repository.InternalProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -17,6 +18,7 @@ import static api.buyhood.errorcode.ProductErrorCode.PRODUCT_NOT_FOUND;
 public class InternalProductService {
     private final InternalProductRepository internalProductRepository;
 
+    @Transactional(readOnly = true)
     public List<ProductFeignDto> getProducts(GetProductReq getProductReq) {
         List<Product> products = internalProductRepository.findAllById(getProductReq.getProductIdList());
 
