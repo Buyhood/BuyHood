@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum AuthErrorCode implements ErrorCode {
 	//에러코드 1100번대
+	UNSUPPORTED_TOKEN(1105, "지원되지 않는 JWT 토큰입니다.", HttpStatus.UNAUTHORIZED),
+	INVALID_SIGNATURE_TOKEN(1104, "유효하지 않는 JWT 서명입니다.", HttpStatus.UNAUTHORIZED),
 	INVALID_TOKEN(1101, "만료된 토큰입니다.", HttpStatus.UNAUTHORIZED),
 	SELLER_EMAIL_DUPLICATED(1103, "이미 가입된 이메일입니다.", HttpStatus.CONFLICT),
 	USER_EMAIL_DUPLICATED(1102, "이미 가입된 이메일입니다.", HttpStatus.CONFLICT);

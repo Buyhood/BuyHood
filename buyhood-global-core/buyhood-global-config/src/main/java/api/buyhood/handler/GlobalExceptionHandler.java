@@ -135,4 +135,5 @@ public class GlobalExceptionHandler {
 		response.setStatus(errorCode.getStatus().value());
 		return Response.error(new CustomExceptionDto(errorCode.getCode(), errorCode.getMessage()));
 	}
+
 }

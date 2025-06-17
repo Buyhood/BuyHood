@@ -45,6 +45,9 @@ dependencies {
 	// h2 database
 	runtimeOnly 'com.h2database:h2'
 	
+	// eureka client
+	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+	
 	// mysql driver
 	runtimeOnly 'com.mysql:mysql-connector-j'
 }

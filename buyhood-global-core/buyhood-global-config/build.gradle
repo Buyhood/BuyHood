@@ -31,9 +31,11 @@ tasks.named("bootJar") {
 
 dependencies {
 	api project(':buyhood-global-core:buyhood-global-common')
-
+	
 	api project(':buyhood-global-core:buyhood-global-feign')
-
+	
+	// spring web
+	implementation 'org.springframework.boot:spring-boot-starter-web'
 	
 	// spring data jpa
 	api 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -44,7 +46,7 @@ dependencies {
 	// spring security
 	api 'org.springframework.boot:spring-boot-starter-security'
 	
-
+	
 	// open feign
 	api 'org.springframework.cloud:spring-cloud-starter-openfeign'
 	

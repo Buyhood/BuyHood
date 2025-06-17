@@ -35,6 +35,9 @@ tasks.named("bootJar") {
 dependencies {
 	implementation project(':buyhood-global-core:buyhood-global-config')
 	
+	// eureka client
+	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+	
 	// spring validation
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	
@@ -43,7 +46,7 @@ dependencies {
 	
 	// mysql driver
 	runtimeOnly 'com.mysql:mysql-connector-j'
-
+	
 	// retry
 	implementation 'org.springframework.retry:spring-retry'
 }

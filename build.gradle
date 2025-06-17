@@ -43,8 +43,6 @@ dependencies {
 	// spring validation
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	
-	// spring web
-	implementation 'org.springframework.boot:spring-boot-starter-web'
 	
 	// lombok
 	compileOnly 'org.projectlombok:lombok'
@@ -68,7 +66,7 @@ dependencies {
 	// QR Code - zxing
 	implementation group: 'com.google.zxing', name: 'javase', version: '3.5.0'
 	implementation group: 'com.google.zxing', name: 'core', version: '3.5.0'
-
+	
 	// retry
 	implementation 'org.springframework.retry:spring-retry'
 	
@@ -91,8 +89,7 @@ subprojects {
 	}
 	
 	dependencies {
-		// spring web
-		implementation 'org.springframework.boot:spring-boot-starter-web'
+		
 		
 		// lombok
 		compileOnly 'org.projectlombok:lombok'

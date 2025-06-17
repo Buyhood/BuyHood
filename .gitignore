@@ -37,5 +37,6 @@ out/
 .vscode/
 
 ### properties ###
+*local.yml
 *local.properties
 src/main/resources/application-ci.properties

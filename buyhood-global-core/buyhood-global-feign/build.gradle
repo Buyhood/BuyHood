@@ -19,6 +19,9 @@ tasks.named("bootJar") {
 
 dependencies {
 	implementation project(':buyhood-global-core:buyhood-global-common')
+	
+	// spring web
+	implementation 'org.springframework.boot:spring-boot-starter-web'
 }
 
 test {

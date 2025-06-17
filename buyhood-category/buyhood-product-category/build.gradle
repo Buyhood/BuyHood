@@ -47,6 +47,9 @@ dependencies {
 	
 	// mysql driver
 	runtimeOnly 'com.mysql:mysql-connector-j'
+	
+	// eureka client
+	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 }
 
 tasks.named('test') {
