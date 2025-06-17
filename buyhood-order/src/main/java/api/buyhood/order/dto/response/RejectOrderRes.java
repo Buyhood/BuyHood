@@ -13,11 +13,13 @@ public class RejectOrderRes {
 
 	private final Long orderId;
 	private final OrderStatus status;
+	private final String message;
 
-	public static RejectOrderRes of(Order order) {
+	public static RejectOrderRes of(Order order, String message) {
 		return RejectOrderRes.builder()
 			.orderId(order.getId())
 			.status(order.getStatus())
+			.message(message)
 			.build();
 	}
 }

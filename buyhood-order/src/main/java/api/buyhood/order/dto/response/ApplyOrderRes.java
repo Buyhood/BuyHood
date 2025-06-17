@@ -1,6 +1,6 @@
 package api.buyhood.order.dto.response;
 
-import api.buyhood.cart.dto.response.CartRes;
+import api.buyhood.dto.cart.CartDto;
 import api.buyhood.order.enums.OrderStatus;
 import api.buyhood.order.enums.PaymentMethod;
 import lombok.Builder;
@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 public class ApplyOrderRes {
 
 	private final Long storeId;
-	private final CartRes orderInfo;
+	private final CartDto orderInfo;
 	private final PaymentMethod paymentMethod;
 	private final BigDecimal totalPrice;
 	private final OrderStatus status;
@@ -24,7 +24,7 @@ public class ApplyOrderRes {
 	private final LocalDateTime createAt;
 
 
-	public static ApplyOrderRes of(Long storeId, CartRes orderInfo, PaymentMethod paymentMethod, BigDecimal totalPrice,
+	public static ApplyOrderRes of(Long storeId, CartDto orderInfo, PaymentMethod paymentMethod, BigDecimal totalPrice,
 								   OrderStatus status, LocalDateTime createAt, String requestMessage) {
 		return ApplyOrderRes.builder()
 			.storeId(storeId)

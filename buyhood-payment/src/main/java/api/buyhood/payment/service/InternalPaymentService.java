@@ -32,6 +32,7 @@ public class InternalPaymentService {
         );
     }
 
+    @Transactional
     public void refundPayment(Long paymentId) {
         Payment payment = internalPaymentRepository.findNotDeletedById(paymentId)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_PAYMENT));

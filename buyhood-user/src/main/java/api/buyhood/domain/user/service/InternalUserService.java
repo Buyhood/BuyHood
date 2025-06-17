@@ -46,8 +46,20 @@ public class InternalUserService {
 	}
 
 	@Transactional(readOnly = true)
+	public UserFeignDto getRoleAdminOrElseThrow(Long userId) {
+		User getUser = userRepository.findActiveUserById(userId)
+				.orElseThrow(() -> new NotFoundException(UserErrorCode.USER_NOT_FOUND));
+
+		if (getUser.getRole() != UserRole.ADMIN) {
+			throw new InvalidRequestException(UserErrorCode.ROLE_MISMATCH);
+		}
+
+		return new UserFeignDto(
+				getUser.getId(), getUser.getUsername(), getUser.getEmail(), getUser.getRole(), getUser.getAddress());
+	}
+
+	@Transactional(readOnly = true)
 	public Boolean existsById(Long userId) {
 		return userRepository.existsById(userId);
 	}
-
 }
