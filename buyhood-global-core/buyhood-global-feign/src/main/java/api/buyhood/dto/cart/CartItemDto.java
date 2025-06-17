@@ -1,4 +1,4 @@
-package api.buyhood.dto.product;
+package api.buyhood.dto.cart;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -8,11 +8,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class ProductFeignDto {
-
-	private Long productId;
-	private String productName;
-	private Long price;
-	private String description;
-	private Long stock;
+public class CartItemDto {
+    private Long productId;
+    private int quantity;
 }

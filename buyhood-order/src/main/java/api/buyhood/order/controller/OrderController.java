@@ -1,10 +1,7 @@
 package api.buyhood.order.controller;
 
 import api.buyhood.dto.Response;
-import api.buyhood.order.dto.request.AcceptOrderReq;
-import api.buyhood.order.dto.request.ApplyOrderReq;
-import api.buyhood.order.dto.request.RefundPaymentReq;
-import api.buyhood.order.dto.request.ZPRefundPaymentReq;
+import api.buyhood.order.dto.request.*;
 import api.buyhood.order.dto.response.AcceptOrderRes;
 import api.buyhood.order.dto.response.ApplyOrderRes;
 import api.buyhood.order.dto.response.RejectOrderRes;
@@ -67,7 +64,7 @@ public class OrderController {
 	public Response<AcceptOrderRes> applyOrder(
 		@AuthenticationPrincipal AuthUser authUser,
 		@PathVariable Long orderId,
-		@RequestBody AcceptOrderReq req
+		@Valid @RequestBody AcceptOrderReq req
 	) {
 		AcceptOrderRes res = orderService.acceptOrder(req, orderId, authUser);
 		return Response.ok(res);
@@ -78,9 +75,10 @@ public class OrderController {
 	@PatchMapping("/v1/orders/{orderId}/reject")
 	public Response<RejectOrderRes> rejectOrder(
 		@AuthenticationPrincipal AuthUser authUser,
-		@PathVariable Long orderId
-	) {
-		RejectOrderRes res = orderService.rejectOrder(orderId, authUser);
+		@PathVariable Long orderId,
+		@Valid @RequestBody RejectOrderReq rejectOrderReq
+		) {
+		RejectOrderRes res = orderService.rejectOrder(orderId, authUser, rejectOrderReq);
 		return Response.ok(res);
 	}
 

@@ -14,5 +14,8 @@ public interface UserClient {
 
 	@GetMapping("/internal/v1/users/{userId}")
 	UserFeignDto getRoleUserOrElseThrow(@PathVariable Long userId);
+
+	@GetMapping("/internal/v1/users/{adminId}")
+	UserFeignDto getRoleAdminOrElseThrow(@PathVariable Long adminId);
 	
 }

@@ -18,7 +18,7 @@ public class OrderFeignDto {
     private String name;
     private String paymentMethod;
     private BigDecimal totalPrice;
-    private String orderState;
+    private String orderState; //todo: enum으로 받아오도록 수정해보기
     private String requestMessage;
     private LocalTime readyAt;
 }
