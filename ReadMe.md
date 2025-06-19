@@ -66,7 +66,7 @@
 </details>
 
 <details>
-<summary>🔎 <strong>최적의 검색을 통한 상품 및 가게 추천?</strong></summary>
+<summary>🔎 <strong>최적의 검색을 통한 상품 및 가게 추천</strong></summary>
 
 
 
@@ -74,6 +74,8 @@
 
 <details>
 <summary>🛒 <strong>주문 및 결제 처리</strong></summary>
+
+<br>
 
 **[장바구니]**
 - 장바구니에서 상품 추가
@@ -220,7 +222,28 @@ erDiagram
 
 ## API 명세서
 
-추가 
+**[노션 API 명세서 확인하러 가기](https://www.notion.so/API-1fa476ed5057806d8aaee36907791c0d?source=copy_link)**
+
+<details>
+<summary> 🧩<strong>각 모듈의 API 명세서 확인하기</strong></summary>
+
+**[유저 API](https://www.notion.so/216476ed50578015a8a5f5685dd896c9?v=216476ed5057817caefd000c26e383a6&source=copy_link)**
+
+**[가게 카테고리 API](https://www.notion.so/217476ed505780a6a0cfda10f7c42046?v=217476ed505781e4ba84000ce49f9540&source=copy_link)**
+
+**[제품 카테고리 API](https://www.notion.so/217476ed505780c2a0ddf18f4d59b0e2?v=217476ed50578198afb2000c0e0cdfd0&source=copy_link)**
+
+**[가게 API](https://www.notion.so/217476ed50578006bf4df49d391bd81b?v=217476ed505781d0be56000c31a1f53b&source=copy_link)**
+
+**[제품 API](https://www.notion.so/217476ed505780cda70afd444bedb5a3?v=217476ed505781828402000c9c18d54b&source=copy_link)**
+
+**[카트 API](https://www.notion.so/217476ed5057808e893bfa49e62b1b01?v=217476ed50578136b3b4000cf2f2b42e&source=copy_link)**
+
+**[주문 API](https://www.notion.so/217476ed505780dbb31ec7ee217a0e72?v=217476ed505781218427000cf1c5c7c1&source=copy_link)**
+
+**[결제 API](https://www.notion.so/217476ed505780fabadfdf949cbff1df?v=217476ed505781a39141000ca55e4807&source=copy_link)**
+
+</details>
 
 <br>
 
