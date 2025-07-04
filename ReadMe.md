@@ -251,7 +251,7 @@ erDiagram
 
 ### 인프라 아키텍처
 
-![Image](https://github.com/user-attachments/assets/480572d4-709e-461a-95bb-5006ac71933c)
+![img_1.png](img_1.png)
 
 <br>
 

@@ -1,0 +1,14 @@
+plugins {
+	id 'java-library'
+}
+
+subprojects {
+	apply plugin: 'java-library'
+	apply plugin: 'io.spring.dependency-management'
+	
+	sourceCompatibility = '21'
+}
+
+tasks.named('bootJar') {
+	enabled = false
+}
